@@ -1,0 +1,11 @@
+services:
+  web:
+    restart: always
+    build: .
+    command: ./node_modules/.bin/fastify start -l info app.js
+    volumes:
+      - ./:/usr/app/
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.exports
