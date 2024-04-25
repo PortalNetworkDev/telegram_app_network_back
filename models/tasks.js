@@ -258,8 +258,8 @@ module.exports = fp(async function (fastify, opts) {
 
         for (let index = 0; index < tasks.length; index++) {
             const task = tasks[index];
-
-            await createUserTaskState(user_id, task.id)
+            if(!getUserTaskByTaskId(user_id, task.id))
+                await createUserTaskState(user_id, task.id)
             
         }
 
