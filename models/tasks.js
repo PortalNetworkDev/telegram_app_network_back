@@ -211,7 +211,36 @@ module.exports = fp(async function (fastify, opts) {
             tasks.other as other
 
             from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.rowid = ?`,[user_id, task_id])
+            console.log(rows)
+            return rows[0];
+        } catch (error) {
+            console.log(error)
+            return [];
+        }
+
+    }
+
+    const getUserTaskByTaskId = async (user_id, task_id) => {
+
+        
+        try {
             
+            const {rows} = await fastify.mysql.select(`select  
+            user_task_state.is_complite as is_complite,
+            user_task_state.is_rewarded as is_rewarded,
+            user_task_state.result as result,
+            user_task_state.rowid as id,
+            tasks.title as title,
+            tasks.label as label,
+            tasks.description as description,
+            tasks.type as type,
+            tasks.category_id as category_id,
+            tasks.reward as reward,
+            tasks.icon_url as icon_url,
+            tasks.other as other
+
+            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.task_id = ?`,[user_id, task_id])
+            console.log(rows)
             return rows[0];
         } catch (error) {
             console.log(error)
