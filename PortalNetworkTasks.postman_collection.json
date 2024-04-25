@@ -28,18 +28,43 @@
 					"response": []
 				},
 				{
-					"name": "getTask",
+					"name": "getUserTaskByTaskId",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{APIURL}}/tasks/getTask/:id",
+							"raw": "{{APIURL}}/tasks/getUserTaskByTaskId/:id",
 							"host": [
 								"{{APIURL}}"
 							],
 							"path": [
 								"tasks",
-								"getTask",
+								"getUserTaskByTaskId",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUserTask",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{APIURL}}/tasks/getUserTask/:id",
+							"host": [
+								"{{APIURL}}"
+							],
+							"path": [
+								"tasks",
+								"getUserTask",
 								":id"
 							],
 							"variable": [
