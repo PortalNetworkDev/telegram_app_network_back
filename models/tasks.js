@@ -300,7 +300,8 @@ module.exports = fp(async function (fastify, opts) {
         getUserTasks,
         getUserTask,
         createUserTaskStates,
-        setRewardedTask
+        setRewardedTask,
+        getUserTaskByTaskId
     })
 
 
