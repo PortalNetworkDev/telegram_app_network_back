@@ -258,7 +258,7 @@ module.exports = fp(async function (fastify, opts) {
 
         for (let index = 0; index < tasks.length; index++) {
             const task = tasks[index];
-            if(!getUserTaskByTaskId(user_id, task.id))
+            if(typeof getUserTaskByTaskId(user_id, task.id) == "undefined")
                 await createUserTaskState(user_id, task.id)
             
         }
