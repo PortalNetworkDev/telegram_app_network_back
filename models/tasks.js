@@ -240,7 +240,7 @@ module.exports = fp(async function (fastify, opts) {
             tasks.other as other
 
             from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.task_id = ?`,[user_id, task_id])
-            console.log(rows)
+            
             return rows[0];
         } catch (error) {
             console.log(error)
@@ -258,7 +258,10 @@ module.exports = fp(async function (fastify, opts) {
 
         for (let index = 0; index < tasks.length; index++) {
             const task = tasks[index];
-            if(typeof getUserTaskByTaskId(user_id, task.id) == "undefined")
+
+            console.log("getUserTaskByTaskId(user_id, task.id)",await getUserTaskByTaskId(user_id, task.id))
+
+            if(typeof await getUserTaskByTaskId(user_id, task.id) == "undefined")
                 await createUserTaskState(user_id, task.id)
             
         }
