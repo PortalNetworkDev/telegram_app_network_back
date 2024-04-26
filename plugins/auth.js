@@ -33,6 +33,8 @@ module.exports = fp(async function (fastify, opts) {
 
                 const user_id = initData.get("start_param").split("-")[1]
 
+                console.log("++++user_id++++", user_id)
+
                 if(!await fastify.models_user.checkReferaluser(user_id, user.id)){
                     await fastify.models_user.addReferalUser(user_id, user.id);
                 }    

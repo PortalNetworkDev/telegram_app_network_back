@@ -21,6 +21,8 @@ module.exports = fp(async function (f, opts) {
             console.log("select after execute")
             connection.release()
             console.log("select after release")
+            f.mysql.connection.end();
+            console.log("select after f.mysql.connection.end")
             return {rows,fields}
           } catch (err) {
             console.log(err);
@@ -36,6 +38,8 @@ module.exports = fp(async function (f, opts) {
             console.log("insert|update after execute")
             connection.release()
             console.log("insert|update after release")
+            f.mysql.connection.end();
+            console.log("insert|update after f.mysql.connection.end")
             return {result,fields}
           } catch (err) {
             console.log(err);
