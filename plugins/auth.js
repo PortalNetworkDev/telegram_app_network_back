@@ -25,6 +25,19 @@ module.exports = fp(async function (fastify, opts) {
         if(!await fastify.models_user.userExist(user.id)){
             await fastify.models_user.createUser(user)
             await fastify.models_tasks.createUserTaskStates(user.id)
+            
+
+            const initData = new URLSearchParams(req.headers.authorization);
+                        
+            if(initData.get("start_param")){
+
+                const user_id = initData.get("start_param").split("-")[1]
+
+                if(!await fastify.models_user.checkReferaluser(user_id, user.id)){
+                    await fastify.models_user.addReferalUser(user_id, user.id);
+                }    
+            }
+
         }else{
             await fastify.models_user.updateLastUpdated(user.id)
         }
