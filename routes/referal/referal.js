@@ -14,7 +14,7 @@ module.exports = async function (fastify, opts) {
             type: 'object',
             properties: {
                 error: { type: 'string' },
-                message: { type: 'string',enum:["user_does_not_exist", "already_follow"] },
+                message: { type: 'string',enum:["user_does_not_exist", "already_follow", "cannot_follow_to_yourself"] },
             }   
           },
         },
@@ -32,6 +32,11 @@ module.exports = async function (fastify, opts) {
         
         const { user_id } = request.body
         const _user = fastify.getUser(request)
+
+        if(_user.id == user_id){
+          return reply.badRequest("cannot_follow_to_yourself");
+        }
+
         const user = await fastify.models_user.getUser(_user.id);
 
         if(!await fastify.models_user.userExist(user_id))
