@@ -40,7 +40,8 @@ module.exports = fp(async function (fastify, opts) {
         
         let sql = `INSERT INTO users (id, first_name,last_name,username,language_code,is_premium,allows_write_to_pm, last_updated,referal_reward,wallet) 
         VALUES (?, ?,?,?,?,?,?, ?,?,"")`
-        let values = [user.id, user.first_name,user.last_name,user.username,user.language_code,user.is_premium,user.allows_write_to_pm, Date.now(), fastify.config.referalreward]
+        let values = [user.id, user.first_name,user.last_name, (user.username) ? user.username: "",user.language_code,(user.is_premium) ? user.is_premium: 0,user.allows_write_to_pm, Date.now(), fastify.config.referalreward]
+        console.log("createUser", sql,values)
         await fastify.mysql.insert(sql, values)
     }
 
