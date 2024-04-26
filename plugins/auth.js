@@ -37,6 +37,12 @@ function createpayload(auth){
 
 
     let payload = `auth_date=${initData.get("auth_date")}\nchat_instance=${initData.get("chat_instance")}\nchat_type=${initData.get("chat_type")}\n`;
+    
+    if(initData.get("start_param")){
+        payload = payload+`start_param=${initData.get("start_param")}\n`
+    }
+
+
     let user = "";
 
 
