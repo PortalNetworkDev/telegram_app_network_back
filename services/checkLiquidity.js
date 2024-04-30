@@ -2,7 +2,7 @@
 
 module.exports = async function (fastify, opts) {
 
-    const checkInterval = 5;
+    const checkInterval = 1;
 
     setInterval(async function(){
         console.log("RUN checkLiquidity")
