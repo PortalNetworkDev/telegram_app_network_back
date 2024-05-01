@@ -42,7 +42,6 @@ module.exports = fp(async function (fastify, opts) {
             }
 
         }else{
-            await fastify.models_user.countReferalUsers(user.id)
             await fastify.models_user.updateLastUpdated(user.id)
         }
 
