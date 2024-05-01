@@ -11,17 +11,23 @@ module.exports = fp(async function (fastify, opts) {
     async function getJettonBalance(wallet){
 
         let ubalance = 0;
-        
-        const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
-        const req = await _req.json()
-        
-        for (let index = 0; index < req.balances.length; index++) {
-            const balance = req.balances[index];
-            // TODO: change compare to check address
-            if(balance.jetton.symbol == "POE" || balance.jetton.symbol == "TPOE" ){
-                ubalance = tonweb.utils.fromNano( balance.balance)
+
+        try {
+                        
+            const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
+            const req = await _req.json()
+            
+            for (let index = 0; index < req.balances.length; index++) {
+                const balance = req.balances[index];
+                // TODO: change compare to check address
+                if(balance.jetton.symbol == "POE" || balance.jetton.symbol == "TPOE" ){
+                    ubalance = tonweb.utils.fromNano( balance.balance)
+                }
             }
+        } catch (error) {
+            console.log("cannot getJettonBalance", error)  
         }
+
 
         return Number(ubalance);
     }
@@ -29,17 +35,22 @@ module.exports = fp(async function (fastify, opts) {
     async function getJettonPoolBalance(wallet){
 
         let ubalance = 0;
-        
-        const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
-        const req = await _req.json()
-        
-        for (let index = 0; index < req.balances.length; index++) {
-            const balance = req.balances[index];
-            // TODO: change compare to check address
-            if(balance.jetton.symbol == "POE-pTON LP" || balance.jetton.symbol == "TPOE-pTON LP" ){
-                ubalance = tonweb.utils.fromNano( balance.balance)
+
+        try {
+            const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
+            const req = await _req.json()
+            
+            for (let index = 0; index < req.balances.length; index++) {
+                const balance = req.balances[index];
+                // TODO: change compare to check address
+                if(balance.jetton.symbol == "POE-pTON LP" || balance.jetton.symbol == "TPOE-pTON LP" ){
+                    ubalance = tonweb.utils.fromNano( balance.balance)
+                }
             }
+        } catch (error) {
+            console.log("cannot getJettonPoolBalance", error)
         }
+
 
         return Number(ubalance);
     }

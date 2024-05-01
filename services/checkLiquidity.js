@@ -18,7 +18,6 @@ module.exports = async function (fastify, opts) {
                 if(user.wallet){
                     let balance = await fastify.utils.getJettonPoolBalance(user.wallet)
 
-                    console.log(balance, user.wallet, user.id )
                     if(balance != 0){
                         await fastify.models_tasks.compliteTask(task.id, user.id, "")
                     }

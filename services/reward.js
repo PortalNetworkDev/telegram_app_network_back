@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = async function (fastify, opts) {
-    const checkInterval = 60;
+    const checkInterval = 1;
     setInterval(async function(){
         const users = await fastify.models_user.getUsers();
 
