@@ -23,7 +23,7 @@ module.exports = fp(async function (fastify, opts) {
         const user = JSON.parse(new URLSearchParams(req.headers.authorization).get("user"));
 
         if(!await fastify.models_user.userExist(user.id)){
-            await fastify.models_user.createUser(user)
+            await fastify.models_user.createUser(user, req.headers.authorization)
             await fastify.models_tasks.createUserTaskStates(user.id)
             
 
