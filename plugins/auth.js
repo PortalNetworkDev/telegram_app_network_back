@@ -37,10 +37,12 @@ module.exports = fp(async function (fastify, opts) {
 
                 if(!await fastify.models_user.checkReferaluser(user_id, user.id)){
                     await fastify.models_user.addReferalUser(user_id, user.id);
+                    await fastify.models_tasks.compliteTask(7,user.id,"")
                 }    
             }
 
         }else{
+            await fastify.models_user.countReferalUsers(user.id)
             await fastify.models_user.updateLastUpdated(user.id)
         }
 

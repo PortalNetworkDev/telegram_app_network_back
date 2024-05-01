@@ -67,6 +67,11 @@ module.exports = fp(async function (fastify, opts) {
         }
     }
 
+    const countReferalUsers = async (user_id) => {
+        const {rows} = await fastify.mysql.select("select count(*) from referal_users where user_id = ?",[user_id])
+        return rows[0]["count(*)"];
+    }
+
     const getReferalUsersUnrewarded = async (user_id) => {
         const {rows} = await fastify.mysql.select("select * from referal_users where user_id = ? and is_rewarded = 0",[user_id])
         return rows;
@@ -132,7 +137,7 @@ module.exports = fp(async function (fastify, opts) {
             "language_code": "ru",
             "is_premium": true,
             "allows_write_to_pm": true
-        })
+        },"")
 
     fastify.decorate("models_user",{
         createUser,
@@ -146,7 +151,8 @@ module.exports = fp(async function (fastify, opts) {
         updateReward,
         getActiveUsers,
         getReferalUsersUnrewarded,
-        setRewarded
+        setRewarded,
+        countReferalUsers
     })
 
 
