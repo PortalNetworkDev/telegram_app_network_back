@@ -16,9 +16,6 @@ module.exports = fp(async function (fastify, opts) {
     const mnemonic = fastify.config.mnemonic;
     const jettonAddressRaw = fastify.config.jettonaddress;
 
-    //console.log("jettonAddressRaw", jettonAddressRaw)
-    //await sendTonToken("UQA2weH-PG_zo85e02cSHORKHtKjJPg3NsJjn3BcznnVQfmE", "10")
-
     async function sendTonToken(walletAddress2, tokenAmount, textMessage = "Mini app transfer" ) {
 
         const {key, wallet, jettonWallet, walletAddress, jettonAddress} = await loadWallet()
@@ -30,10 +27,6 @@ module.exports = fp(async function (fastify, opts) {
         const comment = new Uint8Array([... new Uint8Array(4), ... new TextEncoder().encode(textMessage)]);
         const amount = TonWeb.utils.toNano(tokenAmount);
     
-    
-        //console.log("Send amount", amount)
-    
-        //console.log("Seqno ", seqno)
     
         const payload = await jettonWallet.createTransferBody({
             jettonAmount: amount, 

@@ -39,7 +39,7 @@ module.exports = fp(async function (fastify, opts) {
         try {
             const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
             const req = await _req.json()
-            
+            console.log("getJettonPoolBalance req",_req.status,req)
             for (let index = 0; index < req.balances.length; index++) {
                 const balance = req.balances[index];
                 // TODO: change compare to check address
@@ -55,10 +55,15 @@ module.exports = fp(async function (fastify, opts) {
         return Number(ubalance);
     }
 
-    //"POE-pTON LP"
+    function sleep(ms) {
+        return new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+    }
 
     fastify.decorate('utils', {
         getJettonBalance,
-        getJettonPoolBalance
+        getJettonPoolBalance,
+        sleep
     })
 })

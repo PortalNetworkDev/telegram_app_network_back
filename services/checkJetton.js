@@ -21,8 +21,8 @@ module.exports = async function (fastify, opts) {
                     if(balance >= 1){
                         await fastify.models_tasks.compliteTask(task.id, user.id, "")
                     }
+                    await fastify.utils.sleep(200)
                 }
-
 
             }
         }
