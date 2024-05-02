@@ -22,7 +22,7 @@ module.exports = fp(async function (fastify, opts) {
                 for (let index = 0; index < req.balances.length; index++) {
                     const balance = req.balances[index];
                     // TODO: change compare to check address
-                    if(balance.jetton.symbol == "POE" || balance.jetton.symbol == "TPOE" ){
+                    if(balance.jetton.symbol == fastify.config.tokensymbol ){
                         ubalance = tonweb.utils.fromNano( balance.balance)
                     }
                 }
@@ -50,7 +50,7 @@ module.exports = fp(async function (fastify, opts) {
                 for (let index = 0; index < req.balances.length; index++) {
                     const balance = req.balances[index];
                     // TODO: change compare to check address
-                    if(balance.jetton.symbol == "POE-pTON LP" || balance.jetton.symbol == "TPOE-pTON LP" ){
+                    if(balance.jetton.symbol == `${fastify.config.tokensymbol}-pTON LP`){
                         ubalance = tonweb.utils.fromNano( balance.balance)
                     }
                 }
