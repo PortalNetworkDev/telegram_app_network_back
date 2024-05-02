@@ -24,6 +24,14 @@ module.exports = fp(async function (fastify, opts) {
                     // TODO: change compare to check address
                     if(balance.jetton.symbol == fastify.config.tokensymbol ){
                         ubalance = tonweb.utils.fromNano( balance.balance)
+
+                        if(ubalance.split(".").length == 2){
+                            ubalance = Number(Number(ubalance).toFixed(2))
+                        }else{
+                            ubalance = Number(ubalance)
+                        }
+
+                        break;
                     }
                 }
             }
@@ -33,7 +41,7 @@ module.exports = fp(async function (fastify, opts) {
         }
 
 
-        return Number(ubalance);
+        return ubalance;
     }
 
     async function getJettonPoolBalance(wallet){
