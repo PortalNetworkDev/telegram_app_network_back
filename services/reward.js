@@ -4,7 +4,6 @@ module.exports = async function (fastify, opts) {
     const checkInterval = 5;
     setInterval(async function(){
 
-
         console.log("run sendRewards")
 
         const users = await fastify.models_user.getUsers();
