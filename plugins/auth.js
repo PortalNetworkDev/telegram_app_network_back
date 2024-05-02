@@ -14,11 +14,17 @@ module.exports = fp(async function (fastify, opts) {
 
     fastify.decorate('auth', async function(req, res){
 
-        if(typeof req.headers.authorization == "undefined")
+        if(typeof req.headers.authorization == "undefined"){
+            console.log("req.headers.authorization == undefined")
             return res.unauthorized("Access denied");
+        }
 
-        if(!verifyTelegramWebAppData(fastify.config.bottoken,req.headers.authorization))
+
+        if(!verifyTelegramWebAppData(fastify.config.bottoken,req.headers.authorization)){
+            console.log("Access denied with token:", req.headers.authorization)
             return res.unauthorized("Access denied");
+        }
+
 
         const user = JSON.parse(new URLSearchParams(req.headers.authorization).get("user"));
 
@@ -32,8 +38,6 @@ module.exports = fp(async function (fastify, opts) {
             if(initData.get("start_param")){
 
                 const user_id = initData.get("start_param").split("-")[1]
-
-                console.log("++++user_id++++", user_id)
 
                 if(!await fastify.models_user.checkReferaluser(user_id, user.id)){
                     await fastify.models_user.addReferalUser(user_id, user.id);
