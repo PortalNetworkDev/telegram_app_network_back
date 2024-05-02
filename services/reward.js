@@ -34,6 +34,7 @@ module.exports = async function (fastify, opts) {
                         await fastify.models_tasks.setRewardedTask(task.id,user.id, "")
                     }
 
+                    await fastify.utils.sleep(5000)
                 } catch (error) {
                     console.log(error)
                 }

@@ -73,7 +73,15 @@ module.exports = fp(async function (fastify, opts) {
     }
 
     const getReferalUsersUnrewarded = async (user_id) => {
-        const {rows} = await fastify.mysql.select("select * from referal_users JOIN user_task_state on user_task_state.user_id = referal_users.referal_user_id where referal_users.user_id = ? and referal_users.is_rewarded = 0 and user_task_state.task_id = 5 and user_task_state.is_complite = 1",[user_id])
+        const {rows} = await fastify.mysql.select(`
+            select  
+            referal_users.user_id as user_id,
+            referal_users.referal_user_id as referal_user_id,
+            referal_users.reward as reward,
+            referal_users.is_rewarded as is_rewarded,
+            referal_users.last_updated as last_updated
+            from referal_users JOIN user_task_state on user_task_state.user_id = referal_users.referal_user_id where referal_users.user_id = ? and referal_users.is_rewarded = 0 and user_task_state.task_id = 5 and user_task_state.is_complite = 1;
+        `,[user_id])
         return rows;
     }
 
