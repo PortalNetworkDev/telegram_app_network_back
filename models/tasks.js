@@ -93,7 +93,7 @@ module.exports = fp(async function (fastify, opts) {
 
 
 
-    const csvParser = (file, delimeter = ';') => {
+    const csvParser = (file, delimeter = ',') => {
 
         return new Promise(function(resolve, reject) {
             const results = [];
