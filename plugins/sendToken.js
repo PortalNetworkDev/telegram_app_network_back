@@ -92,11 +92,11 @@ module.exports = fp(async function (fastify, opts) {
         const jettonWallet = new TonWeb.token.jetton.JettonWallet(tonWeb.provider,{address: jettonAddress});
     
         const data = await jettonMinter.getJettonData();
-        console.log('Total supply tokens:', data.totalSupply.toString());
+        //console.log('Total supply tokens:', data.totalSupply.toString());
        
         const data2 = await jettonWallet.getData();
-        console.log('Jetton balance:', data2.balance.toString());
-        console.log("Jetton wallet address", jettonAddress.toString(true, true, true))
+        //console.log('Jetton balance:', data2.balance.toString());
+        //console.log("Jetton wallet address", jettonAddress.toString(true, true, true))
     
         return {key, wallet, walletAddress, jettonWallet, jettonAddress, jettonMinter}
     
