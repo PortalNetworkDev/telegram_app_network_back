@@ -2,11 +2,18 @@
 
 module.exports = async function (fastify, opts) {
     const checkInterval = 5;
+    var runnded = false;
     setInterval(async function(){
+
+
+        if(runnded){
+            return
+        }
 
         console.log("run sendRewards")
 
         const users = await fastify.models_user.getUsers();
+        runnded = true;
 
         for (let index = 0; index < users.length; index++) {
             const user = users[index];
@@ -21,8 +28,13 @@ module.exports = async function (fastify, opts) {
                 
                 try {
                     
-                    let txId = await fastify.sendTonToken(user.wallet, Number(sum).toFixed(1))
-                    console.log("Token transfer to user", user.id, "amount", Number(sum).toFixed(1), "txid", txId)
+                    let seqno = await fastify.sendTonToken(user.wallet, Number(sum).toFixed(1))
+
+                    if(!seqno){
+                        return false;
+                    }
+
+                    console.log("Token transfer to user", user.id, "amount", Number(sum).toFixed(1), "seqno", seqno)
                     
                     for (let index = 0; index < referalUsersUnrewarded.length; index++) {
                         const el = referalUsersUnrewarded[index];
@@ -34,7 +46,6 @@ module.exports = async function (fastify, opts) {
                         await fastify.models_tasks.setRewardedTask(task.id,user.id, "")
                     }
 
-                    await fastify.utils.sleep(5000)
                 } catch (error) {
                     console.log(error)
                 }
@@ -42,6 +53,8 @@ module.exports = async function (fastify, opts) {
 
 
         }
+
+        runnded = false;
     },1000*60*checkInterval)
 }
 

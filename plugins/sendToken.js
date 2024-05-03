@@ -16,6 +16,7 @@ module.exports = fp(async function (fastify, opts) {
     const mnemonic = fastify.config.mnemonic;
     const jettonAddressRaw = fastify.config.jettonaddress;
 
+
     async function sendTonToken(walletAddress2, tokenAmount, textMessage = "Mini app transfer" ) {
 
         const {key, wallet, jettonWallet, walletAddress, jettonAddress} = await loadWallet()
@@ -37,22 +38,41 @@ module.exports = fp(async function (fastify, opts) {
         });
     
     
-        console.log("toAddress", jettonAddress.toString(true, true, true))
-    
-        
-    
-        const txId = await wallet.methods.transfer({
+        const transfer = await wallet.methods.transfer({
             secretKey: key.secretKey,
             toAddress: jettonAddress.toString(true, true, true),
             amount: TonWeb.utils.toNano('0.05'),
             seqno: seqno,
             payload: payload,
             sendMode: 3
-        }).send();
+        });
+
+        await transfer.estimateFee();   // get estimate fee of transfer
+
+        await transfer.send();  // send transfer query to blockchain
     
-        return txId;
+        i = 0
+        let seqnoafter = (await wallet.methods.seqno().call()) || 0;
+    
+        while(i < 100){
+            seqnoafter = (await wallet.methods.seqno().call()) || 0;
+    
+            if(seqnoafter > seqno){
+                break;
+            }
+    
+            await fastify.utils.sleep(5000)
+            i++
+        }
+
+    
+        if(seqnoafter > seqno)
+            return seqno;
+        else
+            return 0;
+    
     }
-    
+        
     
     async function loadWallet(){
 
