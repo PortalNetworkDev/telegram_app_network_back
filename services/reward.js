@@ -1,12 +1,13 @@
 'use strict'
 
 module.exports = async function (fastify, opts) {
-    const checkInterval = 5;
+    const checkInterval = 1;
     var runnded = false;
     setInterval(async function(){
 
 
         if(runnded){
+            console.log("try to run sendRewards, runned")
             return
         }
 
@@ -24,9 +25,11 @@ module.exports = async function (fastify, opts) {
 
             const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks)
 
-            if(sum > fastify.config.minrewardfortransfer && user.wallet){
+            if(sum >= fastify.config.minrewardfortransfer && user.wallet){
+
+                    console.log("Token transfer to user", user.id, "amount", Number(sum).toFixed(1), "wallet", user.wallet)
                 
-                try {
+/*                 try {
                     
                     let seqno = await fastify.sendTonToken(user.wallet, Number(sum).toFixed(1))
 
@@ -48,7 +51,7 @@ module.exports = async function (fastify, opts) {
 
                 } catch (error) {
                     console.log(error)
-                }
+                } */
             }
 
 
