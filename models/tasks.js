@@ -274,7 +274,7 @@ module.exports = fp(async function (fastify, opts) {
     }
 
     const compliteTask = async (id, user_id, result) => {
-        console.log("compliteTask", id, user_id, result)
+        //console.log("compliteTask", id, user_id, result)
         const tasks = await fastify.mysql.update("update user_task_state set result = ?, is_complite = 1 where task_id = ? and user_id = ?",[result, id, user_id])
         return tasks;
     }

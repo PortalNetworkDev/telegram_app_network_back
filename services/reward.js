@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = async function (fastify, opts) {
-    const checkInterval = 1;
+    const checkInterval = 5;
     var runnded = false;
     setInterval(async function(){
 
@@ -27,17 +27,18 @@ module.exports = async function (fastify, opts) {
 
             if(sum >= fastify.config.minrewardfortransfer && user.wallet){
 
-                    console.log("Token transfer to user", user.id, "amount", Number(sum).toFixed(1), "wallet", user.wallet)
+                console.log("Try to transfer token to user", user.id, "amount", Number(sum).toFixed(1))
                 
-/*                 try {
+                try {
                     
                     let seqno = await fastify.sendTonToken(user.wallet, Number(sum).toFixed(1))
 
                     if(!seqno){
+                        console.log("Failed: Token transfer to user seqno:", seqno)
                         return false;
                     }
 
-                    console.log("Token transfer to user", user.id, "amount", Number(sum).toFixed(1), "seqno", seqno)
+                    console.log("Success: Token transfer to user seqno:", seqno)
                     
                     for (let index = 0; index < referalUsersUnrewarded.length; index++) {
                         const el = referalUsersUnrewarded[index];
@@ -51,7 +52,7 @@ module.exports = async function (fastify, opts) {
 
                 } catch (error) {
                     console.log(error)
-                } */
+                }
             }
 
 
