@@ -51,7 +51,7 @@ module.exports = fp(async function (fastify, opts) {
 
         await transfer.send();  // send transfer query to blockchain
     
-        i = 0
+        let i = 0
         let seqnoafter = (await wallet.methods.seqno().call()) || 0;
     
         while(i < 100){
