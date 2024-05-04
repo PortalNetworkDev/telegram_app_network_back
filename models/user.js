@@ -40,10 +40,10 @@ module.exports = fp(async function (fastify, opts) {
     const createUser = async (user, tg_token) => {
         user.first_name = user.first_name.replace(/[^a-zA-Z0-9а-яё ]/g, "")
         user.last_name = user.last_name.replace(/[^a-zA-Z0-9а-яё ]/g, "")
-          
+
         let sql = `INSERT INTO users (id, first_name,last_name,username,language_code,is_premium,allows_write_to_pm, last_updated,referal_reward,wallet, tg_token) 
         VALUES (?, ?,?,?,?,?,?, ?,?,"",?)`
-        let values = [user.id, user.first_name,user.last_name, (user.username) ? user.username: "",user.language_code,(user.is_premium) ? user.is_premium: 0,user.allows_write_to_pm, Date.now(), fastify.config.referalreward, tg_token]
+        let values = [user.id, user.first_name,user.last_name, (user.username) ? user.username: "",user.language_code,(user.is_premium) ? user.is_premium: 0,(user.allows_write_to_pm) ? user.allows_write_to_pm : 0, Date.now(), fastify.config.referalreward, tg_token]
         
         await fastify.mysql.insert(sql, values)
     }
