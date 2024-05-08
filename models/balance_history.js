@@ -11,8 +11,8 @@ module.exports = fp(async function (fastify, opts) {
         CREATE TABLE IF NOT EXISTS balance_history (
             id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id bigint NOT NULL,
-            token_balance bigint NOT NULL,
-            pool_balance bigint NOT NULL,
+            token_balance float NOT NULL,
+            pool_balance float NOT NULL,
             create_time date NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     `;

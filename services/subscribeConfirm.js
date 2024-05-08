@@ -24,7 +24,7 @@ module.exports = async function (fastify, opts) {
                         await fastify.models_tasks.compliteTask(task.id, user.id, "")
                     }
                 } catch (error) {
-                    console.log("subscribeConfirm", user.id , ">",task.description, "failed", "cannot get info")
+                    console.log("subscribeConfirm", user.id , ">",task.description, "failed", "cannot get info", error)
                 }
 
             }

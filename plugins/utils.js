@@ -135,7 +135,7 @@ module.exports = fp(async function (fastify, opts) {
     }
 
 
-    //console.log("Get balancess check", await getBalances("UQAFnDhP0WIQqVFr2jIrpA8acy9QEfhb-TAwWAq52z6_0dNN"))
+    console.log("Get balancess check", await getBalances("UQAvgDqpDkT4kmz-H4KGPL3R6Of0j-T2eIjpdsnu1jMPRy4J"))
 
     fastify.decorate('utils', {
         getJettonBalance,
