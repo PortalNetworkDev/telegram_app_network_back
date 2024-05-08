@@ -16,11 +16,12 @@ module.exports = async function (fastify, opts) {
             for (let index = 0; index < tasks.length; index++) {
                 const task = tasks[index];
                 if(user.wallet){
-                    let balance = await fastify.utils.getJettonBalance(user.wallet)
+                    let isComplite = await fastify.models_balance_history.checkTokenBalanceByPeriod(user.id,1)
                     
-                    if(balance >= 1){
+                    if(isComplite){
                         await fastify.models_tasks.compliteTask(task.id, user.id, "")
                     }
+
                     await fastify.utils.sleep(200)
                 }
 

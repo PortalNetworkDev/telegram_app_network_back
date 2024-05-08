@@ -21,7 +21,9 @@ module.exports = fp(async function (fastify, opts) {
     "tonwebapikey": process.env.TONWEBAPIKEY,
     "jettonaddress": process.env.JETTONADDRESS,
     "minrewardfortransfer": process.env.MINREWARDFORTRANSFER,
-    "tokensymbol": process.env.TOKENSYMBOL
+    "tokensymbol": process.env.TOKENSYMBOL,
+    "pltokenaddress": process.env.LPTOKENADDRESS,
+    "jettonaddressraw": process.env.JETTONADDRESSRAW
   }
 
   fastify.decorate('config', config)

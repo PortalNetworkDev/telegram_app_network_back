@@ -9,7 +9,7 @@ module.exports = fp(async function (fastify, opts) {
 
     const balanceHistory = `
         CREATE TABLE IF NOT EXISTS balance_history (
-            id bigint NOT NULL,
+            id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id bigint NOT NULL,
             token_balance bigint NOT NULL,
             pool_balance bigint NOT NULL,
@@ -20,7 +20,7 @@ module.exports = fp(async function (fastify, opts) {
 
 
     async function addHistory(user_id, token_balance, pool_balance){
-        let sql = `INSERT INTO balance_history (user_id, token_balance, pool_balance, create_time) VALUES (?,?,?,?)`
+        let sql = `INSERT INTO balance_history (user_id, token_balance, pool_balance, create_time) VALUES (?,?,?,NOW())`
 
         let values = [user_id, token_balance, pool_balance]
         
@@ -59,15 +59,19 @@ module.exports = fp(async function (fastify, opts) {
         return true;
     }
 
-    
-
+    async function getUsersWhoNotSetBalanceHistoryToday(){
+        const sql = `select users.id as user_id , users.wallet as wallet, (select create_time from balance_history where user_id=users.id and create_time >= (NOW() - INTERVAL 1 DAY)) as create_time from users where wallet != "";`
+        const {rows} = await fastify.mysql.select(sql)
+        return rows
+    }
 
     fastify.decorate("models_balance_history",{
         addHistory,
         getHoleInHistoryTokenBalance,
         checkTokenBalanceByPeriod,
         getHoleInHistoryPoolBalance,
-        checkPoolBalanceByPeriod
+        checkPoolBalanceByPeriod,
+        getUsersWhoNotSetBalanceHistoryToday
     })
 
 })

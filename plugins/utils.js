@@ -21,8 +21,8 @@ module.exports = fp(async function (fastify, opts) {
             
                 for (let index = 0; index < req.balances.length; index++) {
                     const balance = req.balances[index];
-                    // TODO: change compare to check address
-                    if(balance.jetton.symbol == fastify.config.tokensymbol ){
+                    
+                    if(balance.jetton.address == fastify.config.jettonaddressraw ){
                         ubalance = tonweb.utils.fromNano( balance.balance)
 
                         if(ubalance.split(".").length == 2){
@@ -57,8 +57,8 @@ module.exports = fp(async function (fastify, opts) {
                 
                 for (let index = 0; index < req.balances.length; index++) {
                     const balance = req.balances[index];
-                    // TODO: change compare to check address
-                    if(balance.jetton.symbol == `${fastify.config.tokensymbol}-pTON LP`){
+                    
+                    if(balance.jetton.address == fastify.config.pltokenaddress){
                         ubalance = tonweb.utils.fromNano( balance.balance)
                     }
                 }
@@ -72,6 +72,44 @@ module.exports = fp(async function (fastify, opts) {
         return Number(ubalance);
     }
 
+
+    async function getBalances(wallet){
+
+        let jettonbalance = 0;
+        let poolbalance = 0;
+
+        try {
+            const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
+
+
+            if(_req.status == 200){
+                const req = await _req.json()
+                
+                for (let index = 0; index < req.balances.length; index++) {
+                    const balance = req.balances[index];
+                    
+                    if(balance.jetton.address == fastify.config.pltokenaddress){
+                        poolbalance = tonweb.utils.fromNano( balance.balance)
+                    }
+
+                    if(balance.jetton.address == fastify.config.jettonaddressraw){
+                        jettonbalance = tonweb.utils.fromNano( balance.balance)
+                    }
+
+                }
+            }
+
+        } catch (error) {
+            console.log("cannot getBalances", error)
+        }
+
+
+        return {
+            pool_balance:Number(poolbalance),
+            token_balance: Number(jettonbalance)
+        };
+    }
+
     function sleep(ms) {
         return new Promise((resolve) => {
           setTimeout(resolve, ms);
@@ -81,6 +119,7 @@ module.exports = fp(async function (fastify, opts) {
     fastify.decorate('utils', {
         getJettonBalance,
         getJettonPoolBalance,
+        getBalances,
         sleep
     })
 })
