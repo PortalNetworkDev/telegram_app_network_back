@@ -8,74 +8,6 @@ const tonweb = new TonWeb();
 
 module.exports = fp(async function (fastify, opts) {
 
-    async function getJettonBalance(wallet){
-
-        let ubalance = 0;
-
-        try {
-                        
-            const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
-
-            if(_req.status == 200){
-                const req = await _req.json()
-            
-                for (let index = 0; index < req.balances.length; index++) {
-                    const balance = req.balances[index];
-                    
-                    if(balance.jetton.address == fastify.config.jettonaddressraw ){
-                        ubalance = tonweb.utils.fromNano( balance.balance)
-
-                        if(ubalance.split(".").length == 2){
-                            ubalance = Number(Number(ubalance).toFixed(2))
-                        }else{
-                            ubalance = Number(ubalance)
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-        } catch (error) {
-            console.log("cannot getJettonBalance", error)  
-        }
-
-
-        return ubalance;
-    }
-
-    async function getJettonPoolBalance(wallet){
-
-        let ubalance = 0;
-
-        try {
-            const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
-
-
-            if(_req.status == 200){
-                const req = await _req.json()
-                
-                for (let index = 0; index < req.balances.length; index++) {
-                    const balance = req.balances[index];
-                    
-                    if(balance.jetton.address == fastify.config.pltokenaddress){
-                        ubalance = tonweb.utils.fromNano( balance.balance)
-                    }
-                }
-            }
-
-        } catch (error) {
-            console.log("cannot getJettonPoolBalance", error)
-        }
-
-
-        return Number(ubalance);
-    }
-
-
-
-
-
     async function getBalances(wallet){
 
         let jettonbalance = 0;
@@ -134,12 +66,7 @@ module.exports = fp(async function (fastify, opts) {
         });
     }
 
-
-    console.log("Get balancess check", await getBalances("UQAvgDqpDkT4kmz-H4KGPL3R6Of0j-T2eIjpdsnu1jMPRy4J"))
-
     fastify.decorate('utils', {
-        getJettonBalance,
-        getJettonPoolBalance,
         getBalances,
         sleep
     })
