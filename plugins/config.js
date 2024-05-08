@@ -22,7 +22,7 @@ module.exports = fp(async function (fastify, opts) {
     "jettonaddress": process.env.JETTONADDRESS,
     "minrewardfortransfer": process.env.MINREWARDFORTRANSFER,
     "tokensymbol": process.env.TOKENSYMBOL,
-    "pltokenaddress": process.env.LPTOKENADDRESS,
+    "lptokenaddress": process.env.LPTOKENADDRESS,
     "jettonaddressraw": process.env.JETTONADDRESSRAW
   }
 

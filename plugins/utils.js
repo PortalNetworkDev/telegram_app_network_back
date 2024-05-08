@@ -73,6 +73,9 @@ module.exports = fp(async function (fastify, opts) {
     }
 
 
+
+
+
     async function getBalances(wallet){
 
         let jettonbalance = 0;
@@ -103,7 +106,7 @@ module.exports = fp(async function (fastify, opts) {
                 for (let index = 0; index < req.balances.length; index++) {
                     const balance = req.balances[index];
                     
-                    if(balance.jetton.address == fastify.config.pltokenaddress){
+                    if(balance.jetton.address == fastify.config.lptokenaddress){
                         poolbalance = tonweb.utils.fromNano( balance.balance)
                     }
 
@@ -130,6 +133,9 @@ module.exports = fp(async function (fastify, opts) {
           setTimeout(resolve, ms);
         });
     }
+
+
+    //console.log("Get balancess check", await getBalances("UQAFnDhP0WIQqVFr2jIrpA8acy9QEfhb-TAwWAq52z6_0dNN"))
 
     fastify.decorate('utils', {
         getJettonBalance,
