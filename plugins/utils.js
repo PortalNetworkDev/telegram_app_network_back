@@ -77,9 +77,24 @@ module.exports = fp(async function (fastify, opts) {
 
         let jettonbalance = 0;
         let poolbalance = 0;
+        let tryCount = 0;
 
         try {
-            const _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
+
+            var _req;
+
+
+            while(tryCount < 5){
+                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
+
+
+                if(_req.status == 200)
+                    break;
+
+
+                tryCount++;
+            }
+            
 
 
             if(_req.status == 200){

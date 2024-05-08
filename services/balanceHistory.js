@@ -21,7 +21,7 @@ module.exports = async function (fastify, opts) {
             const user = users[index];
             
 
-            if(!user.create_time){
+            if(user.create_time == null){
                 let balances = await fastify.utils.getBalances(user.wallet)
 
                 await fastify.models_balance_history.addHistory(user.user_id, balances.token_balance,balances.pool_balance)
