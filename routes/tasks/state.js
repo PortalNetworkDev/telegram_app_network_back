@@ -26,6 +26,11 @@ module.exports = async function (fastify, opts) {
             task.description = task.description+`<br><br>Привлечено пользователей: <b>${await fastify.models_user.countReferalUsers(user.id)}</b>`
           }
 
+          if(task.type == "checkLiquidity"){
+            const days = await fastify.models_balance_history.getHoleInHistoryPoolBalance(user.id);
+            task.description = task.description+`<br><br>Дней в пуле: ${days.length}`
+          }
+
           cats[indexCat].tasks.push(task)
         }
       }
