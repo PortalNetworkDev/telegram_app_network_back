@@ -28,7 +28,7 @@ module.exports = async function (fastify, opts) {
 
           if(task.type == "checkLiquidity"){
             const days = await fastify.models_balance_history.getHoleInHistoryPoolBalance(user.id);
-            task.description = task.description+`<br><br>Дней в пуле: ${days.length}`
+            task.description = task.description+`<br><br>Дней в пуле: <b>${days.length}</b>`
           }
 
           cats[indexCat].tasks.push(task)
