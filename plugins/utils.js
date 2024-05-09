@@ -3,6 +3,8 @@
 const fp = require('fastify-plugin')
 const TonWeb = require('tonweb');
 const tonweb = new TonWeb();
+const csv = require('csv-parser')
+const fs = require('fs')
 // the use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 
@@ -66,8 +68,30 @@ module.exports = fp(async function (fastify, opts) {
         });
     }
 
+
+
+    function csvParser(file, delimeter = ','){
+
+        return new Promise(function(resolve, reject) {
+            const results = [];
+
+            fs.createReadStream(file)
+            .pipe(csv({ separator: delimeter }))
+            .on('data', (data) => {
+                results.push(data)
+
+            })
+            .on('end', () => {
+                resolve(results);
+              });
+            
+        })
+
+    }
+
     fastify.decorate('utils', {
         getBalances,
-        sleep
+        sleep,
+        csvParser
     })
 })

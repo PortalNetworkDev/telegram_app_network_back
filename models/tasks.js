@@ -1,8 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const csv = require('csv-parser')
-const fs = require('fs')
+
 
 // the use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
@@ -61,7 +60,7 @@ module.exports = fp(async function (fastify, opts) {
 
         console.log("RUN catImport")
 
-        const cats = await csvParser(file);
+        const cats = await fastify.utils.csvParser(file);
         
         for (let index = 0; index < cats.length; index++) {
             let cat = cats[index];
@@ -79,7 +78,7 @@ module.exports = fp(async function (fastify, opts) {
 
         console.log("RUN taskImport")
 
-        const tasks = await csvParser(file);
+        const tasks = await fastify.utils.csvParser(file);
         for (let index = 0; index < tasks.length; index++) {
             const {id,title, label, description, type, category_id, reward, icon_url, other} = tasks[index];
             try {
@@ -92,25 +91,6 @@ module.exports = fp(async function (fastify, opts) {
     }
 
 
-
-    const csvParser = (file, delimeter = ',') => {
-
-        return new Promise(function(resolve, reject) {
-            const results = [];
-
-            fs.createReadStream(file)
-            .pipe(csv({ separator: delimeter }))
-            .on('data', (data) => {
-                results.push(data)
-
-            })
-            .on('end', () => {
-                resolve(results);
-              });
-            
-        })
-
-    }
 
 
     const getCategories = async () => {
