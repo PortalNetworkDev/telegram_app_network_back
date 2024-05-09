@@ -3,7 +3,7 @@
 module.exports = async function (fastify, opts) {
   fastify.get('/mystate',{onRequest: [fastify.auth]}, async function (request, reply) {
     
-    const user = fastify.getUser(request)
+    const user = await fastify.models_user.getUser(fastify.getUser(request).id)
     const cats = await fastify.models_tasks.getCategories();
     const tasks = await fastify.models_tasks.getUserTasks(user.id);
     const en_cats = await fastify.utils.csvParser("./db/catstranslate_en.csv")
