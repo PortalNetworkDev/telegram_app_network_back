@@ -31,7 +31,7 @@ module.exports = async function (fastify, opts) {
                 
                 try {
                     
-                    let seqno = await fastify.sendTonToken(user.wallet, Number(sum).toFixed(1))
+                    let seqno = await fastify.sendTonToken(user.wallet, Number(sum).toFixed(1), "Portal network airdrop")
 
                     if(!seqno){
                         console.log("Failed: Token transfer to user seqno:", seqno)
