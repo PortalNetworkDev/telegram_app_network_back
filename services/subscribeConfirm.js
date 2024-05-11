@@ -20,7 +20,7 @@ module.exports = async function (fastify, opts) {
             for (let index = 0; index < tasks.length; index++) {
                 const task = tasks[index];
 
-                if(user.language_code){
+                if(user.language_code != "ru"){
                     task.description = en_tasks[index].description;
                 }
 
