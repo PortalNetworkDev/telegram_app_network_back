@@ -10,6 +10,65 @@ const fs = require('fs')
 
 module.exports = fp(async function (fastify, opts) {
 
+    async function checkBuyTokenStonFi(wallet){
+      
+        let have = false;
+        let tryCount = 0;
+
+        try {
+
+            var _req;
+
+
+            while(tryCount < 5){
+                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/events?initiator=true&subject_only=true&limit=100`)
+
+
+                if(_req.status == 200)
+                    break;
+
+
+                tryCount++;
+            }
+            
+
+
+            if(_req.status == 200){
+                const req = await _req.json()
+                
+                for (let index = 0; index < req.events.length; index++) {
+                    const event = req.events[index];
+                    
+
+                    for (let iActions = 0; iActions < event.actions.length; iActions++) {
+                        const action = event.actions[iActions];
+                        if(action.type == "JettonSwap"){
+                            if(
+                                action.JettonSwap.dex == "stonfi" 
+                                && action.status == "ok"
+                                && action.JettonSwap.jetton_master_out?.address == fastify.config.jettonaddressraw
+                            ){
+                                have = true
+                                break;
+                            }
+                                
+                            
+                        }
+                    }
+
+                    if(have){
+                        break;
+                    }
+                }
+            }
+
+        } catch (error) {
+            console.log("cannot checkBuyTokenStonFi", error)
+        }
+
+
+        return have  
+    }
 
 
     async function getFarmingNft(wallet){
@@ -138,6 +197,7 @@ module.exports = fp(async function (fastify, opts) {
     fastify.decorate('utils', {
         getBalances,
         getFarmingNft,
+        checkBuyTokenStonFi,
         sleep,
         csvParser
     })
