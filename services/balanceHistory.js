@@ -22,7 +22,11 @@ module.exports = async function (fastify, opts) {
             if(user.create_time == null){
                 let balances = await fastify.utils.getBalances(user.wallet)
 
-                
+                if(balances.pool_balance == 0){
+                    if(await fastify.utils.getFarmingNft(user.wallet)){
+                        balances.pool_balance = 10101
+                    }
+                }
 
 
                 await fastify.models_balance_history.addHistory(user.user_id, balances.token_balance,balances.pool_balance)

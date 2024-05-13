@@ -10,6 +10,52 @@ const fs = require('fs')
 
 module.exports = fp(async function (fastify, opts) {
 
+
+
+    async function getFarmingNft(wallet){
+
+        let have = false;
+        let tryCount = 0;
+
+        try {
+
+            var _req;
+
+
+            while(tryCount < 5){
+                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/nfts`)
+
+
+                if(_req.status == 200)
+                    break;
+
+
+                tryCount++;
+            }
+            
+
+
+            if(_req.status == 200){
+                const req = await _req.json()
+                
+                for (let index = 0; index < req.nft_items.length; index++) {
+                    const nft = req.nft_items[index];
+                    
+                    if(nft.collection.address == fastify.config.farmingcollectionaddresraw){
+                        have = true
+                    }
+
+                }
+            }
+
+        } catch (error) {
+            console.log("cannot getFarmingNft", error)
+        }
+
+
+        return have
+    }
+
     async function getBalances(wallet){
 
         let jettonbalance = 0;
@@ -91,6 +137,7 @@ module.exports = fp(async function (fastify, opts) {
 
     fastify.decorate('utils', {
         getBalances,
+        getFarmingNft,
         sleep,
         csvParser
     })
