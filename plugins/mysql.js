@@ -16,7 +16,14 @@ module.exports = fp(async function (f, opts) {
     f.mysql.select = async function(sql,values) {
         try {     
 
-            const connection = await f.mysql.getConnection()     
+            const connection = await f.mysql.getConnection((err, connection) => {
+              if (err) {
+                console.log('Error while connecting ', err)
+              } else {
+                if (connection) connection.release()
+                console.log('Database Connected Successfully!')
+              }
+            })
             const [rows, fields] = await connection.execute(sql, values);
             connection.release()
 
@@ -28,7 +35,14 @@ module.exports = fp(async function (f, opts) {
 
     f.mysql.insert = async function(sql,values) {
         try {     
-            const connection = await f.mysql.getConnection()     
+            const connection = await f.mysql.getConnection((err, connection) => {
+              if (err) {
+                console.log('Error while connecting ', err)
+              } else {
+                if (connection) connection.release()
+                console.log('Database Connected Successfully!')
+              }
+            })   
             const [result, fields] = await connection.execute(sql, values);
             connection.release()
             return {result,fields}
