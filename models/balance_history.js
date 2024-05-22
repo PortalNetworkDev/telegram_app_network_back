@@ -60,9 +60,52 @@ module.exports = fp(async function (fastify, opts) {
     }
 
     async function getUsersWhoNotSetBalanceHistoryToday(){
-        const sql = `select users.id as user_id , users.wallet as wallet, (select create_time from balance_history where user_id=users.id and create_time >= (NOW() - INTERVAL 1 DAY)) as create_time from users where wallet != "";`
+        /*const sql = `select 
+        users.id as user_id , 
+        users.wallet as wallet, 
+        (select create_time 
+            from balance_history 
+            where user_id=users.id 
+            and create_time >= (NOW() - INTERVAL 1 DAY)
+        ) as create_time 
+        from users 
+        where wallet != "";`*/
+
+        const sql = `SELECT
+        users.id AS user_id,
+        users.wallet AS wallet,
+        (SELECT create_time
+         FROM balance_history
+         WHERE user_id = users.id
+           AND create_time >= (NOW() - INTERVAL 1 DAY)
+        ) AS create_time
+        FROM users
+        WHERE wallet != ""
+        AND users.id IN (
+          SELECT user_id
+          FROM user_task_state
+          WHERE task_id = 8
+            AND is_complite = 0
+        );`
+        //добавлено что не выполнено задание 8
         const {rows} = await fastify.mysql.select(sql)
         return rows
+    }
+
+    async function checkDaysInHistoryTokenBalance(user_id, period = 3){
+        let sql = `
+        SELECT COUNT(*) AS count 
+        FROM balance_history 
+        WHERE user_id = ? 
+        AND token_balance > 0 
+    `;
+        const {rows} = await fastify.mysql.select(sql,[user_id])
+        const count = rows[0].count;
+
+        if (count >= period)
+            return true
+
+        return false
     }
 
     fastify.decorate("models_balance_history",{
@@ -71,7 +114,8 @@ module.exports = fp(async function (fastify, opts) {
         checkTokenBalanceByPeriod,
         getHoleInHistoryPoolBalance,
         checkPoolBalanceByPeriod,
-        getUsersWhoNotSetBalanceHistoryToday
+        getUsersWhoNotSetBalanceHistoryToday,
+        checkDaysInHistoryTokenBalance
     })
 
 })

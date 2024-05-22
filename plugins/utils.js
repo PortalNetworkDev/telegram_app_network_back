@@ -73,27 +73,24 @@ module.exports = fp(async function (fastify, opts) {
 
     async function getFarmingNft(wallet){
 
-        let have = false;
+        let poolbalance = 0;
         let tryCount = 0;
 
         try {
 
             var _req;
 
-
-            while(tryCount < 5){
-                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/nfts`)
+            while(tryCount < 3){
+                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/nfts`);
 
 
                 if(_req.status == 200)
                     break;
 
-
                 tryCount++;
+                await sleep(100);
             }
             
-
-
             if(_req.status == 200){
                 const req = await _req.json()
                 
@@ -101,10 +98,12 @@ module.exports = fp(async function (fastify, opts) {
                     const nft = req.nft_items[index];
                     
                     if(nft.collection.address == fastify.config.farmingcollectionaddresraw){
-                        have = true
+                        poolbalance = 10101;
                     }
 
                 }
+            } else {
+                poolbalance = -1;
             }
 
         } catch (error) {
@@ -112,7 +111,7 @@ module.exports = fp(async function (fastify, opts) {
         }
 
 
-        return have
+        return poolbalance
     }
 
     async function getBalances(wallet){
@@ -125,19 +124,16 @@ module.exports = fp(async function (fastify, opts) {
 
             var _req;
 
-
-            while(tryCount < 5){
-                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`)
+            while(tryCount < 3){
+                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`);
 
 
                 if(_req.status == 200)
                     break;
 
-
                 tryCount++;
+                await sleep(100);
             }
-            
-
 
             if(_req.status == 200){
                 const req = await _req.json()
@@ -154,6 +150,9 @@ module.exports = fp(async function (fastify, opts) {
                     }
 
                 }
+            } else {
+                poolbalance = -1;
+                jettonbalance = -1;
             }
 
         } catch (error) {

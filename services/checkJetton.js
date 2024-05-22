@@ -17,8 +17,9 @@ module.exports = async function (fastify, opts) {
                 const task = tasks[index];
                 if(user.wallet){
                     let isComplite = await fastify.utils.checkBuyTokenStonFi(user.wallet)
+                    let isLongStored = await fastify.models_balance_history.checkDaysInHistoryTokenBalance(user.id);
                     
-                    if(isComplite){
+                    if(isComplite && isLongStored){
                         await fastify.models_tasks.compliteTask(task.id, user.id, "")
                     }
 

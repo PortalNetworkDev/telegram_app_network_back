@@ -1,6 +1,6 @@
 
 module.exports = async function (fastify, opts) {
-    const checkInterval = 1;
+    const checkInterval = 3;
     var runnded = false;
     setInterval(async function(){
 
@@ -23,16 +23,17 @@ module.exports = async function (fastify, opts) {
                 let balances = await fastify.utils.getBalances(user.wallet)
 
                 if(balances.pool_balance == 0){
-                    if(await fastify.utils.getFarmingNft(user.wallet)){
-                        balances.pool_balance = 10101
-                    }
+                    balances.pool_balance = await fastify.utils.getFarmingNft(user.wallet)
                 }
 
-
-                await fastify.models_balance_history.addHistory(user.user_id, balances.token_balance,balances.pool_balance)
+                if (balances.token_balance != -1 && balances.pool_balance != -1){
+                    await fastify.models_balance_history.addHistory(user.user_id, balances.token_balance, balances.pool_balance)
+                }
+                
+                await fastify.utils.sleep(200);
             }
 
-            await fastify.utils.sleep(300);
+            
         }
 
 
