@@ -24,7 +24,8 @@ module.exports = fp(async function (fastify, opts) {
     "tokensymbol": process.env.TOKENSYMBOL,
     "lptokenaddress": process.env.LPTOKENADDRESS,
     "jettonaddressraw": process.env.JETTONADDRESSRAW,
-    "farmingcollectionaddresraw": process.env.FARMINGCOLLECTIONADDRESSRAW
+    "farmingcollectionaddresraw": process.env.FARMINGCOLLECTIONADDRESSRAW,
+    "tonApiToken": process.env.TONAPITOKEN
   }
 
   fastify.decorate('config', config)

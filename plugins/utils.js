@@ -21,13 +21,19 @@ module.exports = fp(async function (fastify, opts) {
 
 
             while(tryCount < 5){
-                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/events?initiator=true&subject_only=true&limit=100`)
 
+                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/events?initiator=true&subject_only=true&limit=100`, {
+                    method: "GET", 
+                    headers: {
+                      "Content-Type": "application/json",
+                      'Authorization': `Bearer ${fastify.config.tonApiToken}`,
+                    },
+                });
 
                 if(_req.status == 200)
                     break;
 
-
+                await sleep(300);
                 tryCount++;
             }
             
@@ -80,15 +86,22 @@ module.exports = fp(async function (fastify, opts) {
 
             var _req;
 
-            while(tryCount < 3){
-                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/nfts`);
+            while(tryCount < 2){
 
+                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/nfts`, {
+                    method: "GET", 
+                    headers: {
+                      "Content-Type": "application/json",
+                      'Authorization': `Bearer ${fastify.config.tonApiToken}`,
+                    },
+                });
 
                 if(_req.status == 200)
                     break;
 
+                console.log("cannot getFarmingNft, status", _req.status)
                 tryCount++;
-                await sleep(100);
+                await sleep(300);
             }
             
             if(_req.status == 200){
@@ -108,8 +121,8 @@ module.exports = fp(async function (fastify, opts) {
 
         } catch (error) {
             console.log("cannot getFarmingNft", error)
+            poolbalance = -1;
         }
-
 
         return poolbalance
     }
@@ -123,16 +136,24 @@ module.exports = fp(async function (fastify, opts) {
         try {
 
             var _req;
-
-            while(tryCount < 3){
-                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`);
+            
+            while(tryCount < 2){
+                
+                _req = await fetch(`https://tonapi.io/v2/accounts/${wallet}/jettons`, {
+                    method: "GET", 
+                    headers: {
+                      "Content-Type": "application/json",
+                      'Authorization': `Bearer ${fastify.config.tonApiToken}`,
+                    },
+                });
 
 
                 if(_req.status == 200)
                     break;
 
+                console.log("cannot get balance, status", _req.status)
                 tryCount++;
-                await sleep(100);
+                await sleep(300);
             }
 
             if(_req.status == 200){
@@ -151,14 +172,15 @@ module.exports = fp(async function (fastify, opts) {
 
                 }
             } else {
-                poolbalance = -1;
                 jettonbalance = -1;
+                poolbalance = -1;
             }
 
         } catch (error) {
             console.log("cannot getBalances", error)
+            jettonbalance = -1;
+            poolbalance = -1;
         }
-
 
         return {
             pool_balance:Number(poolbalance),

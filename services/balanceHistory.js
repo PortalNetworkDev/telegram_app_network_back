@@ -1,6 +1,6 @@
 
 module.exports = async function (fastify, opts) {
-    const checkInterval = 3;
+    const checkInterval = 1;
     var runnded = false;
     setInterval(async function(){
 
@@ -21,8 +21,10 @@ module.exports = async function (fastify, opts) {
 
             if(user.create_time == null){
                 let balances = await fastify.utils.getBalances(user.wallet)
+                
 
                 if(balances.pool_balance == 0){
+                    await fastify.utils.sleep(150);
                     balances.pool_balance = await fastify.utils.getFarmingNft(user.wallet)
                 }
 
@@ -30,7 +32,7 @@ module.exports = async function (fastify, opts) {
                     await fastify.models_balance_history.addHistory(user.user_id, balances.token_balance, balances.pool_balance)
                 }
                 
-                await fastify.utils.sleep(200);
+                await fastify.utils.sleep(150);
             }
 
             
