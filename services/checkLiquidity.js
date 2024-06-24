@@ -2,7 +2,7 @@
 
 module.exports = async function (fastify, opts) {
 
-    const checkInterval = 5;
+    const checkInterval = 1;
 
     setInterval(async function(){
         console.log("RUN checkLiquidity")
@@ -16,12 +16,13 @@ module.exports = async function (fastify, opts) {
             for (let index = 0; index < tasks.length; index++) {
                 const task = tasks[index];
                 if(user.wallet){
-                    let balance = await fastify.utils.getJettonPoolBalance(user.wallet)
+                    let isComplite = await fastify.models_balance_history.checkPoolBalanceByPeriod(user.id)
 
-                    console.log(balance, user.wallet, user.id )
-                    if(balance != 0){
+                    if(isComplite){
                         await fastify.models_tasks.compliteTask(task.id, user.id, "")
                     }
+
+                    await fastify.utils.sleep(200)
                 }
 
 

@@ -16,8 +16,6 @@ module.exports = fp(async function (fastify, opts) {
     const mnemonic = fastify.config.mnemonic;
     const jettonAddressRaw = fastify.config.jettonaddress;
 
-    //console.log("jettonAddressRaw", jettonAddressRaw)
-    //await sendTonToken("UQA2weH-PG_zo85e02cSHORKHtKjJPg3NsJjn3BcznnVQfmE", "10")
 
     async function sendTonToken(walletAddress2, tokenAmount, textMessage = "Mini app transfer" ) {
 
@@ -31,10 +29,6 @@ module.exports = fp(async function (fastify, opts) {
         const amount = TonWeb.utils.toNano(tokenAmount);
     
     
-        //console.log("Send amount", amount)
-    
-        //console.log("Seqno ", seqno)
-    
         const payload = await jettonWallet.createTransferBody({
             jettonAmount: amount, 
             toAddress: new TonWeb.utils.Address(walletAddress2), 
@@ -44,22 +38,41 @@ module.exports = fp(async function (fastify, opts) {
         });
     
     
-        console.log("toAddress", jettonAddress.toString(true, true, true))
-    
-        
-    
-        const txId = await wallet.methods.transfer({
+        const transfer = await wallet.methods.transfer({
             secretKey: key.secretKey,
             toAddress: jettonAddress.toString(true, true, true),
             amount: TonWeb.utils.toNano('0.05'),
             seqno: seqno,
             payload: payload,
             sendMode: 3
-        }).send();
+        });
+
+        await transfer.estimateFee();   // get estimate fee of transfer
+
+        await transfer.send();  // send transfer query to blockchain
     
-        return txId;
+        let i = 0
+        let seqnoafter = (await wallet.methods.seqno().call()) || 0;
+    
+        while(i < 100){
+            seqnoafter = (await wallet.methods.seqno().call()) || 0;
+    
+            if(seqnoafter > seqno){
+                break;
+            }
+    
+            await fastify.utils.sleep(5000)
+            i++
+        }
+
+    
+        if(seqnoafter > seqno)
+            return seqno;
+        else
+            return 0;
+    
     }
-    
+        
     
     async function loadWallet(){
 
@@ -79,11 +92,11 @@ module.exports = fp(async function (fastify, opts) {
         const jettonWallet = new TonWeb.token.jetton.JettonWallet(tonWeb.provider,{address: jettonAddress});
     
         const data = await jettonMinter.getJettonData();
-        console.log('Total supply tokens:', data.totalSupply.toString());
+        //console.log('Total supply tokens:', data.totalSupply.toString());
        
         const data2 = await jettonWallet.getData();
-        console.log('Jetton balance:', data2.balance.toString());
-        console.log("Jetton wallet address", jettonAddress.toString(true, true, true))
+        //console.log('Jetton balance:', data2.balance.toString());
+        //console.log("Jetton wallet address", jettonAddress.toString(true, true, true))
     
         return {key, wallet, walletAddress, jettonWallet, jettonAddress, jettonMinter}
     

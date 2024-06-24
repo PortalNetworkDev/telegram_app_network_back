@@ -38,6 +38,10 @@ module.exports = async function (fastify, opts) {
         const user = fastify.getUser(request)
         const task = await fastify.models_tasks.getUserTask(user.id, task_id);
         
+        if(!task){
+          return reply.badRequest(`task_not_found ${user.id}, ${task_id}`);
+        }
+
         if(!["selfConfirm","connectToTon"].includes(task.type))
           return reply.badRequest("incorrect_type");
 

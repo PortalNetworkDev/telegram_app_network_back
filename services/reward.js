@@ -1,9 +1,20 @@
 'use strict'
 
 module.exports = async function (fastify, opts) {
-    const checkInterval = 60;
+    const checkInterval = 5;
+    var runnded = false;
     setInterval(async function(){
+
+
+        if(runnded){
+            console.log("try to run sendRewards, runned")
+            return
+        }
+
+        console.log("run sendRewards")
+
         const users = await fastify.models_user.getUsers();
+        runnded = true;
 
         for (let index = 0; index < users.length; index++) {
             const user = users[index];
@@ -14,12 +25,20 @@ module.exports = async function (fastify, opts) {
 
             const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks)
 
-            if(sum > fastify.config.minrewardfortransfer && user.wallet){
+            if(sum >= fastify.config.minrewardfortransfer && user.wallet){
+
+                console.log("Try to transfer token to user", user.id, "amount", Number(sum).toFixed(1))
                 
                 try {
                     
-                    let txId = await fastify.sendTonToken(user.wallet, Number(sum).toFixed(1))
-                    console.log("Token transfer to user", user.id, "amount", Number(sum).toFixed(1), "txid", txId)
+                    let seqno = await fastify.sendTonToken(user.wallet, Number(sum).toFixed(1), "Portal network airdrop")
+
+                    if(!seqno){
+                        console.log("Failed: Token transfer to user seqno:", seqno)
+                        return false;
+                    }
+
+                    console.log("Success: Token transfer to user seqno:", seqno)
                     
                     for (let index = 0; index < referalUsersUnrewarded.length; index++) {
                         const el = referalUsersUnrewarded[index];
@@ -38,6 +57,8 @@ module.exports = async function (fastify, opts) {
 
 
         }
+
+        runnded = false;
     },1000*60*checkInterval)
 }
 

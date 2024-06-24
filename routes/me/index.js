@@ -8,7 +8,8 @@ module.exports = async function (fastify, opts) {
     const user = await fastify.models_user.getUser(_user.id);
     const obj = {balance:0}
     if(user.wallet){
-      obj.balance = await fastify.utils.getJettonBalance(user.wallet)
+      const {token_balance} = await fastify.utils.getBalances(user.wallet)
+      obj.balance = token_balance
     }else{
       obj.balance = 0;
     }

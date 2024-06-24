@@ -14,16 +14,23 @@ module.exports = fp(async function (fastify, opts) {
 
     fastify.decorate('auth', async function(req, res){
 
-        if(typeof req.headers.authorization == "undefined")
+        if(typeof req.headers.authorization == "undefined"){
+            console.log("req.headers.authorization == undefined")
             return res.unauthorized("Access denied");
+        }
 
-        if(!verifyTelegramWebAppData(fastify.config.bottoken,req.headers.authorization))
+
+
+        if(!verifyTelegramWebAppData(fastify.config.bottoken,req.headers.authorization)){
+            console.log("Access denied with token:", req.headers.authorization)
             return res.unauthorized("Access denied");
+        }
+
 
         const user = JSON.parse(new URLSearchParams(req.headers.authorization).get("user"));
 
         if(!await fastify.models_user.userExist(user.id)){
-            await fastify.models_user.createUser(user)
+            await fastify.models_user.createUser(user, req.headers.authorization)
             await fastify.models_tasks.createUserTaskStates(user.id)
             
 
@@ -33,10 +40,9 @@ module.exports = fp(async function (fastify, opts) {
 
                 const user_id = initData.get("start_param").split("-")[1]
 
-                console.log("++++user_id++++", user_id)
-
                 if(!await fastify.models_user.checkReferaluser(user_id, user.id)){
                     await fastify.models_user.addReferalUser(user_id, user.id);
+                    await fastify.models_tasks.compliteTask(7,user_id,"")
                 }    
             }
 
@@ -47,46 +53,26 @@ module.exports = fp(async function (fastify, opts) {
     })
 })
 
-function createpayload(auth){
-    const initData = new URLSearchParams(auth);
-
-
-    let payload = `auth_date=${initData.get("auth_date")}\nchat_instance=${initData.get("chat_instance")}\nchat_type=${initData.get("chat_type")}\n`;
+function createpayload(initData){
     
-    if(initData.get("start_param")){
-        payload = payload+`start_param=${initData.get("start_param")}\n`
+    let array = []
+    
+    initData.sort()
+
+    for (const [key, value] of initData.entries()) {
+        if(key != "hash")
+            array.push(`${key}=${value}`)
     }
 
-
-    let user = "";
-
-
-
-    let _split = auth.split("&")
-
-    for (let index = 0; index < _split.length; index++) {
-        const element = _split[index];
-        
-        let _elem = element.split("=")
-
-        if(_elem[0] == "user"){
-            user = decodeURI(_elem[1]).replaceAll("%3A", ":").replaceAll("%2C",",");
-        }
-    }
-    
-    return payload+"user="+user;
+    return array.join("\n")
 }
 
 function verifyTelegramWebAppData(TELEGRAM_BOT_TOKEN,telegramInitData){
     const initData = new URLSearchParams(telegramInitData);
-    const payload = createpayload(telegramInitData)
+    const payload = createpayload(initData)
     const hash = initData.get("hash");
-
     const secret_key = CryptoJS.HmacSHA256(TELEGRAM_BOT_TOKEN, "WebAppData");
-    //console.log("secret_key", secret_key.toString())
     const calculated_hash = CryptoJS.HmacSHA256(payload, secret_key).toString();
-    //console.log("calculated_hash", calculated_hash)
-    //console.log("hash",hash)
     return calculated_hash === hash;
 }
 

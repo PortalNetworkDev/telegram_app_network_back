@@ -1,8 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const csv = require('csv-parser')
-const fs = require('fs')
+
 
 // the use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
@@ -61,7 +60,7 @@ module.exports = fp(async function (fastify, opts) {
 
         console.log("RUN catImport")
 
-        const cats = await csvParser(file);
+        const cats = await fastify.utils.csvParser(file);
         
         for (let index = 0; index < cats.length; index++) {
             let cat = cats[index];
@@ -79,7 +78,7 @@ module.exports = fp(async function (fastify, opts) {
 
         console.log("RUN taskImport")
 
-        const tasks = await csvParser(file);
+        const tasks = await fastify.utils.csvParser(file);
         for (let index = 0; index < tasks.length; index++) {
             const {id,title, label, description, type, category_id, reward, icon_url, other} = tasks[index];
             try {
@@ -92,25 +91,6 @@ module.exports = fp(async function (fastify, opts) {
     }
 
 
-
-    const csvParser = (file, delimeter = ';') => {
-
-        return new Promise(function(resolve, reject) {
-            const results = [];
-
-            fs.createReadStream(file)
-            .pipe(csv({ separator: delimeter }))
-            .on('data', (data) => {
-                results.push(data)
-
-            })
-            .on('end', () => {
-                resolve(results);
-              });
-            
-        })
-
-    }
 
 
     const getCategories = async () => {
@@ -171,7 +151,7 @@ module.exports = fp(async function (fastify, opts) {
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
             user_task_state.result as result,
-            user_task_state.rowid as id,
+            user_task_state.task_id as id,
             tasks.title as title,
             tasks.label as label,
             tasks.description as description,
@@ -200,7 +180,7 @@ module.exports = fp(async function (fastify, opts) {
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
             user_task_state.result as result,
-            user_task_state.rowid as id,
+            user_task_state.task_id as id,
             tasks.title as title,
             tasks.label as label,
             tasks.description as description,
@@ -210,8 +190,8 @@ module.exports = fp(async function (fastify, opts) {
             tasks.icon_url as icon_url,
             tasks.other as other
 
-            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.rowid = ?`,[user_id, task_id])
-            console.log(rows)
+            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.task_id = ?`,[user_id, task_id])
+            
             return rows[0];
         } catch (error) {
             console.log(error)
@@ -229,7 +209,7 @@ module.exports = fp(async function (fastify, opts) {
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
             user_task_state.result as result,
-            user_task_state.rowid as id,
+            user_task_state.task_id as id,
             tasks.title as title,
             tasks.label as label,
             tasks.description as description,
@@ -259,8 +239,6 @@ module.exports = fp(async function (fastify, opts) {
         for (let index = 0; index < tasks.length; index++) {
             const task = tasks[index];
 
-            console.log("getUserTaskByTaskId(user_id, task.id)",await getUserTaskByTaskId(user_id, task.id))
-
             if(typeof await getUserTaskByTaskId(user_id, task.id) == "undefined")
                 await createUserTaskState(user_id, task.id)
             
@@ -275,26 +253,20 @@ module.exports = fp(async function (fastify, opts) {
 
     }
 
-    const getUserTasksState = async (user_id) => {
-        const [rows] =  await fastify.mysql.select("select * from user_task_state where user_id = ?",[user_id])
-        return rows;
-    }
-
     const compliteTask = async (id, user_id, result) => {
-        console.log("compliteTask", id, user_id, result)
-        const tasks = await fastify.mysql.update("update user_task_state set result = ?, is_complite = 1 where rowid = ? and user_id = ?",[result, id, user_id])
+        //console.log("compliteTask", id, user_id, result)
+        const tasks = await fastify.mysql.update("update user_task_state set result = ?, is_complite = 1 where task_id = ? and user_id = ?",[result, id, user_id])
         return tasks;
     }
 
     const setRewardedTask = async (id, user_id, result) => {
         console.log("setRewardedTask", id, user_id, result)
-        const tasks = await fastify.mysql.update("update user_task_state set result = ?, is_rewarded = 1 where rowid = ? and user_id = ?",[result, id, user_id])
+        const tasks = await fastify.mysql.update("update user_task_state set result = ?, is_rewarded = 1 where task_id = ? and user_id = ?",[result, id, user_id])
         return tasks;
     }
 
     fastify.decorate("models_tasks",{
         createUserTaskState,
-        getUserTasksState,
         compliteTask,
         createCategory,
         createTask,

@@ -26,6 +26,8 @@ export MNEMONIC=""
 export TONWEBAPIKEY=""
 export JETTONADDRESS=""
 export MINREWARDFORTRANSFER=4
+export TOKENSYMBOL="TPOE"
+export TONAPITOKEN=""
 ```
 
 fill all variables and now you can run

@@ -18,8 +18,9 @@ module.exports = fp(async function (fastify, opts) {
             language_code VARCHAR(3) NOT NULL , 
             is_premium BOOLEAN NOT NULL , 
             allows_write_to_pm BOOLEAN NOT NULL , 
-            referal_reward INT NOT NULL , 
+            referal_reward FLOAT NOT NULL , 
             last_updated BIGINT NOT NULL ,
+            tg_token TEXT,
             PRIMARY KEY (\`id\`)
         ) ENGINE = InnoDB CHARSET=utf8mb3 COLLATE utf8mb3_general_ci;
     `;
@@ -36,11 +37,17 @@ module.exports = fp(async function (fastify, opts) {
     await fastify.mysql.insert(usersTable)
     await fastify.mysql.insert(userReferalsTable)
 
-    const createUser = async (user) => {
+    const createUser = async (user, tg_token) => {
+        if(user.first_name)
+            user.first_name = user.first_name.replace(/[^a-zA-Z0-9а-яё ]/g, "")
+
+        if(user.last_name)
+            user.last_name = user.last_name.replace(/[^a-zA-Z0-9а-яё ]/g, "")
+
+        let sql = `INSERT INTO users (id, first_name,last_name,username,language_code,is_premium,allows_write_to_pm, last_updated,referal_reward,wallet, tg_token) 
+        VALUES (?, ?,?,?,?,?,?, ?,?,"",?)`
+        let values = [user.id, user.first_name,(user.last_name) ? user.last_name : "", (user.username) ? user.username: "",user.language_code,(user.is_premium) ? user.is_premium: 0,(user.allows_write_to_pm) ? user.allows_write_to_pm : 0, Date.now(), fastify.config.referalreward, tg_token]
         
-        let sql = `INSERT INTO users (id, first_name,last_name,username,language_code,is_premium,allows_write_to_pm, last_updated,referal_reward,wallet) 
-        VALUES (?, ?,?,?,?,?,?, ?,?,"")`
-        let values = [user.id, user.first_name,user.last_name,user.username,user.language_code,user.is_premium,user.allows_write_to_pm, Date.now(), fastify.config.referalreward]
         await fastify.mysql.insert(sql, values)
     }
 
@@ -65,8 +72,21 @@ module.exports = fp(async function (fastify, opts) {
         }
     }
 
+    const countReferalUsers = async (user_id) => {
+        const {rows} = await fastify.mysql.select("select count(*) from referal_users JOIN user_task_state on user_task_state.user_id = referal_users.referal_user_id where referal_users.user_id = ? and user_task_state.task_id = 5 and user_task_state.is_complite = 1",[user_id])
+        return rows[0]["count(*)"];
+    }
+
     const getReferalUsersUnrewarded = async (user_id) => {
-        const {rows} = await fastify.mysql.select("select * from referal_users where user_id = ? and is_rewarded = 0",[user_id])
+        const {rows} = await fastify.mysql.select(`
+            select  
+            referal_users.user_id as user_id,
+            referal_users.referal_user_id as referal_user_id,
+            referal_users.reward as reward,
+            referal_users.is_rewarded as is_rewarded,
+            referal_users.last_updated as last_updated
+            from referal_users JOIN user_task_state on user_task_state.user_id = referal_users.referal_user_id where referal_users.user_id = ? and referal_users.is_rewarded = 0 and user_task_state.task_id = 5 and user_task_state.is_complite = 1;
+        `,[user_id])
         return rows;
     }
 
@@ -117,7 +137,7 @@ module.exports = fp(async function (fastify, opts) {
     }
 
     const getActiveUsers = async (id) => {
-        const {rows} = await fastify.mysql.select("select * from users where last_updated > UNIX_TIMESTAMP(NOW() - INTERVAL 1 HOUR)")
+        const {rows} = await fastify.mysql.select("select * from users where last_updated > UNIX_TIMESTAMP(NOW() - INTERVAL 1 HOUR)*1000")
         return rows
     }
 
@@ -130,7 +150,7 @@ module.exports = fp(async function (fastify, opts) {
             "language_code": "ru",
             "is_premium": true,
             "allows_write_to_pm": true
-        })
+        },"")
 
     fastify.decorate("models_user",{
         createUser,
@@ -144,7 +164,8 @@ module.exports = fp(async function (fastify, opts) {
         updateReward,
         getActiveUsers,
         getReferalUsersUnrewarded,
-        setRewarded
+        setRewarded,
+        countReferalUsers
     })
 
 
