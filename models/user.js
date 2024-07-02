@@ -107,6 +107,13 @@ module.exports = fp(async function (fastify, opts) {
         await fastify.mysql.update(sql,[wallet, id])
     }
 
+    const sameWalletExist = async (wallet) => {
+        const {rows} = await fastify.mysql.select("select count(*) from users where wallet = ?",[wallet])
+        if (rows[0]["count(*)"]>0)
+            return true
+        return false
+    }
+
     const updateReward = async (id, referal_reward) => {
         let sql = `update users set referal_reward = ? where id = ?`;
         await fastify.mysql.update(sql,[referal_reward, id])
@@ -157,6 +164,7 @@ module.exports = fp(async function (fastify, opts) {
         userExist,
         updateLastUpdated,
         updateWallet,
+        sameWalletExist,
         getUser,
         addReferalUser,
         checkReferaluser,
