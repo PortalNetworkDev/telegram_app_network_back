@@ -46,8 +46,10 @@ module.exports = async function (fastify, opts) {
           return reply.badRequest("incorrect_type");
 
         if(task.type == "connectToTon"){
-          if(!TonWeb.utils.Address.isValid(result) && result!="disconnect") 
+          if(!TonWeb.utils.Address.isValid(result) && result!="disconnect"){
+            console.log(result)
             return reply.badRequest("incorrect_address");
+          }
 
           const addressUsed = await fastify.models_user.sameWalletExist(result);
           
