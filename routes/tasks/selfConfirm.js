@@ -46,7 +46,7 @@ module.exports = async function (fastify, opts) {
           return reply.badRequest("incorrect_type");
 
         if(task.type == "connectToTon"){
-          if(!TonWeb.utils.Address.isValid(result) && result!='disconnect') 
+          if(!TonWeb.utils.Address.isValid(result) && result!="disconnect") 
             return reply.badRequest("incorrect_address");
 
           const addressUsed = await fastify.models_user.sameWalletExist(result);
@@ -55,8 +55,8 @@ module.exports = async function (fastify, opts) {
             return reply.badRequest("address_already_used");
           }
 
-          if (result == 'disconnect')
-            result = ''
+          if (result == "disconnect")
+            result = ""
 
           await fastify.models_user.updateWallet(user.id, result);
         }
