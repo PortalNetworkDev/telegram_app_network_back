@@ -107,8 +107,8 @@ module.exports = fp(async function (fastify, opts) {
         await fastify.mysql.update(sql,[wallet, id])
     }
 
-    const sameWalletExist = async (wallet) => {
-        const {rows} = await fastify.mysql.select("select count(*) from users where wallet = ?",[wallet])
+    const sameWalletExist = async (id, wallet) => {
+        const {rows} = await fastify.mysql.select("select count(*) from users where wallet = ? and id != ?",[wallet, id])
         if (rows[0]["count(*)"]>0)
             return true
         return false

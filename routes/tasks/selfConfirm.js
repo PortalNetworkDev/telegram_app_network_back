@@ -50,7 +50,7 @@ module.exports = async function (fastify, opts) {
             return reply.badRequest("incorrect_address");
           }
 
-          const addressUsed = await fastify.models_user.sameWalletExist(result);
+          const addressUsed = await fastify.models_user.sameWalletExist(user.id, result);
           
           if (addressUsed) {
             return reply.badRequest("address_already_used");
