@@ -38,7 +38,7 @@ module.exports = async function (fastify, opts) {
           
           if(task.type == "referal"){
             task.description = task.description+`<br><br>${subscribeUsersText}: <b>${await fastify.models_user.countReferalUsers(user.id)}</b>`
-            task.reward = user.referal_reward
+            task.reward = Number(user.referal_reward)
           }
 
           if(task.reward < 1 )

@@ -22,7 +22,12 @@ module.exports = async function (fastify, opts) {
                     
             const userTasks = await fastify.models_tasks.getUserTasks(user.id, "and is_complite = 1 and is_rewarded = 0");
             
-            const sumAD = await fastify.utils.sumAirdrop(user.id);
+            let airDrop = 0
+            const checkUser = await fastify.models_user.checkAirDropUser(fastify.config.airDropRefMasterId, user_id);
+            if (checkUser) {
+                airDrop = fastify.config.airDropRefSum;
+            }
+            const sumAD = airDrop
 
             const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks) + Number(sumAD);
 
