@@ -23,7 +23,7 @@ module.exports = async function (fastify, opts) {
             const userTasks = await fastify.models_tasks.getUserTasks(user.id, "and is_complite = 1 and is_rewarded = 0");
             
             let airDrop = 0
-            const checkUser = await fastify.models_user.checkAirDropUser(fastify.config.airDropRefMasterId, user_id);
+            const checkUser = await fastify.models_user.checkAirDropUser(fastify.config.airDropRefMasterId, user.id);
             if (checkUser) {
                 airDrop = fastify.config.airDropRefSum;
             }

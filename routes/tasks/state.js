@@ -8,7 +8,7 @@ module.exports = async function (fastify, opts) {
     const tasks = await fastify.models_tasks.getUserTasks(user.id);
     const en_cats = await fastify.utils.csvParser("./db/catstranslate_en.csv")
     const en_tasks = await fastify.utils.csvParser("./db/taskstranslate_en.csv")
-    const subscribeUsersText = (user.language_code == "ru") ? "Привлечено пользователей": "Users attracted";
+    const subscribeUsersText = (user.language_code == "ru") ? "Привлечено пользователей, купивших POE": "Attracted users who bought POE";
     const daysInPoolText = (user.language_code == "ru") ? "Дней в пуле": "Days in the pool";
 
 
