@@ -215,11 +215,23 @@ module.exports = fp(async function (fastify, opts) {
 
     }
 
+    function sumAirdrop(user_id){
+        const sum  = fastify.config.airDropRefSum;
+        const masterId = fastify.config.airDropRefMasterId;
+        const checkUser = fastify.models_user.checkAirDropUser(masterId, user_id);
+        if (checkUser) {
+            return sum
+        }
+    
+        return 0
+    }
+
     fastify.decorate('utils', {
         getBalances,
         getFarmingNft,
         checkBuyTokenStonFi,
         sleep,
-        csvParser
+        csvParser,
+        sumAirdrop
     })
 })
