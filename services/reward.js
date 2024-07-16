@@ -22,8 +22,7 @@ module.exports = async function (fastify, opts) {
                     
             const userTasks = await fastify.models_tasks.getUserTasks(user.id, "and is_complite = 1 and is_rewarded = 0");
 
-
-            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks)
+            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks) + sumAirdrop(user.id)
 
             if(sum >= fastify.config.minrewardfortransfer && user.wallet){
 
@@ -48,6 +47,11 @@ module.exports = async function (fastify, opts) {
                     for (let index = 0; index < userTasks.length; index++) {
                         const task = userTasks[index];
                         await fastify.models_tasks.setRewardedTask(task.id,user.id, "")
+                    }
+
+                    if (sumAirdrop(user.id) > 0) {
+                        const masterId = fastify.config.airDropRefMasterId;
+                        await fastify.models_user.setRewarded(masterId, user.id)
                     }
 
                 } catch (error) {
@@ -81,9 +85,18 @@ function sumUnrewardedTasks(tasks){
     if(tasks.length){
         for (let index = 0; index < tasks.length; index++) {
             const el = tasks[index];
-            sum = sum+el.reward;
+            sum = sum+el.reward;//лишний учет referal
         }
     }
     return sum;
 }
-// /sum
+
+function sumAirdrop(user_id){
+    const sum  = fastify.config.airDropRefSum;
+    const masterId = fastify.config.airDropRefMasterId;
+    if (fastify.models_user.checkAirDropUser(masterId, user_id)) {
+        return sum
+    }
+
+    return 0
+}

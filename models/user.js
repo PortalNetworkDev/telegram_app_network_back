@@ -148,6 +148,16 @@ module.exports = fp(async function (fastify, opts) {
         return rows
     }
 
+    const checkAirDropUser = async (user_id, referal_user_id) => {
+        const {rows} = await fastify.mysql.select("select * from referal_users where user_id = ? and referal_user_id = ? and is_rewarded = 1",[user_id, referal_user_id])
+        
+        if(!rows.length){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
     if(!await userExist(1))
         await createUser({
             "id": 1,
@@ -173,7 +183,8 @@ module.exports = fp(async function (fastify, opts) {
         getActiveUsers,
         getReferalUsersUnrewarded,
         setRewarded,
-        countReferalUsers
+        countReferalUsers,
+        checkAirDropUser
     })
 
 

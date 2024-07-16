@@ -26,7 +26,9 @@ module.exports = fp(async function (fastify, opts) {
     "jettonaddressraw": process.env.JETTONADDRESSRAW,
     "farmingcollectionaddresraw": process.env.FARMINGCOLLECTIONADDRESSRAW,
     "tonApiToken": process.env.TONAPITOKEN,
-    "balanceHistoryInterval": process.env.BALANCEHISTORYINTERVAL
+    "balanceHistoryInterval": process.env.BALANCEHISTORYINTERVAL,
+    "airDropRefSum": process.env.AIRDROPREFSUM,
+    "airDropRefMasterId": process.env.AIRDROPREFMASTERID
   }
 
   fastify.decorate('config', config)

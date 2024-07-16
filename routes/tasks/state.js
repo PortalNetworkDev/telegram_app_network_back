@@ -35,13 +35,14 @@ module.exports = async function (fastify, opts) {
         }
 
         if(task.category_id == cat.id){
-          if(task.reward < 1 )
-            task.reward = Number(Number(task.reward).toFixed(2))
-
-
+          
           if(task.type == "referal"){
             task.description = task.description+`<br><br>${subscribeUsersText}: <b>${await fastify.models_user.countReferalUsers(user.id)}</b>`
+            task.reward = user.referal_reward
           }
+
+          if(task.reward < 1 )
+            task.reward = Number(Number(task.reward).toFixed(2))
 
           if(task.type == "checkLiquidity"){
             const days = await fastify.models_balance_history.getHoleInHistoryPoolBalance(user.id);
