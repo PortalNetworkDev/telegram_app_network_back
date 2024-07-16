@@ -22,13 +22,13 @@ module.exports = async function (fastify, opts) {
                     
             const userTasks = await fastify.models_tasks.getUserTasks(user.id, "and is_complite = 1 and is_rewarded = 0");
             
-            const sumAD = await fastify.utils.sumAirdrop(user.id)
+            const sumAD = await fastify.utils.sumAirdrop(user.id);
 
-            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks) + sumAD
+            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks) + sumAD;
 
             if(sum >= fastify.config.minrewardfortransfer && user.wallet){
 
-                console.log("Try to transfer token to user", user.id, "amount", Number(sum).toFixed(1))
+                console.log("Try to transfer token to user", user.id, "amount", Number(sum).toFixed(1), "ref, task, Airdrop", sumReferalUsersUnrewarded(referalUsersUnrewarded),sumUnrewardedTasks(userTasks), sumAD)
                 
                 try {
                     
