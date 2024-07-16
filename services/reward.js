@@ -22,18 +22,18 @@ module.exports = async function (fastify, opts) {
                     
             const userTasks = await fastify.models_tasks.getUserTasks(user.id, "and is_complite = 1 and is_rewarded = 0");
             
-            let airDrop = 0
+            let airDrop = 0//airdrop
             const checkUser = await fastify.models_user.checkAirDropUser(fastify.config.airDropRefMasterId, user.id);
             if (checkUser) {
                 airDrop = fastify.config.airDropRefSum;
             }
             const sumAD = airDrop
 
-            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks) + Number(sumAD);
+            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded, user.referal_reward) + sumUnrewardedTasks(userTasks) + Number(sumAD);
 
             if(sum >= fastify.config.minrewardfortransfer && user.wallet){
 
-                console.log("Try to transfer token to user", user.id, "amount", Number(sum).toFixed(1), "ref", sumReferalUsersUnrewarded(referalUsersUnrewarded), "task", sumUnrewardedTasks(userTasks), "Airdrop", sumAD)
+                console.log("Try to transfer token to user", user.id, "amount", Number(sum).toFixed(1), "ref", sumReferalUsersUnrewarded(referalUsersUnrewarded, user.referal_reward), "task", sumUnrewardedTasks(userTasks), "Airdrop", sumAD)
                 
                 try {
                     
@@ -74,14 +74,15 @@ module.exports = async function (fastify, opts) {
 }
 
 
-function sumReferalUsersUnrewarded(referalUsersUnrewarded){
+function sumReferalUsersUnrewarded(referalUsersUnrewarded, reward){
     let sum = 0;
     if(referalUsersUnrewarded.length){
-        for (let index = 0; index < referalUsersUnrewarded.length; index++) {
+        /*for (let index = 0; index < referalUsersUnrewarded.length; index++) {
             const el = referalUsersUnrewarded[index];
             sum = sum+el.reward;
             
-        }
+        }*/
+        sum = referalUsersUnrewarded.length*reward
     }
 
     return sum;
