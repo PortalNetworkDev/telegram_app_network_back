@@ -24,7 +24,7 @@ module.exports = async function (fastify, opts) {
             
             const sumAD = await fastify.utils.sumAirdrop(user.id);
 
-            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks) + sumAD;
+            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded) + sumUnrewardedTasks(userTasks) + Number(sumAD);
 
             if(sum >= fastify.config.minrewardfortransfer && user.wallet){
 

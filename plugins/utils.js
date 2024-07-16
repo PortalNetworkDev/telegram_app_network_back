@@ -220,9 +220,9 @@ module.exports = fp(async function (fastify, opts) {
         const masterId = fastify.config.airDropRefMasterId;
         const checkUser = fastify.models_user.checkAirDropUser(masterId, user_id);
         if (checkUser) {
+            console.log("AirDropUser", user_id)
             return sum
         }
-    
         return 0
     }
 
