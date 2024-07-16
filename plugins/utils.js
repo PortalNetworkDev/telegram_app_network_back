@@ -220,7 +220,6 @@ module.exports = fp(async function (fastify, opts) {
         getFarmingNft,
         checkBuyTokenStonFi,
         sleep,
-        csvParser,
-        sumAirdrop
+        csvParser
     })
 })
