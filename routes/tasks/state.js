@@ -8,7 +8,7 @@ module.exports = async function (fastify, opts) {
     const tasks = await fastify.models_tasks.getUserTasks(user.id);
     const en_cats = await fastify.utils.csvParser("./db/catstranslate_en.csv")
     const en_tasks = await fastify.utils.csvParser("./db/taskstranslate_en.csv")
-    const subscribeUsersText = (user.language_code == "ru") ? "Привлечено пользователей, купивших POE": "Attracted users who bought POE";
+    const subscribeUsersText = (user.language_code == "ru") ? "Привлечено пользователей, выполнивших задание Первенец": "Attracted users who bought POE";
     const daysInPoolText = (user.language_code == "ru") ? "Дней в пуле": "Days in the pool";
 
 
@@ -35,14 +35,14 @@ module.exports = async function (fastify, opts) {
         }
 
         if(task.category_id == cat.id){
-          
-          if(task.type == "referal"){
-            task.description = task.description+`<br><br>${subscribeUsersText}: <b>${await fastify.models_user.countReferalUsers(user.id)}</b>`
-            task.reward = Number(user.referal_reward)
-          }
 
           if(task.reward < 1 )
             task.reward = Number(Number(task.reward).toFixed(2))
+          
+          if(task.type == "referal"){
+            task.description = task.description+`<br><br>${subscribeUsersText}: <b>${await fastify.models_user.countReferalUsers(user.id)}</b>`
+            task.reward = Number(Number(user.referal_reward).toFixed(2))
+          }
 
           if(task.type == "checkLiquidity"){
             const days = await fastify.models_balance_history.getHoleInHistoryPoolBalance(user.id);
