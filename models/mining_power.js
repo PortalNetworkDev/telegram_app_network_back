@@ -11,7 +11,7 @@ module.exports = fp(async function (fastify, opts) {
         CREATE TABLE IF NOT EXISTS mining_data (
             rowid bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id bigint NOT NULL,
-            poe_balance float NOT NULL
+            poe_balance float NOT NULL,
             power_balance bigint NOT NULL,
             battery_balance bigint NOT NULL,
             battery_capacity bigint NOT NULL,
