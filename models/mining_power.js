@@ -38,7 +38,7 @@ module.exports = fp(async function (fastify, opts) {
         let sql = `select * from mining_data where user_id=?`;
         let rows = await fastify.mysql.select(sql,[user_id])
 
-        if(rows.length == 0){
+        if(!rows.length){
             console.log("Creating mining data for user", user_id)
             await createUserMiningData(user_id, fastify.config.batteryStart, fastify.config.generatorStart)
             rows = await fastify.mysql.select(sql,[user_id])
