@@ -11,14 +11,14 @@ module.exports = fp(async function (fastify, opts) {
         CREATE TABLE IF NOT EXISTS mining_data (
             rowid bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id bigint NOT NULL,
-            poe_balance float NOT NULL,
-            power_balance bigint NOT NULL,
-            battery_balance bigint NOT NULL,
-            battery_capacity bigint NOT NULL,
-            battery_level int NOT NULL,
-            generator_limit bigint NOT NULL,
-            generator_balance bigint NOT NULL,
-            generator_level int NOT NULL,
+            poe_balance float NOT NULL DEFAULT 0,
+            power_balance bigint NOT NULL DEFAULT 0,
+            battery_balance bigint NOT NULL DEFAULT 0,
+            battery_capacity bigint NOT NULL DEFAULT 0,
+            battery_level int NOT NULL DEFAULT 0,
+            generator_limit bigint NOT NULL DEFAULT 0,
+            generator_balance bigint NOT NULL DEFAULT 0,
+            generator_level int NOT NULL DEFAULT 0,
             time_last_spin datetime NOT NULL,
             time_last_claim datetime NOT NULL,
             time_last_update datetime NOT NULL
@@ -29,7 +29,7 @@ module.exports = fp(async function (fastify, opts) {
     async function createUserMiningData(user_id, battery_capacity, generator_limit){
         let sql = `INSERT INTO mining_data (user_id, battery_capacity, generator_limit, time_last_spin, time_last_claim, time_last_update) VALUES (?,?,?, NOW(), NOW(), NOW())`
 
-        let values = [user_id, battery_capacity,generator_limit]
+        let values = [user_id, battery_capacity, generator_limit]
         
         await fastify.mysql.insert(sql, values)
     }

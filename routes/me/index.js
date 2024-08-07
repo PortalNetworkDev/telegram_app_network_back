@@ -16,7 +16,7 @@ module.exports = async function (fastify, opts) {
 
     await fastify.models_mining_power.updatePoeBalance(_user.id, obj.balance)
     
-    const {data} = await fastify.models_mining_power.getMiningData(_user.id)
+    const data = await fastify.models_mining_power.getMiningData(_user.id)
     obj.power_balance = data.power_balance
 
     return {...user, ...obj};
