@@ -43,7 +43,8 @@ module.exports = async function (fastify, opts) {
         return {
           code:"succcess",
           power_balance:data.power_balance,
-          battery_capacity:data.battery_capacity
+          battery_capacity:data.battery_capacity,
+          battery_level:data.battery_level
         }
 
     })

@@ -18,7 +18,7 @@ module.exports = async function (fastify, opts) {
     if (data.battery_balance < data.battery_capacity || data.generator_balance < data.generator_limit) {
 
       batteryBalance = data.battery_balance + (now - lastUpdate)*data.poe_balance*data.powerPrice/3600
-      generatorBalance = data.generator_balance + (now - lastUpdate)/1000/5
+      generatorBalance = data.generator_balance + (now - lastUpdate)/1000/fastify.config.recoveryGeneratorLim
 
       if (batteryBalance > data.battery_capacity) {
         batteryBalance = data.battery_capacity
@@ -45,7 +45,8 @@ module.exports = async function (fastify, opts) {
       price_rize_generator: 2^(data.generator_level+1)*fastify.config.stepGeneratorPrice,
       power_rize_generator: data.generator_limit+fastify.config.stepGeneratorLim,
       price_rize_battery: 2^(data.battery_level+1)*fastify.config.stepBatteryPrice,
-      power_rize_battery: data.battery_capacity+fastify.config.stepBatteryCap
+      power_rize_battery: data.battery_capacity+fastify.config.stepBatteryCap,
+      recovery_power_lim: fastify.config.recoveryGeneratorLim
 
     }
 

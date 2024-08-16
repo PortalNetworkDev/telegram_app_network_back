@@ -35,7 +35,8 @@ module.exports = fp(async function (fastify, opts) {
     "stepBatteryPrice": process.env.STEPBATTERYPRICE,
     "stepGeneratorPrice": process.env.STEPGENERATORPRICE,
     "stepBatteryCap": process.env.STEPBATTERYCAP,
-    "stepGeneratorLim": process.env.STEPGENERATORLIM
+    "stepGeneratorLim": process.env.STEPGENERATORLIM,
+    "recoveryGeneratorLim": process.env.RECOVERYGENERATORLIM
   }
 
   fastify.decorate('config', config)
