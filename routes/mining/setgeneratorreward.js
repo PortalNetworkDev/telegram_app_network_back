@@ -45,8 +45,8 @@ module.exports = async function (fastify, opts) {
 
         if (data.battery_balance < data.battery_capacity || data.generator_balance < data.generator_limit) {
 
-          batteryBalance = data.battery_balance + (now - lastUpdate)*data.poe_balance*data.powerPrice/3600
-          generatorBalance = data.generator_balance + (now - lastUpdate)/1000/5
+          batteryBalance = data.battery_balance + (now - lastUpdate)*data.poe_balance*Number(fastify.config.powerPrice)/3600
+          generatorBalance = data.generator_balance + (now - lastUpdate)/1000/Number(fastify.config.recoveryGeneratorLim)
     
           if (batteryBalance > data.battery_capacity) {
             batteryBalance = data.battery_capacity
@@ -72,20 +72,20 @@ module.exports = async function (fastify, opts) {
           await fastify.models_mining_power.generatingEnergy(user.id, generatorBalance-minPow, batteryBalance+minPow) 
         }
 
-        data = await fastify.models_mining_power.getMiningData(_user.id)
+        //data = await fastify.models_mining_power.getMiningData(_user.id)
 
         return {
 
-          power_price: fastify.config.powerPrice,
-          power_poe: fastify.config.powerPrice*data.poe_balance,
-          power_balance:data.power_balance,
-          battery_capacity: data.battery_capacity,
-          battery_level: data.battery_level,
-          generator_limit: data.generator_limit,
-          generator_level: data.generator_level,
+          //power_price: fastify.config.powerPrice,
+          //power_poe: fastify.config.powerPrice*data.poe_balance,
+          //power_balance:data.power_balance,
+          //battery_capacity: data.battery_capacity,
+          //battery_level: data.battery_level,
+          //generator_limit: data.generator_limit,
+          //generator_level: data.generator_level,
           
-          generator_balance: data.generator_balance,
-          battery_balance: data.battery_balance,
+          //generator_balance: data.generator_balance,
+          //battery_balance: data.battery_balance,
           
           code:"succcess"
         }

@@ -29,12 +29,12 @@ module.exports = async function (fastify, opts) {
 
         await fastify.models_mining_power.claimBattery(user.id)
 
-        const data = await fastify.models_mining_power.getMiningData(_user.id)
+        //const data = await fastify.models_mining_power.getMiningData(_user.id)
 
         return {
           code:"succcess",
-          power_balance:data.power_balance,
-          battery_balance:data.battery_balance
+          //power_balance:data.power_balance,
+          //battery_balance:data.battery_balance
         }
 
     })

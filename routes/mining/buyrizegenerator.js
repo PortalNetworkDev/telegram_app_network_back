@@ -29,8 +29,8 @@ module.exports = async function (fastify, opts) {
 
         let data = await fastify.models_mining_power.getMiningData(_user.id)
 
-        const price_rize_generator = 2^(data.generator_level+1)*fastify.config.stepGeneratorPrice
-        const power_rize_generator = data.generator_limit+fastify.config.stepGeneratorLim
+        const price_rize_generator = 2^(data.generator_level+1)*Number(fastify.config.stepGeneratorPrice)
+        const power_rize_generator = data.generator_limit+Number(fastify.config.stepGeneratorLim)
 
         if (data.power_balance < price_rize_generator){
           return reply.badRequest("not_enough_power");
@@ -38,13 +38,13 @@ module.exports = async function (fastify, opts) {
 
         await fastify.models_mining_power.buyGeneratorLimit(user.id, power_rize_generator, price_rize_generator)
 
-        data = await fastify.models_mining_power.getMiningData(_user.id)
+        //data = await fastify.models_mining_power.getMiningData(_user.id)
 
         return {
           code:"succcess",
-          power_balance:data.power_balance,
-          generator_limit:data.generator_limit,
-          battery_level:data.battery_level
+          //power_balance:data.power_balance,
+          //generator_limit:data.generator_limit,
+          //battery_level:data.battery_level
         }
 
     })
