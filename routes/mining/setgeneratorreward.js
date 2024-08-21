@@ -39,7 +39,7 @@ module.exports = async function (fastify, opts) {
         let data = await fastify.models_mining_power.getMiningData(user.id)
 
         const now = new Date();
-        const lastUpdate = new Date(data.last_update)
+        const lastUpdate = new Date(data.time_last_update)
         let batteryBalance = data.battery_balance
         let generatorBalance = data.generator_balance
 

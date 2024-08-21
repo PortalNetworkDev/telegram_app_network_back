@@ -27,7 +27,7 @@ module.exports = fp(async function (fastify, opts) {
     await fastify.mysql.insert(miningData)
 
     async function createUserMiningData(user_id, battery_capacity, generator_limit){
-        let sql = `INSERT INTO mining_data (user_id, battery_capacity, generator_limit, generator_balance, time_last_spin, time_last_claim, time_last_update) VALUES (?,?,?,?,?,?)`
+        let sql = `INSERT INTO mining_data (user_id, battery_capacity, generator_limit, generator_balance, time_last_spin, time_last_claim, time_last_update) VALUES (?,?,?,?,?,?,?)`
         const now = new Date();
         let values = [user_id, battery_capacity, generator_limit, generator_limit, now, now, now]
         
