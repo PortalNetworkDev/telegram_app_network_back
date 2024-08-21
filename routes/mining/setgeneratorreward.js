@@ -36,7 +36,7 @@ module.exports = async function (fastify, opts) {
       
         const user = fastify.getUser(request)
 
-        let data = await fastify.models_mining_power.getMiningData(_user.id)
+        let data = await fastify.models_mining_power.getMiningData(user.id)
 
         const now = new Date();
         const lastUpdate = new Date(data.last_update)
