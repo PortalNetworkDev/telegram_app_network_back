@@ -80,12 +80,11 @@ module.exports = fp(async function (fastify, opts) {
         await fastify.mysql.update(sql,[generator_limit, user_id])
     }
 
-    
-    //по нескольку сразу по кейсам
 
     async function claimBattery(user_id) {
-        let sql = `update mining_data set power_balance=power_balance+battery_balance, battery_balance = 0, time_last_claim = NOW() where user_id = ?`;
-        await fastify.mysql.update(sql,[user_id])
+        let sql = `update mining_data set power_balance=power_balance+battery_balance, battery_balance = 0, time_last_claim = ? where user_id = ?`;
+        const now = new Date(); 
+        await fastify.mysql.update(sql,[now, user_id])
     }
 
     async function generatingEnergy(user_id, generator_balance, battery_balance) {
