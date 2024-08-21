@@ -17,8 +17,8 @@ module.exports = async function (fastify, opts) {
 
     if (data.battery_balance < data.battery_capacity || data.generator_balance < data.generator_limit) {
 
-      batteryBalance = data.battery_balance + (now - lastUpdate)*data.poe_balance*data.powerPrice/3600
-      generatorBalance = data.generator_balance + (now - lastUpdate)/1000/Number(fastify.config.recoveryGeneratorLim)
+      batteryBalance = data.battery_balance + ((now - lastUpdate)/1000)*data.poe_balance*Number(fastify.config.powerPrice)/3600
+      generatorBalance = data.generator_balance + ((now - lastUpdate)/1000)/Number(fastify.config.recoveryGeneratorLim)
 
       if (batteryBalance > data.battery_capacity) {
         batteryBalance = data.battery_capacity
@@ -33,22 +33,24 @@ module.exports = async function (fastify, opts) {
     
 
     const obj = {
-      power_price: Number(fastify.config.powerPrice), //
-      power_poe: Number(fastify.config.powerPrice)*data.poe_balance,//
-      power_balance:data.power_balance,    //
+      power_price: Number(fastify.config.powerPrice), 
+      power_poe: Number(fastify.config.powerPrice)*data.poe_balance,
+      power_balance:data.power_balance,    
       battery_balance: batteryBalance,
-      battery_capacity: data.battery_capacity, //
-      battery_level: data.battery_level,      //
-      generator_limit: data.generator_limit, //
+      battery_capacity: data.battery_capacity, 
+      battery_level: data.battery_level,      
+      generator_limit: data.generator_limit, 
       generator_balance: generatorBalance, 
-      generator_level: data.generator_level, //
-      price_rize_generator: 2^(data.generator_level+1)*Number(fastify.config.stepGeneratorPrice),//
-      power_rize_generator: data.generator_limit+Number(fastify.config.stepGeneratorLim),//
-      price_rize_battery: 2^(data.battery_level+1)*Number(fastify.config.stepBatteryPrice),//
-      power_rize_battery: data.battery_capacity+Number(fastify.config.stepBatteryCap),//
-      recovery_power_lim: Number(fastify.config.recoveryGeneratorLim)//
+      generator_level: data.generator_level, 
+      price_rize_generator: 2**(data.generator_level+1)*Number(fastify.config.stepGeneratorPrice),
+      power_rize_generator: Number(fastify.config.stepGeneratorLim),
+      price_rize_battery: 2**(data.battery_level+1)*Number(fastify.config.stepBatteryPrice),
+      power_rize_battery: Number(fastify.config.stepBatteryCap),
+      recovery_power_lim: Number(fastify.config.recoveryGeneratorLim)
 
     }
+
+    //console.log('Mining data:', obj);
 
     return {...obj};
 

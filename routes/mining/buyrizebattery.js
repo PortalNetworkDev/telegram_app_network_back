@@ -27,9 +27,9 @@ module.exports = async function (fastify, opts) {
       
         const user = fastify.getUser(request)
 
-        let data = await fastify.models_mining_power.getMiningData(_user.id)
+        let data = await fastify.models_mining_power.getMiningData(user.id)
 
-        const price_rize_battery = 2^(data.battery_level+1)*Number(fastify.config.stepBatteryPrice)
+        const price_rize_battery = 2**(data.battery_level+1)*Number(fastify.config.stepBatteryPrice)
         const power_rize_battery = data.battery_capacity+Number(fastify.config.stepBatteryCap)
 
         if (data.power_balance < price_rize_battery){
@@ -38,7 +38,7 @@ module.exports = async function (fastify, opts) {
 
         await fastify.models_mining_power.buyBatteryCapacity(user.id, power_rize_battery, price_rize_battery)
 
-        //data = await fastify.models_mining_power.getMiningData(_user.id)
+        //data = await fastify.models_mining_power.getMiningData(user.id)
 
         return {
           code:"succcess",
