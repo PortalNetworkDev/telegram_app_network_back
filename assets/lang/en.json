@@ -10,9 +10,9 @@
     "MiningTitle": "Mine energy",
     "MiningDisc":"Buy and store POE - get Wh",
     "PoePowerDisc1": "POE - your power source 1 POE = 10 W (per hour)",
-    "PoePowerDisc2": "POE generates power in the background and charges the battery. Save Wh, you can use them later",
+    "PoePowerDisc2": "Connect the wallet, the POE in the wallet generates power in the background and charges the battery. Save Wh, they can be used in the future",
     "PoePowerDiscButton": "It's clear",
-    "PoePowerUp1": "To increase the power of your power source, buy POE",
+    "PoePowerUp1": "To increase the power of your energy source, connect a wallet, buy POE and keep them in your wallet",
     "PoePowerUp2": "1 POE generates in background 10 W (per hour)",
     "PoePowerUpButton": "Buy POE",
     "BatteryDisc1": "The battery is charged by POE and generator",
@@ -28,5 +28,15 @@
     "GeneratorUp1": "Increase generator resource",
     "GeneratorUp2": "The resource will increase by:",
     "GeneratorUp3": "Cost of resource increase:",
-    "GeneratorUpButton": "Increase resource!"
+    "GeneratorUpButton": "Increase resource!",
+    "NotEnoughBalance1":"Not enough power",
+    "NotEnoughBalance2": "Accumulate more Wh: connect a wallet and buy POE or spin up a generator",
+    "NotEnoughBalanceButton": "Buy POE",
+    "ClaimButton":"Claim",
+    "FullBattery1":"Battery is full",
+    "FullBattery2":"Transfer energy to your balance by clicking the Collect button",
+    "FullBatteryButton":"It's clear",
+    "LowGenerator1":"The generator has overheated",
+    "LowGenerator2":"Wait until it cools down or raise its level",
+    "LowGeneratorButton":"It's clear"
 }
