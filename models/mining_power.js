@@ -12,6 +12,7 @@ module.exports = fp(async function (fastify, opts) {
             rowid bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id bigint NOT NULL,
             poe_balance float NOT NULL DEFAULT 0,
+            level int NOT NULL DEFAULT 0,
             power_balance bigint NOT NULL DEFAULT 0,
             battery_balance bigint NOT NULL DEFAULT 0,
             battery_capacity bigint NOT NULL DEFAULT 0,
@@ -19,6 +20,7 @@ module.exports = fp(async function (fastify, opts) {
             generator_limit bigint NOT NULL DEFAULT 0,
             generator_balance bigint NOT NULL DEFAULT 0,
             generator_level int NOT NULL DEFAULT 0,
+            multitab int NOT NULL DEFAULT 1,
             time_last_spin TEXT NOT NULL,
             time_last_claim TEXT NOT NULL,
             time_last_update TEXT NOT NULL
@@ -108,8 +110,11 @@ module.exports = fp(async function (fastify, opts) {
         let sql = `update mining_data set generator_limit = ?, power_balance=power_balance-?, generator_level=generator_level+1 where user_id = ?`;
         await fastify.mysql.update(sql,[generator_limit, price, user_id])
     }
-
-
+    
+    async function buyMultitab(user_id, price) {
+        let sql = `update mining_data set power_balance=power_balance-?, multitab=multitab+1 where user_id = ?`;
+        await fastify.mysql.update(sql,[price, user_id])
+    }
    
 
 
@@ -127,6 +132,7 @@ module.exports = fp(async function (fastify, opts) {
         updateBatteryGeneratorBalance,
         buyBatteryCapacity,
         buyGeneratorLimit,
+        buyMultitab,
     })
 
 })

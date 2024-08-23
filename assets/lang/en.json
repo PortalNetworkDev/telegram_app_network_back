@@ -38,5 +38,9 @@
     "FullBatteryButton":"It's clear",
     "LowGenerator1":"The generator has overheated",
     "LowGenerator2":"Wait until it cools down or raise its level",
-    "LowGeneratorButton":"It's clear"
+    "LowGeneratorButton":"It's clear",
+    "MultitabUp1":"Increase the number of clicks per click",
+    "MultitabUp2":"Cost of increasing clicks:",
+    "MultitabUp3":"Clicks will increase by +1",
+    "MultitabUpButton":"Increase clicks!"
 }

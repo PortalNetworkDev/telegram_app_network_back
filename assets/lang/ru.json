@@ -38,5 +38,9 @@
     "FullBatteryButton":"Понятно",
     "LowGenerator1":"Генератор перегрелся",
     "LowGenerator2":"Подождите пока он остынет или повысте его уровень",
-    "LowGeneratorButton":"Понятно"
+    "LowGeneratorButton":"Понятно",
+    "MultitabUp1":"Увеличить количество кликов за одно нажатие",
+    "MultitabUp2":"Цена увеличения кликов:",
+    "MultitabUp3":"Клики увеличатся на +1",
+    "MultitabUpButton":"Увеличить клики!"
 }
