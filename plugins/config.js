@@ -28,7 +28,16 @@ module.exports = fp(async function (fastify, opts) {
     "tonApiToken": process.env.TONAPITOKEN,
     "balanceHistoryInterval": process.env.BALANCEHISTORYINTERVAL,
     "airDropRefSum": process.env.AIRDROPREFSUM,
-    "airDropRefMasterId": process.env.AIRDROPREFMASTERID
+    "airDropRefMasterId": process.env.AIRDROPREFMASTERID,
+    "powerPrice": process.env.POWERPRICE,
+    "batteryStart": process.env.BATTERYSTART,
+    "generatorStart": process.env.GENERATORSTART,
+    "stepBatteryPrice": process.env.STEPBATTERYPRICE,
+    "stepGeneratorPrice": process.env.STEPGENERATORPRICE,
+    "stepBatteryCap": process.env.STEPBATTERYCAP,
+    "stepGeneratorLim": process.env.STEPGENERATORLIM,
+    "recoveryGeneratorLim": process.env.RECOVERYGENERATORLIM,
+    "stepMultitabPrice": process.env.STEPMULTITABPRICE,
   }
 
   fastify.decorate('config', config)

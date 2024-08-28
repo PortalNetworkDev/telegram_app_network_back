@@ -95,6 +95,6 @@ function sumUnrewardedTasks(tasks){
             const el = tasks[index];
             sum = sum+el.reward;//лишний учет referal
         }
-    }
+    }   
     return sum;
 }
