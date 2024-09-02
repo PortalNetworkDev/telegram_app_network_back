@@ -34,6 +34,7 @@ module.exports = async function (fastify, opts) {
     async function (request, reply) {
         
         const { task_id, result } = request.body
+        await fastify.utils.Sleep(100)
       
         const user = fastify.getUser(request)
         const task = await fastify.models_tasks.getUserTask(user.id, task_id);
