@@ -235,7 +235,6 @@ module.exports = fp(async function (fastify, opts) {
         const tasks = await getTasks();
 
 
-
         for (let index = 0; index < tasks.length; index++) {
             const task = tasks[index];
 
