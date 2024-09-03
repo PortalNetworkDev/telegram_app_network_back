@@ -9,6 +9,8 @@
     "buy": "Buy POE token",
     "MiningTitle": "Mine energy",
     "MiningDisc":"Buy and store POE - get Wh",
+    "ScreenLoader1":"Buy and store POE - get Wh",
+    "ScreenLoader2":"1 POE = 10 W",
     "PoePowerDisc1": "POE - your power source 1 POE = 10 W (per hour)",
     "PoePowerDisc2": "Connect the wallet, the POE in the wallet generates power in the background and charges the battery. Save Wh, they can be used in the future",
     "PoePowerDiscButton": "It's clear",
