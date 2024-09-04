@@ -39,10 +39,10 @@ module.exports = fp(async function (fastify, opts) {
 
     const createUser = async (user, tg_token) => {
         if(user.first_name)
-            user.first_name = user.first_name.replace(/[^a-zA-Z0-9а-яё ]/g, "")
+            user.first_name = user.first_name.replace(/[^a-zA-Z0-9а-яА-ЯёЁ ]/g, "")
 
         if(user.last_name)
-            user.last_name = user.last_name.replace(/[^a-zA-Z0-9а-яё ]/g, "")
+            user.last_name = user.last_name.replace(/[^a-zA-Z0-9а-яА-ЯёЁ ]/g, "")
 
         let sql = `INSERT INTO users (id, first_name,last_name,username,language_code,is_premium,allows_write_to_pm, last_updated,referal_reward,wallet, tg_token) 
         VALUES (?, ?,?,?,?,?,?, ?,?,"",?)`
