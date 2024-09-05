@@ -43,7 +43,7 @@
     "LowGenerator2":"Wait until it cools down or raise its level",
     "LowGeneratorButton":"It's clear",
     "MultitabUp1":"Increase the number of clicks per click",
-    "MultitabUp2":"Cost of increasing clicks:",
-    "MultitabUp3":"Clicks will increase by +1",
+    "MultitabUp2":"+1 Wh per tap for",
+    "MultitabUp3":"Wh - price",
     "MultitabUpButton":"Increase clicks!"
 }
