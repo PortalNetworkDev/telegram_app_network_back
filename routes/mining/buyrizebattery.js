@@ -29,8 +29,8 @@ module.exports = async function (fastify, opts) {
 
         let data = await fastify.models_mining_power.getMiningData(user.id)
 
-        const price_rize_battery = 2**(data.battery_level+1)*Number(fastify.config.stepBatteryPrice)
-        const power_rize_battery = data.battery_capacity+Number(fastify.config.stepBatteryCap)
+        const price_rize_battery = 2**(Math.round((data.battery_level+1)/2))*Number(fastify.config.stepBatteryPrice)
+        const power_rize_battery = data.battery_capacity+Number(fastify.config.stepBatteryCap)*Math.round(1.2**data.battery_level)
 
         if (data.power_balance < price_rize_battery){
           return reply.badRequest("not_enough_power");
