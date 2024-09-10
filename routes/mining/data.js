@@ -45,7 +45,7 @@ module.exports = async function (fastify, opts) {
       price_rize_generator: 2**(data.generator_level)*Number(fastify.config.stepGeneratorPrice),
       power_rize_generator: Number(fastify.config.stepGeneratorLim),
       price_rize_battery: 2**(data.battery_level+1)*Number(fastify.config.stepBatteryPrice),
-      power_rize_battery: Number(fastify.config.stepBatteryCap),
+      power_rize_battery: Number(fastify.config.stepBatteryCap)*(1+0.2*data.battery_level),
       recovery_power_lim: Number(fastify.config.recoveryGeneratorLim),
       multitab: data.multitab,
       price_rize_multitab: 2**(data.multitab-1)*Number(fastify.config.stepMultitabPrice),
