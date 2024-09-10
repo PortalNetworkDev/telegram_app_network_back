@@ -29,7 +29,7 @@ module.exports = async function (fastify, opts) {
 
         let data = await fastify.models_mining_power.getMiningData(user.id)
 
-        const price_rize_generator = 2**(data.generator_level)*Number(fastify.config.stepGeneratorPrice)
+        const price_rize_generator = 2**(Math.floor((data.generator_level)/2))*Number(fastify.config.stepGeneratorPrice)
         const power_rize_generator = data.generator_limit+Number(fastify.config.stepGeneratorLim)
 
         if (data.power_balance < price_rize_generator){

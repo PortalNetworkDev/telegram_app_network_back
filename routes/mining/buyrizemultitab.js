@@ -29,7 +29,7 @@ module.exports = async function (fastify, opts) {
 
         let data = await fastify.models_mining_power.getMiningData(user.id)
 
-        const price_rize_multitab = 2**(data.multitab-1)*Number(fastify.config.stepMultitabPrice)
+        const price_rize_multitab = 2**(Math.floor((data.multitab-1)/2))*Number(fastify.config.stepMultitabPrice)
 
         if (data.power_balance < price_rize_multitab){
           return reply.badRequest("not_enough_power");
