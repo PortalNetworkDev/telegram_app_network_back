@@ -60,6 +60,11 @@ module.exports = fp(async function (fastify, opts) {
         `
         let values = [user_id, referal_user_id, user.referal_reward, 0, Date.now()]
         await fastify.mysql.insert(sql, values)
+
+        await fastify.models_mining_power.getMiningData(user_id)//проверка данных пользователя
+        await fastify.models_mining_power.getMiningData(referal_user_id)//проверка данных пользователя
+        await fastify.models_mining_power.addPowerBalance(user_id, fastify.config.forReferalPowerReward)
+        await fastify.models_mining_power.addPowerBalance(referal_user_id, fastify.config.toReferalPowerReward)
     }
 
     const checkReferaluser = async (user_id, referal_user_id) => {

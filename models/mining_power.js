@@ -56,6 +56,11 @@ module.exports = fp(async function (fastify, opts) {
         await fastify.mysql.update(sql,[power_balance, user_id])
     }
 
+    async function addPowerBalance(user_id, add_power_balance) {
+        let sql = `update mining_data set power_balance = power_balance+? where user_id = ?`;
+        await fastify.mysql.update(sql,[add_power_balance, user_id])
+    }
+
     async function updateBatteryBalance(user_id, battery_balance) {
         let sql = `update mining_data set battery_balance = ? where user_id = ?`;
         await fastify.mysql.update(sql,[battery_balance, user_id])
@@ -122,6 +127,7 @@ module.exports = fp(async function (fastify, opts) {
         createUserMiningData,
         getMiningData,
         updatePowerBalance,
+        addPowerBalance,
         updateBatteryBalance,
         updateBatteryCapacity,
         updateGeneratorLimit,
