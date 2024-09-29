@@ -38,6 +38,8 @@ module.exports = fp(async function (fastify, opts) {
     "stepGeneratorLim": process.env.STEPGENERATORLIM,
     "recoveryGeneratorLim": process.env.RECOVERYGENERATORLIM,
     "stepMultitabPrice": process.env.STEPMULTITABPRICE,
+    "forReferalPowerReward":process.env.FORREFERALPOWERREWARD,
+    "toReferalPowerReward":process.env.TOREFERALPOWERREWARD,
   }
 
   fastify.decorate('config', config)
