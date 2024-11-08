@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = async function (fastify, opts) {
+export default async function (fastify, opts) {
   fastify.get(
     "/data",
     { onRequest: [fastify.auth] },
@@ -76,4 +76,4 @@ module.exports = async function (fastify, opts) {
       };
     }
   );
-};
+}

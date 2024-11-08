@@ -1,6 +1,4 @@
-const TonWeb = require("tonweb");
-
-module.exports = async function (fastify, opts) {
+export default async function (fastify, opts) {
   fastify.post(
     "/buyrizebattery",
     {
@@ -60,4 +58,4 @@ module.exports = async function (fastify, opts) {
       };
     }
   );
-};
+}

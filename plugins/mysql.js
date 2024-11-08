@@ -1,55 +1,60 @@
-'use strict'
+"use strict";
 
-const fp = require('fastify-plugin')
+import createPlugin from "fastify-plugin";
+import mysql from "@fastify/mysql";
 
-module.exports = fp(async function (f, opts) {
-    await f.register(require('@fastify/mysql'), {
-        promise: true,
-        host: f.config.dbHost,
-        port: f.config.dbPort,
-        user: f.config.dbUser,
-        password: f.config.dbPassword,
-        database: f.config.dbName,
-    })
+export default createPlugin(async function (fastify, opts) {
+  const { config } = fastify;
 
+  await fastify.register(mysql, {
+    promise: true,
+    host: config.dbHost,
+    port: config.dbPort,
+    user: config.dbUser,
+    password: config.dbPassword,
+    database: config.dbName,
+  });
 
-    f.mysql.select = async function(sql,values) {
-        try {     
-
-            const connection = await f.mysql.getConnection((err, connection) => {
-              if (err) {
-                console.log('Error while connecting ', err)
-              } else {
-                if (connection) connection.release()
-                console.log('Database Connected Successfully!')
-              }
-            })
-            const [rows, fields] = await connection.execute(sql, values);
-            connection.release()
-
-            return {rows,fields}
-          } catch (err) {
-            console.log(err);
+  fastify.mysql.select = async function (sql, values) {
+    try {
+      const connection = await fastify.mysql.getConnection(
+        (err, connection) => {
+          if (err) {
+            console.log("Error while connecting ", err);
+          } else {
+            if (connection) connection.release();
+            console.log("Database Connected Successfully!");
           }
-    }
+        }
+      );
+      const [rows, fields] = await connection.execute(sql, values);
+      connection.release();
 
-    f.mysql.insert = async function(sql,values) {
-        try {     
-            const connection = await f.mysql.getConnection((err, connection) => {
-              if (err) {
-                console.log('Error while connecting ', err)
-              } else {
-                if (connection) connection.release()
-                console.log('Database Connected Successfully!')
-              }
-            })   
-            const [result, fields] = await connection.execute(sql, values);
-            connection.release()
-            return {result,fields}
-          } catch (err) {
-            console.log(err);
+      return { rows, fields };
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fastify.mysql.insert = async function (sql, values) {
+    try {
+      const connection = await fastify.mysql.getConnection(
+        (err, connection) => {
+          if (err) {
+            console.log("Error while connecting ", err);
+          } else {
+            if (connection) connection.release();
+            console.log("Database Connected Successfully!");
           }
+        }
+      );
+      const [result, fields] = await connection.execute(sql, values);
+      connection.release();
+      return { result, fields };
+    } catch (err) {
+      console.log(err);
     }
+  };
 
-    f.mysql.update = f.mysql.insert; // same
-})
+  fastify.mysql.update = fastify.mysql.insert;
+});
