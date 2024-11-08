@@ -28,7 +28,7 @@ export default async function (fastify, opts) {
 
       let data = await fastify.models_mining_power.getMiningData(user.id);
 
-      const price_rize_battery = calculatePriceRiseBatteryWithLimit(
+      const price_rize_battery = fastify.calculationUtils.calculatePriceRiseBatteryWithLimit(
         data.battery_level,
         fastify.config.stepBatteryPrice
       );

@@ -21,13 +21,12 @@ export default async function (fastify, opts) {
 
   fastify.register(AutoLoad, {
     dir: join(__dirname, "plugins"),
-    ignorePattern: /^.*.ts$/
+    ignorePattern: /^.*.ts$/,
   });
 
   fastify.register(AutoLoad, {
     dir: join(__dirname, "models"),
     options: Object.assign({}, opts),
-    
   });
 
   fastify.register(AutoLoad, {
@@ -38,6 +37,11 @@ export default async function (fastify, opts) {
   fastify.register(AutoLoad, {
     dir: join(__dirname, "services"),
     options: Object.assign({}, opts),
+  });
+  fastify.register(AutoLoad, {
+    dir: join(__dirname, "utils/calculationUtils"),
+    options: Object.assign({}, opts),
+    ignorePattern: /^.*.ts$/,
   });
 }
 

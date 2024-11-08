@@ -1,8 +1,5 @@
 "use strict";
 
-import { calculatePriceRiseBatteryWithLimit } from "../../utils/calculatePriceRiseBattery.js";
-import { calculateGeneratorRecoveryInterval } from "../../utils/calculateGeneratorRecoveryInterval.js";
-
 export default async function (fastify, opts) {
   fastify.get(
     "/data",
@@ -14,10 +11,17 @@ export default async function (fastify, opts) {
 
       const now = new Date();
       const lastUpdate = new Date(data.time_last_update);
-      const calculatedPriceRiseBattery = calculatePriceRiseBatteryWithLimit(
-        data.battery_level,
-        fastify.config.stepBatteryPrice
-      );
+      const calculatedPriceRiseBattery =
+        fastify.calculationUtils.calculatePriceRiseBatteryWithLimit(
+          data.battery_level,
+          fastify.config.stepBatteryPrice
+        );
+
+      const calculatedRecoveryPowerLimit =
+        fastify.calculationUtils.calculateGeneratorRecoveryInterval(
+          data.generator_limit,
+          data.generator_level
+        );
 
       let batteryBalance = data.battery_balance;
       let generatorBalance = data.generator_balance;
@@ -71,10 +75,7 @@ export default async function (fastify, opts) {
         power_rize_battery:
           Number(fastify.config.stepBatteryCap) *
           Math.round(1.2 ** data.battery_level),
-        recovery_power_lim: calculateGeneratorRecoveryInterval(
-          data.generator_limit,
-          data.generator_level
-        ),
+        recovery_power_lim: calculatedRecoveryPowerLimit,
         multitab: data.multitab,
         price_rize_multitab:
           2 ** (data.multitab - 1) * Number(fastify.config.stepMultitabPrice),

@@ -10,7 +10,8 @@
     "test": "node --test test/**/*.test.js",
     "start": "fastify start -l info app.js",
     "build": "tsc -p tsconfig.json",
-    "dev": "fastify start -w -l info -P app.js"
+    "dev": "fastify start -w -l info -P app.js",
+    "compileDev": "source .exports && npm run build && npm run dev"
   },
   "keywords": [],
   "author": "",
