@@ -153,9 +153,9 @@ export default createPlugin(async function (fastify, opts) {
 
     if (await taskExist(id)) return true;
 
-    let sql = `INSERT INTO tasks (id,title, label, description, type, category_id, reward, icon_url, other) 
+    const sql = `INSERT INTO tasks (id,title, label, description, type, category_id, reward, icon_url, other) 
         VALUES (?,?, ?, ?, ?, ?, ?, ?, ?)`;
-    let values = [
+    const values = [
       id,
       title,
       label,
@@ -293,6 +293,22 @@ export default createPlugin(async function (fastify, opts) {
     return tasks;
   };
 
+  const getAllTasks = async () => {
+    const sql = `select * from tasks`;
+    const result = await fastify.mysql.insert(sql);
+    return result;
+  };
+
+  const reimportCat = async()=>{
+    await fastify.mysql.query('delete from categories_task;')
+    await catImport("./db/catsimport.csv");
+  }
+
+  const reimportTasks = async()=>{
+    await fastify.mysql.query('delete from tasks;')
+    await taskImport("./db/tasksimport.csv");
+  }
+
   fastify.decorate("models_tasks", {
     createUserTaskState,
     compliteTask,
@@ -305,8 +321,10 @@ export default createPlugin(async function (fastify, opts) {
     createUserTaskStates,
     setRewardedTask,
     getUserTaskByTaskId,
+    getAllTasks,
+    reimportCat,
+    reimportTasks,
   });
 
-  await catImport("./db/catsimport.csv");
-  await taskImport("./db/tasksimport.csv");
+  await Promise.all([catImport("./db/catsimport.csv"),taskImport("./db/tasksimport.csv")]);
 });

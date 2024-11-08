@@ -1,4 +1,4 @@
-import { MAX_PRICE_FOR_UPGRADE } from "./constants/constants";
+import { MAX_PRICE_FOR_UPGRADE } from "./constants/constants.js";
 
 export const calculatePriceRiseBattery = (
   batteryLevel: number,

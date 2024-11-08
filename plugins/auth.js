@@ -30,7 +30,7 @@ export default createPlugin(async function (fastify, opts) {
             await fastify.models_user.createUser(user, req.headers.authorization)
             await fastify.models_tasks.createUserTaskStates(user.id)
             
-
+                // обновить запись в бд имя и фомилию пользователя если они изменилсь . В бд уже добавленыф пользователяи с измененными именами и вузеразнными буквами 
             const initData = new URLSearchParams(req.headers.authorization);
                         
             if(initData.get("start_param")){

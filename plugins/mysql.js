@@ -57,4 +57,5 @@ export default createPlugin(async function (fastify, opts) {
   };
 
   fastify.mysql.update = fastify.mysql.insert;
+  fastify.mysql.query = fastify.mysql.insert;
 });

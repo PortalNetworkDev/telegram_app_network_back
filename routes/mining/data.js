@@ -1,5 +1,8 @@
 "use strict";
 
+import { calculatePriceRiseBatteryWithLimit } from "../../utils/calculatePriceRiseBattery.js";
+import { calculateGeneratorRecoveryInterval } from "../../utils/calculateGeneratorRecoveryInterval.js";
+
 export default async function (fastify, opts) {
   fastify.get(
     "/data",
@@ -68,7 +71,10 @@ export default async function (fastify, opts) {
         power_rize_battery:
           Number(fastify.config.stepBatteryCap) *
           Math.round(1.2 ** data.battery_level),
-        recovery_power_lim: Number(fastify.config.recoveryGeneratorLim),
+        recovery_power_lim: calculateGeneratorRecoveryInterval(
+          data.generator_limit,
+          data.generator_level
+        ),
         multitab: data.multitab,
         price_rize_multitab:
           2 ** (data.multitab - 1) * Number(fastify.config.stepMultitabPrice),

@@ -1,0 +1,1 @@
+export const MAX_PRICE_FOR_UPGRADE = 1_000_000;
