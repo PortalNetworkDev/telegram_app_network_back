@@ -18,7 +18,12 @@ module.exports = async function (fastify, opts) {
 
         for (let index = 0; index < users.length; index++) {
             const user = users[index];
-            const referalUsersUnrewarded = await fastify.models_user.getReferalUsersUnrewarded(user.id)
+
+            let referalUsersUnrewarded = await fastify.models_user.getReferalUsersUnrewarded(user.id)
+            if (user.referal_reward>fastify.config.referalreward && fastify.config.setSpecialReferalReward) {
+                referalUsersUnrewarded = await fastify.models_user.getReferalUsersUnrewardedSpecial(user.id)
+            }
+            
                     
             const userTasks = await fastify.models_tasks.getUserTasks(user.id, "and is_complite = 1 and is_rewarded = 0");
             

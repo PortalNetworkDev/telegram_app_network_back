@@ -40,6 +40,7 @@ module.exports = fp(async function (fastify, opts) {
     "stepMultitabPrice": process.env.STEPMULTITABPRICE,
     "forReferalPowerReward":process.env.FORREFERALPOWERREWARD,
     "toReferalPowerReward":process.env.TOREFERALPOWERREWARD,
+    "setSpecialReferalReward":process.env.TOREFERALPOWERREWARD,
   }
 
   fastify.decorate('config', config)
