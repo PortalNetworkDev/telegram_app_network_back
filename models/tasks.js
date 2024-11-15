@@ -45,16 +45,16 @@ export default createPlugin(async function (fastify, opts) {
     "referal",
   ];
 
-  await fastify.mysql.insert(userTaskState);
-  await fastify.mysql.insert(categoriesTable);
-  await fastify.mysql.insert(tasksTable);
+  await fastify.dataBase.insert(userTaskState);
+  await fastify.dataBase.insert(categoriesTable);
+  await fastify.dataBase.insert(tasksTable);
 
   const createCategory = async (id, label, description) => {
     if (await categoryExist(id)) return true;
 
     const sql = `INSERT INTO categories_task (id,label, description) VALUES (?,?,?)`;
     const values = [id, label, description];
-    await fastify.mysql.insert(sql, values);
+    await fastify.dataBase.insert(sql, values);
   };
 
   const catImport = async (file) => {
@@ -105,14 +105,14 @@ export default createPlugin(async function (fastify, opts) {
   };
 
   const getCategories = async () => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select * from categories_task"
     );
     return rows;
   };
 
   const categoryExist = async (id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select id from categories_task where id = ?",
       [id]
     );
@@ -124,7 +124,7 @@ export default createPlugin(async function (fastify, opts) {
   };
 
   const taskExist = async (id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select id from tasks where id = ?",
       [id]
     );
@@ -167,17 +167,17 @@ export default createPlugin(async function (fastify, opts) {
       other,
     ];
 
-    await fastify.mysql.insert(sql, values);
+    await fastify.dataBase.insert(sql, values);
   };
 
   const getTasks = async () => {
-    const { rows } = await fastify.mysql.select("select * from tasks");
+    const { rows } = await fastify.dataBase.select("select * from tasks");
     return rows;
   };
 
   const getUserTasks = async (user_id, where = "") => {
     try {
-      const { rows } = await fastify.mysql.select(
+      const { rows } = await fastify.dataBase.select(
         `select  
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
@@ -205,7 +205,7 @@ export default createPlugin(async function (fastify, opts) {
 
   const getUserTask = async (user_id, task_id) => {
     try {
-      const { rows } = await fastify.mysql.select(
+      const { rows } = await fastify.dataBase.select(
         `select  
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
@@ -233,7 +233,7 @@ export default createPlugin(async function (fastify, opts) {
 
   const getUserTaskByTaskId = async (user_id, task_id) => {
     try {
-      const { rows } = await fastify.mysql.select(
+      const { rows } = await fastify.dataBase.select(
         `select  
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
@@ -272,12 +272,12 @@ export default createPlugin(async function (fastify, opts) {
 
   const createUserTaskState = async (user_id, task_id) => {
     let sql = `INSERT INTO user_task_state (user_id, task_id) VALUES (?,?)`;
-    await fastify.mysql.insert(sql, [user_id, task_id]);
+    await fastify.dataBase.insert(sql, [user_id, task_id]);
   };
 
   const compliteTask = async (id, user_id, result) => {
     //console.log("compliteTask", id, user_id, result)
-    const tasks = await fastify.mysql.update(
+    const tasks = await fastify.dataBase.update(
       "update user_task_state set result = ?, is_complite = 1 where task_id = ? and user_id = ?",
       [result, id, user_id]
     );
@@ -286,7 +286,7 @@ export default createPlugin(async function (fastify, opts) {
 
   const setRewardedTask = async (id, user_id, result) => {
     console.log("setRewardedTask", id, user_id, result);
-    const tasks = await fastify.mysql.update(
+    const tasks = await fastify.dataBase.update(
       "update user_task_state set result = ?, is_rewarded = 1 where task_id = ? and user_id = ?",
       [result, id, user_id]
     );
@@ -295,17 +295,17 @@ export default createPlugin(async function (fastify, opts) {
 
   const getAllTasks = async () => {
     const sql = `select * from tasks`;
-    const result = await fastify.mysql.insert(sql);
+    const result = await fastify.dataBase.insert(sql);
     return result;
   };
 
   const reimportCat = async()=>{
-    await fastify.mysql.query('delete from categories_task;')
+    await fastify.dataBase.query('delete from categories_task;')
     await catImport("./db/catsimport.csv");
   }
 
   const reimportTasks = async()=>{
-    await fastify.mysql.query('delete from tasks;')
+    await fastify.dataBase.query('delete from tasks;')
     await taskImport("./db/tasksimport.csv");
   }
 

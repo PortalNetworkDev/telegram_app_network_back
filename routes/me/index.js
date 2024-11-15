@@ -6,6 +6,7 @@ export default async function (fastify, opts) {
     { onRequest: [fastify.auth] },
     async function (request, reply) {
       const _user = fastify.getUser(request);
+      console.log("UUUUSER><",_user);
       const user = await fastify.models_user.getUser(_user.id);
       
       const obj = { balance: 0, power_balance: 0 };

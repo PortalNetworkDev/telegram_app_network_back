@@ -4,17 +4,19 @@ import createPlugin from "fastify-plugin";
 import TonWeb from "tonweb";
 import { mnemonicToWalletKey } from "ton-crypto";
 
-
-//TODO: refactor: new TonWeb call in several palace 
+//TODO: refactor: new TonWeb call in several palace
 export default createPlugin(async function (fastify, opts) {
   const tonWeb = new TonWeb(
     new TonWeb.HttpProvider("https://toncenter.com/api/v2/jsonRPC", {
-      apiKey: fastify.config.tonwebapikey,
+      apiKey: fastify?.config?.tonwebapikey ?? '',
     })
   );
 
-  const { mnemonic, jettonaddress: jettonAddressRaw } = fastify.config;
-  
+  const { mnemonic, jettonaddress: jettonAddressRaw } = fastify?.config ?? {
+    mnemonic: "",
+    jettonaddress: "",
+  };
+
   async function sendTonToken(
     walletAddress2,
     tokenAmount,

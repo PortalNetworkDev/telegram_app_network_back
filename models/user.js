@@ -29,8 +29,8 @@ export default createPlugin(async function (fastify, opts) {
             last_updated BIGINT
         ) ENGINE = InnoDB CHARSET=utf8mb3 COLLATE utf8mb3_general_ci;`;
 
-  await fastify.mysql.insert(usersTable);
-  await fastify.mysql.insert(userReferalsTable);
+  await fastify.dataBase.insert(usersTable);
+  await fastify.dataBase.insert(userReferalsTable);
 
   const createUser = async (user, tg_token) => {
     if (user.first_name)
@@ -54,7 +54,7 @@ export default createPlugin(async function (fastify, opts) {
       tg_token,
     ];
 
-    await fastify.mysql.insert(sql, values);
+    await fastify.dataBase.insert(sql, values);
   };
 
   const addReferalUser = async (user_id, referal_user_id) => {
@@ -63,8 +63,14 @@ export default createPlugin(async function (fastify, opts) {
     const sql = `INSERT INTO referal_users (user_id, referal_user_id, reward, is_rewarded, last_updated)
         VALUES (?, ?, ?, ?, ?)
         `;
-    const values = [user_id, referal_user_id, user.referal_reward, 0, Date.now()];
-    await fastify.mysql.insert(sql, values);
+    const values = [
+      user_id,
+      referal_user_id,
+      user.referal_reward,
+      0,
+      Date.now(),
+    ];
+    await fastify.dataBase.insert(sql, values);
 
     await fastify.models_mining_power.getMiningData(user_id); //проверка данных пользователя
     await fastify.models_mining_power.getMiningData(referal_user_id); //проверка данных пользователя
@@ -79,7 +85,7 @@ export default createPlugin(async function (fastify, opts) {
   };
 
   const checkReferaluser = async (user_id, referal_user_id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select * from referal_users where user_id = ? and referal_user_id = ?",
       [user_id, referal_user_id]
     );
@@ -92,7 +98,7 @@ export default createPlugin(async function (fastify, opts) {
   };
 
   const countReferalUsers = async (user_id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select count(*) from referal_users JOIN user_task_state on user_task_state.user_id = referal_users.referal_user_id where referal_users.user_id = ? and user_task_state.task_id = 5 and user_task_state.is_complite = 1",
       [user_id]
     );
@@ -100,7 +106,7 @@ export default createPlugin(async function (fastify, opts) {
   };
 
   const getReferalUsersUnrewarded = async (user_id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       `
             select  
             referal_users.user_id as user_id,
@@ -118,21 +124,21 @@ export default createPlugin(async function (fastify, opts) {
   const setRewarded = async (user_id, referal_user_id) => {
     const sql = `update referal_users set is_rewarded = 1 where user_id = ? and referal_user_id = ?`;
     console.log("setRewarded", user_id, referal_user_id);
-    await fastify.mysql.update(sql, [user_id, referal_user_id]);
+    await fastify.dataBase.update(sql, [user_id, referal_user_id]);
   };
 
   const updateLastUpdated = async (id) => {
     const sql = `update users set last_updated = ? where id = ?`;
-    await fastify.mysql.update(sql, [Date.now(), id]);
+    await fastify.dataBase.update(sql, [Date.now(), id]);
   };
 
   const updateWallet = async (id, wallet) => {
     const sql = `update users set wallet = ? where id = ?`;
-    await fastify.mysql.update(sql, [wallet, id]);
+    await fastify.dataBase.update(sql, [wallet, id]);
   };
 
   const sameWalletExist = async (id, wallet) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select count(*) from users where wallet = ? and id != ?",
       [wallet, id]
     );
@@ -142,11 +148,11 @@ export default createPlugin(async function (fastify, opts) {
 
   const updateReward = async (id, referal_reward) => {
     const sql = `update users set referal_reward = ? where id = ?`;
-    await fastify.mysql.update(sql, [referal_reward, id]);
+    await fastify.dataBase.update(sql, [referal_reward, id]);
   };
 
   const userExist = async (id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select * from users where id = ?",
       [id]
     );
@@ -154,12 +160,26 @@ export default createPlugin(async function (fastify, opts) {
     if (!rows.length) {
       return false;
     } else {
-      return true;
+      return true; 
     }
   };
 
+  const getUserByNickname = async (nick) => {
+    let result = null;
+    try {
+      result = await fastify.dataBase.select(
+        "select * from users where username = ?",
+        [nick]
+      );
+    } catch (error) {
+      fastify.log.error('error when try to get user by nickname form db');
+      return null;
+    }
+    return result.rows;
+  };
+
   const getUser = async (id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select * from users where id = ?",
       [id]
     );
@@ -171,19 +191,19 @@ export default createPlugin(async function (fastify, opts) {
   };
 
   const getUsers = async (id) => {
-    const { rows } = await fastify.mysql.select("select * from users");
+    const { rows } = await fastify.dataBase.select("select * from users");
     return rows;
   };
 
   const getActiveUsers = async (id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select * from users where last_updated > UNIX_TIMESTAMP(NOW() - INTERVAL 1 HOUR)*1000"
     );
     return rows;
   };
 
   const checkAirDropUser = async (user_id, referal_user_id) => {
-    const { rows } = await fastify.mysql.select(
+    const { rows } = await fastify.dataBase.select(
       "select * from referal_users where user_id = ? and referal_user_id = ? and is_rewarded = 0",
       [user_id, referal_user_id]
     );
@@ -225,5 +245,6 @@ export default createPlugin(async function (fastify, opts) {
     setRewarded,
     countReferalUsers,
     checkAirDropUser,
+    getUserByNickname,
   });
 });

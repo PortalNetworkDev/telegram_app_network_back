@@ -25,7 +25,7 @@ export default createPlugin(async function (fastify, opts) {
             time_last_update TEXT NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     `;
-  await fastify.mysql.insert(miningData);
+  await fastify.dataBase.insert(miningData);
 
   async function createUserMiningData(
     user_id,
@@ -44,12 +44,12 @@ export default createPlugin(async function (fastify, opts) {
       now,
     ];
 
-    await fastify.mysql.insert(sql, values);
+    await fastify.dataBase.insert(sql, values);
   }
 
   async function getMiningData(user_id) {
     let sql = `select * from mining_data where user_id=?`;
-    const { rows } = await fastify.mysql.select(sql, [user_id]);
+    const { rows } = await fastify.dataBase.select(sql, [user_id]);
 
     if (!rows.length) {
       console.log("Creating mining data for user", user_id);
@@ -59,7 +59,7 @@ export default createPlugin(async function (fastify, opts) {
         fastify.config.generatorStart
       );
 
-      const { rows } = await fastify.mysql.select(sql, [user_id]);
+      const { rows } = await fastify.dataBase.select(sql, [user_id]);
       return rows[0];
     }
 
@@ -67,50 +67,55 @@ export default createPlugin(async function (fastify, opts) {
   }
 
   async function updatePowerBalance(user_id, power_balance) {
-    let sql = `update mining_data set power_balance = ? where user_id = ?`;
-    await fastify.mysql.update(sql, [power_balance, user_id]);
+    const sql = `update mining_data set power_balance = ? where user_id = ?`;
+    await fastify.dataBase.update(sql, [power_balance, user_id]);
   }
 
   async function addPowerBalance(user_id, add_power_balance) {
-    let sql = `update mining_data set power_balance = power_balance+? where user_id = ?`;
-    await fastify.mysql.update(sql, [add_power_balance, user_id]);
+    const sql = `update mining_data set power_balance = power_balance+? where user_id = ?`;
+    await fastify.dataBase.update(sql, [add_power_balance, user_id]);
+  }
+
+  async function subtractPowerBalance(user_id, add_power_balance) {
+    const sql = `update mining_data set power_balance = power_balance-? where user_id = ?`;
+    await fastify.dataBase.update(sql, [add_power_balance, user_id]);
   }
 
   async function updateBatteryBalance(user_id, battery_balance) {
     let sql = `update mining_data set battery_balance = ? where user_id = ?`;
-    await fastify.mysql.update(sql, [battery_balance, user_id]);
+    await fastify.dataBase.update(sql, [battery_balance, user_id]);
   }
 
   async function updateGeneratorBalance(user_id, generator_balance) {
     let sql = `update mining_data set generator_balance = ? where user_id = ?`;
-    await fastify.mysql.update(sql, [generator_balance, user_id]);
+    await fastify.dataBase.update(sql, [generator_balance, user_id]);
   }
 
   async function updatePoeBalance(user_id, poe_balance) {
     let sql = `update mining_data set poe_balance = ? where user_id = ?`;
-    await fastify.mysql.update(sql, [poe_balance, user_id]);
+    await fastify.dataBase.update(sql, [poe_balance, user_id]);
   }
 
   async function updateBatteryCapacity(user_id, battery_capacity) {
     let sql = `update mining_data set battery_capacity = ? where user_id = ?`;
-    await fastify.mysql.update(sql, [battery_capacity, user_id]);
+    await fastify.dataBase.update(sql, [battery_capacity, user_id]);
   }
 
   async function updateGeneratorLimit(user_id, generator_limit) {
     let sql = `update mining_data set generator_limit = ? where user_id = ?`;
-    await fastify.mysql.update(sql, [generator_limit, user_id]);
+    await fastify.dataBase.update(sql, [generator_limit, user_id]);
   }
 
   async function claimBattery(user_id) {
     let sql = `update mining_data set power_balance=power_balance+battery_balance, battery_balance = 0, time_last_claim = ? where user_id = ?`;
     const now = new Date();
-    await fastify.mysql.update(sql, [now, user_id]);
+    await fastify.dataBase.update(sql, [now, user_id]);
   }
 
   async function generatingEnergy(user_id, generator_balance, battery_balance) {
     let sql = `update mining_data set generator_balance = ?, battery_balance = ?, time_last_spin = ?, time_last_update = ? where user_id = ?`;
     const now = new Date();
-    await fastify.mysql.update(sql, [
+    await fastify.dataBase.update(sql, [
       generator_balance,
       battery_balance,
       now,
@@ -126,7 +131,7 @@ export default createPlugin(async function (fastify, opts) {
   ) {
     let sql = `update mining_data set generator_balance = ?, battery_balance = ?, time_last_update = ? where user_id = ?`;
     const now = new Date();
-    await fastify.mysql.update(sql, [
+    await fastify.dataBase.update(sql, [
       generator_balance,
       battery_balance,
       now,
@@ -136,17 +141,24 @@ export default createPlugin(async function (fastify, opts) {
 
   async function buyBatteryCapacity(user_id, battery_capacity, price) {
     let sql = `update mining_data set battery_capacity = ?, power_balance=power_balance-?, battery_level=battery_level+1 where user_id = ?`;
-    await fastify.mysql.update(sql, [battery_capacity, price, user_id]);
+    await fastify.dataBase.update(sql, [battery_capacity, price, user_id]);
   }
 
   async function buyGeneratorLimit(user_id, generator_limit, price) {
     let sql = `update mining_data set generator_limit = ?, power_balance=power_balance-?, generator_level=generator_level+1 where user_id = ?`;
-    await fastify.mysql.update(sql, [generator_limit, price, user_id]);
+    await fastify.dataBase.update(sql, [generator_limit, price, user_id]);
   }
 
   async function buyMultitab(user_id, price) {
     let sql = `update mining_data set power_balance=power_balance-?, multitab=multitab+1 where user_id = ?`;
-    await fastify.mysql.update(sql, [price, user_id]);
+    await fastify.dataBase.update(sql, [price, user_id]);
+  }
+
+  async function getUserPowerBalance(userId) {
+    const query = "select power_balance from mining_data where user_id = ?";
+    const {rows} = await fastify.dataBase.select(query, [userId]);
+
+    return rows[0].power_balance;
   }
 
   fastify.decorate("models_mining_power", {
@@ -165,5 +177,7 @@ export default createPlugin(async function (fastify, opts) {
     buyBatteryCapacity,
     buyGeneratorLimit,
     buyMultitab,
+    getUserPowerBalance,
+    subtractPowerBalance,
   });
 });
