@@ -21,27 +21,32 @@ export default async function (fastify, opts) {
 
   fastify.register(AutoLoad, {
     dir: join(__dirname, "plugins"),
-    ignorePattern: /^.*.ts$/,
+    ignorePattern: /^.*(?:\.ts|\.types.js)$/,
   });
 
   fastify.register(AutoLoad, {
     dir: join(__dirname, "models"),
     options: Object.assign({}, opts),
+    ignorePattern: /^.*(?:\.ts|\.types.js)$/,
+    maxDepth:1,
   });
 
   fastify.register(AutoLoad, {
     dir: join(__dirname, "routes"),
     options: Object.assign({}, opts),
+    ignorePattern: /^.*(?:\.ts|\.types.js)$/,
   });
 
   fastify.register(AutoLoad, {
     dir: join(__dirname, "services"),
     options: Object.assign({}, opts),
+    ignorePattern: /^.*(?:\.ts|\.types.js)$/,
   });
   fastify.register(AutoLoad, {
     dir: join(__dirname, "utils/calculationUtils"),
     options: Object.assign({}, opts),
     ignorePattern: /^.*.ts$/,
+    ignorePattern: /^.*(?:\.ts|\.types.js)$/,
   });
 }
 

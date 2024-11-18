@@ -1,6 +1,10 @@
 "use strict";
+
+import { FastifyPluginAsync } from "fastify";
 import createPlugin from "fastify-plugin";
-export default createPlugin(async function (fastify, opts) {
+
+export default createPlugin<FastifyPluginAsync>( async function (fastify, opts) {
+
   const config = {
     bottoken: process.env.BOTTOKEN,
     referalreward: process.env.REFERALREWARD,
@@ -33,7 +37,8 @@ export default createPlugin(async function (fastify, opts) {
     stepMultitabPrice: process.env.STEPMULTITABPRICE,
     forReferalPowerReward: process.env.FORREFERALPOWERREWARD,
     toReferalPowerReward: process.env.TOREFERALPOWERREWARD,
-    setSpecialReferalReward: process.env.TOREFERALPOWERREWARD,
   };
+
   fastify.decorate("config", config);
+
 });

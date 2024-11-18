@@ -15,19 +15,19 @@ export default createPlugin(async function (fastify, opts) {
             create_time date NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     `;
-  await fastify.mysql.insert(balanceHistory);
+  await fastify.dataBase.insert(balanceHistory);
 
   async function addHistory(user_id, token_balance, pool_balance) {
     const sql = `INSERT INTO balance_history (user_id, token_balance, pool_balance, create_time) VALUES (?,?,?,NOW())`;
 
     const values = [user_id, token_balance, pool_balance];
 
-    await fastify.mysql.insert(sql, values);
+    await fastify.dataBase.insert(sql, values);
   }
 
   async function getHoleInHistoryTokenBalance(user_id, period = 14) {
     const sql = `select * from balance_history where user_id=? and token_balance > 0 and create_time >= (NOW() - INTERVAL ? DAY) `;
-    const { rows } = await fastify.mysql.select(sql, [user_id, period]);
+    const { rows } = await fastify.dataBase.select(sql, [user_id, period]);
     return rows;
   }
 
@@ -41,7 +41,7 @@ export default createPlugin(async function (fastify, opts) {
 
   async function getHoleInHistoryPoolBalance(user_id) {
     const sql = `select * from balance_history where user_id=? and pool_balance > 0`;
-    const { rows } = await fastify.mysql.select(sql, [user_id]);
+    const { rows } = await fastify.dataBase.select(sql, [user_id]);
     return rows;
   }
 
@@ -82,7 +82,7 @@ export default createPlugin(async function (fastify, opts) {
             AND is_complite = 0
         );`*/
     //добавлено что не выполнено задание 8
-    const { rows } = await fastify.mysql.select(sql);
+    const { rows } = await fastify.dataBase.select(sql);
     return rows;
   }
 
@@ -93,7 +93,7 @@ export default createPlugin(async function (fastify, opts) {
         WHERE user_id = ? 
         AND token_balance > 0 
     `;
-    const { rows } = await fastify.mysql.select(sql, [user_id]);
+    const { rows } = await fastify.dataBase.select(sql, [user_id]);
     const count = rows[0].count;
 
     if (count >= period) return true;

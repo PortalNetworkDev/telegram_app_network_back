@@ -10,7 +10,7 @@
     "test": "node --test test/**/*.test.js",
     "start": "fastify start -l info app.js",
     "build": "tsc -p tsconfig.json",
-    "dev": "fastify start -w -l info -P app.js",
+    "dev": "fastify start -w -l info -P -p 3001 app.js",
     "compileDev": "source .exports && npm run build && npm run dev"
   },
   "keywords": [],
@@ -19,7 +19,7 @@
   "dependencies": {
     "@fastify/autoload": "^6.0.2",
     "@fastify/cors": "^9.0.1",
-    "@fastify/mysql": "^4.2.0",
+    "@fastify/mysql": "^5.0.1",
     "@fastify/sensible": "^5.0.0",
     "@fastify/static": "^7.0.3",
     "crypto-js": "^4.2.0",
