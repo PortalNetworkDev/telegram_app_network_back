@@ -1,15 +1,12 @@
-'use strict'
+"use strict";
 
-const fp = require('fastify-plugin')
-
+import createPlugin from "fastify-plugin";
 
 // the use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 
-module.exports = fp(async function (fastify, opts) {
-
-
-    const userTaskState = `
+export default createPlugin(async function (fastify, opts) {
+  const userTaskState = `
         CREATE TABLE IF NOT EXISTS user_task_state (
             rowid BIGINT NOT NULL AUTO_INCREMENT , PRIMARY KEY (\`rowid\`),
             task_id INTEGER,
@@ -19,14 +16,14 @@ module.exports = fp(async function (fastify, opts) {
             result VARCHAR(255) DEFAULT ""
         )`;
 
-    const categoriesTable = `
+  const categoriesTable = `
         CREATE TABLE IF NOT EXISTS categories_task (
             id BIGINT PRIMARY KEY,
             label VARCHAR(255),
             description TEXT
     )`;
 
-    const tasksTable = `
+  const tasksTable = `
         CREATE TABLE IF NOT EXISTS tasks (
             id BIGINT PRIMARY KEY,
             title TEXT,
@@ -39,115 +36,149 @@ module.exports = fp(async function (fastify, opts) {
             other TEXT
     )`;
 
+  const typesTasks = [
+    "selfConfirm",
+    "checkSubscribe",
+    "connectToTon",
+    "checkJetton",
+    "checkLiquidity",
+    "referal",
+  ];
 
-    const typesTasks = ["selfConfirm", "checkSubscribe", "connectToTon","checkJetton", "checkLiquidity", "referal"]
+  await fastify.mysql.insert(userTaskState);
+  await fastify.mysql.insert(categoriesTable);
+  await fastify.mysql.insert(tasksTable);
 
-    await fastify.mysql.insert(userTaskState)
-    await fastify.mysql.insert(categoriesTable)
-    await fastify.mysql.insert(tasksTable)
+  const createCategory = async (id, label, description) => {
+    if (await categoryExist(id)) return true;
 
-    const createCategory = async (id,label, description) => {
+    const sql = `INSERT INTO categories_task (id,label, description) VALUES (?,?,?)`;
+    const values = [id, label, description];
+    await fastify.mysql.insert(sql, values);
+  };
 
-        if(await categoryExist(id))
-            return true;
+  const catImport = async (file) => {
+    console.log("RUN catImport");
 
-        let sql = `INSERT INTO categories_task (id,label, description) VALUES (?,?,?)`;
-        let values = [id,label, description];
-        await fastify.mysql.insert(sql, values)
+    const cats = await fastify.utils.csvParser(file);
+
+    for (let index = 0; index < cats.length; index++) {
+      let cat = cats[index];
+      try {
+        await createCategory(cat.id, cat.label, cat.description);
+      } catch (error) {
+        //console.log("Error add cat", cat, error)
+      }
     }
+  };
 
-    const catImport = async (file) => {
+  const taskImport = async (file) => {
+    console.log("RUN taskImport");
 
-        console.log("RUN catImport")
-
-        const cats = await fastify.utils.csvParser(file);
-        
-        for (let index = 0; index < cats.length; index++) {
-            let cat = cats[index];
-            try {
-                await createCategory(cat.id, cat.label, cat.description);
-            } catch (error) {
-                //console.log("Error add cat", cat, error)
-            }
-
-        }
+    const tasks = await fastify.utils.csvParser(file);
+    for (let index = 0; index < tasks.length; index++) {
+      const {
+        id,
+        title,
+        label,
+        description,
+        type,
+        category_id,
+        reward,
+        icon_url,
+        other,
+      } = tasks[index];
+      try {
+        await createTask(
+          id,
+          title,
+          label,
+          description,
+          type,
+          category_id,
+          reward,
+          icon_url,
+          other
+        );
+      } catch (error) {}
     }
+  };
 
+  const getCategories = async () => {
+    const { rows } = await fastify.mysql.select(
+      "select * from categories_task"
+    );
+    return rows;
+  };
 
-    const taskImport = async (file) => {
-
-        console.log("RUN taskImport")
-
-        const tasks = await fastify.utils.csvParser(file);
-        for (let index = 0; index < tasks.length; index++) {
-            const {id,title, label, description, type, category_id, reward, icon_url, other} = tasks[index];
-            try {
-                await createTask(id,title, label, description, type, category_id, reward, icon_url, other)
-            } catch (error) {
-                
-            }
-
-        }
+  const categoryExist = async (id) => {
+    const { rows } = await fastify.mysql.select(
+      "select id from categories_task where id = ?",
+      [id]
+    );
+    if (rows.length) {
+      return true;
+    } else {
+      return false;
     }
+  };
 
+  const taskExist = async (id) => {
+    const { rows } = await fastify.mysql.select(
+      "select id from tasks where id = ?",
+      [id]
+    );
 
-
-
-    const getCategories = async () => {
-        const {rows} = await fastify.mysql.select("select * from categories_task")
-        return rows;
+    if (rows.length) {
+      return true;
+    } else {
+      return false;
     }
+  };
 
-    const categoryExist = async (id) => {
-        const {rows} = await fastify.mysql.select("select id from categories_task where id = ?",[id])
-        if(rows.length){
-            return true;
-        }else{
-            return false;
-        }
-    }
+  const createTask = async (
+    id,
+    title,
+    label,
+    description,
+    type,
+    category_id,
+    reward,
+    icon_url,
+    other
+  ) => {
+    if (!(await categoryExist(category_id))) throw "category_does_not_exist";
 
-    const taskExist = async (id) => {
-        const {rows} = await fastify.mysql.select("select id from tasks where id = ?",[id])
-        
-        if(rows.length){
-            return true;
-        }else{
-            return false;
-        }
-    }
+    if (!typesTasks.includes(type)) throw "type_does_not_exist";
 
+    if (await taskExist(id)) return true;
 
-    const createTask = async (id,title, label, description, type, category_id, reward, icon_url, other) => {
-
-        if(!await categoryExist(category_id))
-            throw "category_does_not_exist";
-
-        if(!typesTasks.includes(type))
-            throw "type_does_not_exist";
-
-        if(await taskExist(id))
-            return true;
-
-        let sql = `INSERT INTO tasks (id,title, label, description, type, category_id, reward, icon_url, other) 
+    const sql = `INSERT INTO tasks (id,title, label, description, type, category_id, reward, icon_url, other) 
         VALUES (?,?, ?, ?, ?, ?, ?, ?, ?)`;
-        let values = [id,title,label,description,type,category_id,reward,icon_url,other];
+    const values = [
+      id,
+      title,
+      label,
+      description,
+      type,
+      category_id,
+      reward,
+      icon_url,
+      other,
+    ];
 
-        await fastify.mysql.insert(sql,values)
-    }
+    await fastify.mysql.insert(sql, values);
+  };
 
-    const getTasks = async () => {
-        const {rows} = await fastify.mysql.select("select * from tasks")
-        return rows;
-    }
+  const getTasks = async () => {
+    const { rows } = await fastify.mysql.select("select * from tasks");
+    return rows;
+  };
 
-
-    const getUserTasks = async (user_id, where = "") => {
-
-        
-        try {
-            
-            const {rows} = await fastify.mysql.select(`select  
+  const getUserTasks = async (user_id, where = "") => {
+    try {
+      const { rows } = await fastify.mysql.select(
+        `select  
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
             user_task_state.result as result,
@@ -161,22 +192,21 @@ module.exports = fp(async function (fastify, opts) {
             tasks.icon_url as icon_url,
             tasks.other as other
 
-            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? ${where}`,[user_id])
-            
-            return rows;
-        } catch (error) {
-            console.log(error)
-            return [];
-        }
+            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? ${where}`,
+        [user_id]
+      );
 
+      return rows;
+    } catch (error) {
+      console.log(error);
+      return [];
     }
+  };
 
-    const getUserTask = async (user_id, task_id) => {
-
-        
-        try {
-            
-            const {rows} = await fastify.mysql.select(`select  
+  const getUserTask = async (user_id, task_id) => {
+    try {
+      const { rows } = await fastify.mysql.select(
+        `select  
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
             user_task_state.result as result,
@@ -190,22 +220,21 @@ module.exports = fp(async function (fastify, opts) {
             tasks.icon_url as icon_url,
             tasks.other as other
 
-            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.task_id = ?`,[user_id, task_id])
-            
-            return rows[0];
-        } catch (error) {
-            console.log(error)
-            return [];
-        }
+            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.task_id = ?`,
+        [user_id, task_id]
+      );
 
+      return rows[0];
+    } catch (error) {
+      console.log(error);
+      return [];
     }
+  };
 
-    const getUserTaskByTaskId = async (user_id, task_id) => {
-
-        
-        try {
-            
-            const {rows} = await fastify.mysql.select(`select  
+  const getUserTaskByTaskId = async (user_id, task_id) => {
+    try {
+      const { rows } = await fastify.mysql.select(
+        `select  
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
             user_task_state.result as result,
@@ -219,68 +248,83 @@ module.exports = fp(async function (fastify, opts) {
             tasks.icon_url as icon_url,
             tasks.other as other
 
-            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.task_id = ?`,[user_id, task_id])
-            
-            return rows[0];
-        } catch (error) {
-            console.log(error)
-            return [];
-        }
+            from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? and user_task_state.task_id = ?`,
+        [user_id, task_id]
+      );
 
+      return rows[0];
+    } catch (error) {
+      console.log(error);
+      return [];
     }
+  };
 
+  const createUserTaskStates = async (user_id) => {
+    const tasks = await getTasks();
 
+    for (let index = 0; index < tasks.length; index++) {
+      const task = tasks[index];
 
-    const createUserTaskStates = async (user_id) => {
-        const tasks = await getTasks();
-
-
-        for (let index = 0; index < tasks.length; index++) {
-            const task = tasks[index];
-
-            if(typeof await getUserTaskByTaskId(user_id, task.id) == "undefined")
-                await createUserTaskState(user_id, task.id)
-            
-        }
-
+      if (typeof (await getUserTaskByTaskId(user_id, task.id)) == "undefined")
+        await createUserTaskState(user_id, task.id);
     }
+  };
 
-    const createUserTaskState = async (user_id, task_id) => {
-        
-        let sql = `INSERT INTO user_task_state (user_id, task_id) VALUES (?,?)`
-        await fastify.mysql.insert(sql,[user_id, task_id])
+  const createUserTaskState = async (user_id, task_id) => {
+    let sql = `INSERT INTO user_task_state (user_id, task_id) VALUES (?,?)`;
+    await fastify.mysql.insert(sql, [user_id, task_id]);
+  };
 
-    }
+  const compliteTask = async (id, user_id, result) => {
+    //console.log("compliteTask", id, user_id, result)
+    const tasks = await fastify.mysql.update(
+      "update user_task_state set result = ?, is_complite = 1 where task_id = ? and user_id = ?",
+      [result, id, user_id]
+    );
+    return tasks;
+  };
 
-    const compliteTask = async (id, user_id, result) => {
-        //console.log("compliteTask", id, user_id, result)
-        const tasks = await fastify.mysql.update("update user_task_state set result = ?, is_complite = 1 where task_id = ? and user_id = ?",[result, id, user_id])
-        return tasks;
-    }
+  const setRewardedTask = async (id, user_id, result) => {
+    console.log("setRewardedTask", id, user_id, result);
+    const tasks = await fastify.mysql.update(
+      "update user_task_state set result = ?, is_rewarded = 1 where task_id = ? and user_id = ?",
+      [result, id, user_id]
+    );
+    return tasks;
+  };
 
-    const setRewardedTask = async (id, user_id, result) => {
-        console.log("setRewardedTask", id, user_id, result)
-        const tasks = await fastify.mysql.update("update user_task_state set result = ?, is_rewarded = 1 where task_id = ? and user_id = ?",[result, id, user_id])
-        return tasks;
-    }
+  const getAllTasks = async () => {
+    const sql = `select * from tasks`;
+    const result = await fastify.mysql.insert(sql);
+    return result;
+  };
 
-    fastify.decorate("models_tasks",{
-        createUserTaskState,
-        compliteTask,
-        createCategory,
-        createTask,
-        getCategories,
-        categoryExist,
-        getUserTasks,
-        getUserTask,
-        createUserTaskStates,
-        setRewardedTask,
-        getUserTaskByTaskId
-    })
+  const reimportCat = async()=>{
+    await fastify.mysql.query('delete from categories_task;')
+    await catImport("./db/catsimport.csv");
+  }
 
+  const reimportTasks = async()=>{
+    await fastify.mysql.query('delete from tasks;')
+    await taskImport("./db/tasksimport.csv");
+  }
 
-    await catImport("./db/catsimport.csv")
-    await taskImport("./db/tasksimport.csv")
-    
-    
-})
+  fastify.decorate("models_tasks", {
+    createUserTaskState,
+    compliteTask,
+    createCategory,
+    createTask,
+    getCategories,
+    categoryExist,
+    getUserTasks,
+    getUserTask,
+    createUserTaskStates,
+    setRewardedTask,
+    getUserTaskByTaskId,
+    getAllTasks,
+    reimportCat,
+    reimportTasks,
+  });
+
+  await Promise.all([catImport("./db/catsimport.csv"),taskImport("./db/tasksimport.csv")]);
+});

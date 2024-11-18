@@ -1,13 +1,12 @@
 'use strict'
 
-const fp = require('fastify-plugin')
-
-var CryptoJS = require("crypto-js");
+import createPlugin from "fastify-plugin";
+import CryptoJS from 'crypto-js'
 
 // the use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 
-module.exports = fp(async function (fastify, opts) {
+export default createPlugin(async function (fastify, opts) {
     fastify.decorate("getUser",  function(req){
         return JSON.parse(new URLSearchParams(req.headers.authorization).get("user"))
     })
@@ -18,8 +17,6 @@ module.exports = fp(async function (fastify, opts) {
             console.log("req.headers.authorization == undefined")
             return res.unauthorized("Access denied");
         }
-
-
 
         if(!verifyTelegramWebAppData(fastify.config.bottoken,req.headers.authorization)){
             console.log("Access denied with token:", req.headers.authorization)
@@ -33,7 +30,7 @@ module.exports = fp(async function (fastify, opts) {
             await fastify.models_user.createUser(user, req.headers.authorization)
             await fastify.models_tasks.createUserTaskStates(user.id)
             
-
+                // обновить запись в бд имя и фомилию пользователя если они изменилсь . В бд уже добавленыф пользователяи с измененными именами и вузеразнными буквами 
             const initData = new URLSearchParams(req.headers.authorization);
                         
             if(initData.get("start_param")){

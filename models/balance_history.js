@@ -1,13 +1,12 @@
-'use strict'
+"use strict";
 
-const fp = require('fastify-plugin');
+import createPlugin from "fastify-plugin";
 
 // the use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 
-module.exports = fp(async function (fastify, opts) {
-
-    const balanceHistory = `
+export default createPlugin(async function (fastify, opts) {
+  const balanceHistory = `
         CREATE TABLE IF NOT EXISTS balance_history (
             id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
             user_id bigint NOT NULL,
@@ -16,51 +15,46 @@ module.exports = fp(async function (fastify, opts) {
             create_time date NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     `;
-    await fastify.mysql.insert(balanceHistory)
+  await fastify.mysql.insert(balanceHistory);
 
+  async function addHistory(user_id, token_balance, pool_balance) {
+    const sql = `INSERT INTO balance_history (user_id, token_balance, pool_balance, create_time) VALUES (?,?,?,NOW())`;
 
-    async function addHistory(user_id, token_balance, pool_balance){
-        let sql = `INSERT INTO balance_history (user_id, token_balance, pool_balance, create_time) VALUES (?,?,?,NOW())`
+    const values = [user_id, token_balance, pool_balance];
 
-        let values = [user_id, token_balance, pool_balance]
-        
-        await fastify.mysql.insert(sql, values)
-    }
+    await fastify.mysql.insert(sql, values);
+  }
 
-    async function getHoleInHistoryTokenBalance(user_id, period = 14){
-        let sql = `select * from balance_history where user_id=? and token_balance > 0 and create_time >= (NOW() - INTERVAL ? DAY) `;
-        const {rows} = await fastify.mysql.select(sql,[user_id,period])
-        return rows
-    }
+  async function getHoleInHistoryTokenBalance(user_id, period = 14) {
+    const sql = `select * from balance_history where user_id=? and token_balance > 0 and create_time >= (NOW() - INTERVAL ? DAY) `;
+    const { rows } = await fastify.mysql.select(sql, [user_id, period]);
+    return rows;
+  }
 
+  async function checkTokenBalanceByPeriod(user_id, period = 14) {
+    const elements = await getHoleInHistoryTokenBalance(user_id, period);
 
-    async function checkTokenBalanceByPeriod(user_id, period = 14){
-        const elements = await getHoleInHistoryTokenBalance(user_id, period)
+    if (elements.length <= period) return false;
 
-        if(elements.length <= period)
-            return false
-        
-        return true;
-    }
+    return true;
+  }
 
-    async function getHoleInHistoryPoolBalance(user_id){
-        let sql = `select * from balance_history where user_id=? and pool_balance > 0`;
-        const {rows} = await fastify.mysql.select(sql,[user_id])
-        return rows
-    }
+  async function getHoleInHistoryPoolBalance(user_id) {
+    const sql = `select * from balance_history where user_id=? and pool_balance > 0`;
+    const { rows } = await fastify.mysql.select(sql, [user_id]);
+    return rows;
+  }
 
+  async function checkPoolBalanceByPeriod(user_id, period = 14) {
+    const elements = await getHoleInHistoryPoolBalance(user_id);
 
-    async function checkPoolBalanceByPeriod(user_id, period = 14){
-        const elements = await getHoleInHistoryPoolBalance(user_id)
+    if (elements.length <= period) return false;
 
-        if(elements.length <= period)
-            return false
-        
-        return true;
-    }
+    return true;
+  }
 
-    async function getUsersWhoNotSetBalanceHistoryToday(){
-        const sql = `select 
+  async function getUsersWhoNotSetBalanceHistoryToday() {
+    const sql = `select 
         users.id as user_id , 
         users.wallet as wallet, 
         (select create_time 
@@ -69,9 +63,9 @@ module.exports = fp(async function (fastify, opts) {
             and create_time > (NOW() - INTERVAL 1 DAY) limit 1
         ) as create_time 
         from users 
-        where wallet != "";`
+        where wallet != "";`;
 
-        /*const sql = `SELECT
+    /*const sql = `SELECT
         users.id AS user_id,
         users.wallet AS wallet,
         (SELECT create_time
@@ -87,35 +81,33 @@ module.exports = fp(async function (fastify, opts) {
           WHERE task_id = 8
             AND is_complite = 0
         );`*/
-        //добавлено что не выполнено задание 8
-        const {rows} = await fastify.mysql.select(sql)
-        return rows
-    }
+    //добавлено что не выполнено задание 8
+    const { rows } = await fastify.mysql.select(sql);
+    return rows;
+  }
 
-    async function checkDaysInHistoryTokenBalance(user_id, period = 3){
-        let sql = `
+  async function checkDaysInHistoryTokenBalance(user_id, period = 3) {
+    const sql = `
         SELECT COUNT(*) AS count 
         FROM balance_history 
         WHERE user_id = ? 
         AND token_balance > 0 
     `;
-        const {rows} = await fastify.mysql.select(sql,[user_id])
-        const count = rows[0].count;
+    const { rows } = await fastify.mysql.select(sql, [user_id]);
+    const count = rows[0].count;
 
-        if (count >= period)
-            return true
+    if (count >= period) return true;
 
-        return false
-    }
+    return false;
+  }
 
-    fastify.decorate("models_balance_history",{
-        addHistory,
-        getHoleInHistoryTokenBalance,
-        checkTokenBalanceByPeriod,
-        getHoleInHistoryPoolBalance,
-        checkPoolBalanceByPeriod,
-        getUsersWhoNotSetBalanceHistoryToday,
-        checkDaysInHistoryTokenBalance
-    })
-
-})
+  fastify.decorate("models_balance_history", {
+    addHistory,
+    getHoleInHistoryTokenBalance,
+    checkTokenBalanceByPeriod,
+    getHoleInHistoryPoolBalance,
+    checkPoolBalanceByPeriod,
+    getUsersWhoNotSetBalanceHistoryToday,
+    checkDaysInHistoryTokenBalance,
+  });
+});
