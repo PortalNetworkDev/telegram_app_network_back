@@ -63,7 +63,13 @@ export default createPlugin(async function (fastify, opts) {
     const sql = `INSERT INTO referal_users (user_id, referal_user_id, reward, is_rewarded, last_updated)
         VALUES (?, ?, ?, ?, ?)
         `;
-    const values = [user_id, referal_user_id, user.referal_reward, 0, Date.now()];
+    const values = [
+      user_id,
+      referal_user_id,
+      user.referal_reward,
+      0,
+      Date.now(),
+    ];
     await fastify.mysql.insert(sql, values);
 
     await fastify.models_mining_power.getMiningData(user_id); //проверка данных пользователя
@@ -109,6 +115,22 @@ export default createPlugin(async function (fastify, opts) {
             referal_users.is_rewarded as is_rewarded,
             referal_users.last_updated as last_updated
             from referal_users JOIN user_task_state on user_task_state.user_id = referal_users.referal_user_id where referal_users.user_id = ? and referal_users.is_rewarded = 0 and user_task_state.task_id = 5 and user_task_state.is_complite = 1;
+        `,
+      [user_id]
+    );
+    return rows;
+  };
+
+  const getReferalUsersUnrewardedSpecial = async (user_id) => {
+    const { rows } = await fastify.mysql.select(
+      `
+            select  
+            referal_users.user_id as user_id,
+            referal_users.referal_user_id as referal_user_id,
+            referal_users.reward as reward,
+            referal_users.is_rewarded as is_rewarded,
+            referal_users.last_updated as last_updated
+            from referal_users JOIN user_task_state on user_task_state.user_id = referal_users.referal_user_id where referal_users.user_id = ? and referal_users.is_rewarded = 0 and user_task_state.task_id = 4 and user_task_state.is_complite = 1;
         `,
       [user_id]
     );
@@ -222,6 +244,7 @@ export default createPlugin(async function (fastify, opts) {
     updateReward,
     getActiveUsers,
     getReferalUsersUnrewarded,
+    getReferalUsersUnrewardedSpecial,
     setRewarded,
     countReferalUsers,
     checkAirDropUser,
