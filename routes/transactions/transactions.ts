@@ -5,27 +5,30 @@ interface Props {
   limit: number;
   page: number;
   timePeriod: { from: number; to: number };
-  userId: number;
 }
 
 const params = Schema.object()
   .prop("timePeriod", Schema.object())
   .prop("page", Schema.number())
   .prop("limit", Schema.number())
-  .prop("userId", Schema.number());
 const schema = { params };
 
 export default async function (fastify: FastifyInstance) {
   fastify.post<{ Body: Props }>(
     "/history",
-    { schema },
+    // @ts-ignore: Unreachable code error
+    { schema, onRequest: [fastify.auth] },
     async (request, response) => {
-      const { limit, page, timePeriod, userId } = request.body;
+      const { limit, page, timePeriod } = request.body;
+      // @ts-ignore: Unreachable code error
+      const userId = fastify.getUser(request).id;
+      const returnedRowsLimit = limit > 50 ? 50 : limit;
+
       const result = await fastify.transactions.getTransactionsByUserIdAndTime(
         userId,
         timePeriod,
-        limit,
-        page * limit
+        returnedRowsLimit,
+        page * returnedRowsLimit
       );
 
       return result;
@@ -42,13 +45,4 @@ export default async function (fastify: FastifyInstance) {
     }
   );
 
-  fastify.get<{ Querystring: { id: number } }>(
-    "/getTransactionsByUserId",
-    async (request, replay) => {
-      const transactions = await fastify.transactions.getTransactionsByUserId(
-        request.query.id
-      );
-      return transactions;
-    }
-  );
 }

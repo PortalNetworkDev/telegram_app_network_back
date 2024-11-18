@@ -1,13 +1,15 @@
 import Schema from "fluent-json-schema";
 const params = Schema.object()
     .prop("recipient", Schema.string())
-    .prop("senderId", Schema.number())
     .prop("amount", Schema.number());
 const schema = { params };
 //TODO: how to get tg ID by username
 export default async function (fastify) {
-    fastify.post("/send", { schema }, async (request, reply) => {
-        const senderId = request.body.senderId;
+    fastify.post("/send", 
+    // @ts-ignore: Unreachable code error
+    { schema, onRequest: [fastify.auth] }, async (request, reply) => {
+        // @ts-ignore: Unreachable code error
+        const senderId = fastify.getUser(request).id;
         const recipientName = request.body.recipient;
         const sendPowerAmount = request.body.amount;
         if (typeof sendPowerAmount !== "number") {

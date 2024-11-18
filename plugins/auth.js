@@ -50,7 +50,7 @@ export default createPlugin(async function (fastify, opts) {
     })
 })
 
-function createpayload(initData){
+function createPayload(initData){
     
     let array = []
     
@@ -66,10 +66,11 @@ function createpayload(initData){
 
 function verifyTelegramWebAppData(TELEGRAM_BOT_TOKEN,telegramInitData){
     const initData = new URLSearchParams(telegramInitData);
-    const payload = createpayload(initData)
+    const payload = createPayload(initData)
     const hash = initData.get("hash");
     const secret_key = CryptoJS.HmacSHA256(TELEGRAM_BOT_TOKEN, "WebAppData");
     const calculated_hash = CryptoJS.HmacSHA256(payload, secret_key).toString();
+
     return calculated_hash === hash;
 }
 
