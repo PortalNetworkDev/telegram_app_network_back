@@ -2,7 +2,7 @@
 
 export default async function(fastify, opts) {
   const checkInterval = 5;
-  var runnded = false;
+  let runnded = false;
   setInterval(async function () {
     if (runnded) {
       console.log("try to run sendRewards, runned");
@@ -14,30 +14,25 @@ export default async function(fastify, opts) {
     const users = await fastify.models_user.getUsers();
     runnded = true;
 
-    for (let index = 0; index < users.length; index++) {
-      const user = users[index];
-      const referalUsersUnrewarded =
-        await fastify.models_user.getReferalUsersUnrewarded(user.id);
+        for (let index = 0; index < users.length; index++) {
+            const user = users[index];
 
-      const userTasks = await fastify.models_tasks.getUserTasks(
-        user.id,
-        "and is_complite = 1 and is_rewarded = 0"
-      );
+            let referalUsersUnrewarded = await fastify.models_user.getReferalUsersUnrewarded(user.id)
+            if (user.referal_reward>fastify.config.referalreward && fastify.config.setSpecialReferalReward) {
+                referalUsersUnrewarded = await fastify.models_user.getReferalUsersUnrewardedSpecial(user.id)
+            }
+            
+                    
+            const userTasks = await fastify.models_tasks.getUserTasks(user.id, "and is_complite = 1 and is_rewarded = 0");
+            
+            let airDrop = 0//airdrop
+            const checkUser = await fastify.models_user.checkAirDropUser(fastify.config.airDropRefMasterId, user.id);
+            if (checkUser) {
+                airDrop = fastify.config.airDropRefSum;
+            }
+            const sumAD = airDrop
 
-      let airDrop = 0; //airdrop
-      const checkUser = await fastify.models_user.checkAirDropUser(
-        fastify.config.airDropRefMasterId,
-        user.id
-      );
-      if (checkUser) {
-        airDrop = fastify.config.airDropRefSum;
-      }
-      const sumAD = airDrop;
-
-      const sum =
-        sumReferalUsersUnrewarded(referalUsersUnrewarded, user.referal_reward) +
-        sumUnrewardedTasks(userTasks) +
-        Number(sumAD);
+            const sum = sumReferalUsersUnrewarded(referalUsersUnrewarded, user.referal_reward) + sumUnrewardedTasks(userTasks) + Number(sumAD);
 
       if (sum >= fastify.config.minrewardfortransfer && user.wallet) {
         console.log(
