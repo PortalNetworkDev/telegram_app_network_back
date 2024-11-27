@@ -1,15 +1,12 @@
 "use strict";
-
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-
 import AutoLoad from "@fastify/autoload";
 import cors from "@fastify/cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Pass --options via CLI arguments in command to enable these options.
 const options = {};
 
 export default async function (fastify, opts) {
@@ -18,36 +15,30 @@ export default async function (fastify, opts) {
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
   });
-
   fastify.register(AutoLoad, {
-    dir: join(__dirname, "plugins"),
+    dir: join(__dirname, "/build/plugins"),
     ignorePattern: /^.*(?:\.ts|\.types.js)$/,
   });
-
   fastify.register(AutoLoad, {
-    dir: join(__dirname, "models"),
+    dir: join(__dirname, "/build/models"),
     options: Object.assign({}, opts),
     ignorePattern: /^.*(?:\.ts|\.types.js)$/,
-    maxDepth:1,
+    maxDepth: 1,
   });
-
   fastify.register(AutoLoad, {
-    dir: join(__dirname, "routes"),
-    options: Object.assign({}, opts),
-    ignorePattern: /^.*(?:\.ts|\.types.js)$/,
-  });
-
-  fastify.register(AutoLoad, {
-    dir: join(__dirname, "services"),
+    dir: join(__dirname, "/build/routes"),
     options: Object.assign({}, opts),
     ignorePattern: /^.*(?:\.ts|\.types.js)$/,
   });
   fastify.register(AutoLoad, {
-    dir: join(__dirname, "utils/calculationUtils"),
+    dir: join(__dirname, "/build/services"),
     options: Object.assign({}, opts),
-    ignorePattern: /^.*.ts$/,
+    ignorePattern: /^.*(?:\.ts|\.types.js)$/,
+  });
+  fastify.register(AutoLoad, {
+    dir: join(__dirname, "/build/utils/calculationUtils"),
+    options: Object.assign({}, opts),
     ignorePattern: /^.*(?:\.ts|\.types.js)$/,
   });
 }
-
 export { options };

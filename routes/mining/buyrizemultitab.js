@@ -26,7 +26,7 @@ export default async function (fastify, opts) {
     async function (request, reply) {
       const user = fastify.getUser(request);
 
-      let data = await fastify.models_mining_power.getMiningData(user.id);
+      let data = await fastify.miningPower.getMiningData(user.id);
 
       const price_rize_multitab =
         2 ** (data.multitab - 1) * Number(fastify.config.stepMultitabPrice);
@@ -35,12 +35,12 @@ export default async function (fastify, opts) {
         return reply.badRequest("not_enough_power");
       }
 
-      await fastify.models_mining_power.buyMultitab(
+      await fastify.miningPower.buyMultitab(
         user.id,
         price_rize_multitab
       );
 
-      //data = await fastify.models_mining_power.getMiningData(user.id)
+      //data = await fastify.miningPower.getMiningData(user.id)
 
       return {
         code: "succcess",

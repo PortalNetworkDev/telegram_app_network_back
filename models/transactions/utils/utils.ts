@@ -1,37 +1,53 @@
-import { MySQLRowDataPacket } from "@fastify/mysql";
-import { Transaction, TransactionHistoryItem } from "../transactions.types";
+import { FastifyPluginCallback } from "fastify";
+import {
+  Transaction,
+  TransactionHistoryItem,
+  TransactionModel,
+} from "../transactions.types";
 
-export const transformSqlRowToTransactionData = (input: MySQLRowDataPacket): Transaction => ({
-  senderId: input.sender_id,
-  recipientId: input.recipient_id,
-  powerAmount: input.power_amount,
-  creationTime: input.creation_time,
-});
+import createPlugin from "fastify-plugin";
 
-export const transformTransactionHistoryItemData = (
-  transactionData: MySQLRowDataPacket,
-  senderUserName: string,
-  recipientUserName: string
-): TransactionHistoryItem => {
-  return {
-    ...transformSqlRowToTransactionData(transactionData),
-    senderUserName,
-    recipientUserName,
+export default createPlugin<FastifyPluginCallback>(async (fastify, opts) => {
+  const transformSqlRowToTransactionData = (
+    input: TransactionModel
+  ): Transaction => ({
+    senderId: input.sender_id,
+    recipientId: input.recipient_id,
+    powerAmount: input.power_amount,
+    creationTime: input.creation_time,
+  });
+
+  const transformTransactionHistoryItemData = (
+    transactionData: TransactionModel,
+    senderUserName: string,
+    recipientUserName: string
+  ): TransactionHistoryItem => {
+    return {
+      ...transformSqlRowToTransactionData(transactionData),
+      senderUserName,
+      recipientUserName,
+    };
   };
-};
 
-export const getTimePeriodSQLCondition = (period: {
-  from?: number;
-  to?: number;
-}) => {
-  const { from, to } = period;
-  if (from && to) {
-    return `creation_time <=${from} AND creation_time >=${to}`;
-  }
+  const getTimePeriodSQLCondition = (period: {
+    from?: number;
+    to?: number;
+  }) => {
+    const { from, to } = period;
+    if (from && to) {
+      return `creation_time <=${from} AND creation_time >=${to}`;
+    }
 
-  if (from && !to) {
-    return `creation_time <=${from}`;
-  } else {
-    return `creation_time >=${to}`;
-  }
-};
+    if (from && !to) {
+      return `creation_time <=${from}`;
+    } else {
+      return `creation_time >=${to}`;
+    }
+  };
+
+  fastify.decorate("transactionsUtils", {
+    transformSqlRowToTransactionData,
+    transformTransactionHistoryItemData,
+    getTimePeriodSQLCondition,
+  });
+});

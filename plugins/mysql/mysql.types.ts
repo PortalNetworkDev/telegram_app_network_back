@@ -1,29 +1,26 @@
 import { MySQLRowDataPacket } from "@fastify/mysql";
 import { QueryResult, FieldPacket } from "mysql2";
 
-export interface Result {
-  rows: MySQLRowDataPacket[];
+export interface DataBaseQueryResult<T = MySQLRowDataPacket> {
+  rows: T[];
   fields: FieldPacket[];
 }
 
 export interface DataBase {
-  insert: (
+  insert: <T>(
     query: string,
     values?: any[]
-  ) => Promise<Result | null>;
+  ) => Promise<DataBaseQueryResult<T> | null>;
 
-  select: (
+  select: <T>(
     query: string,
     values?: any[]
-  ) => Promise<Result | null>;
+  ) => Promise<DataBaseQueryResult<T> | null>;
 
-  update: (
+  update: <T>(
     query: string,
     values?: any[]
-  ) => Promise<Result | null>;
-  
-  query: (
-    query: string,
-    values?: any[]
-  ) => Promise<Result | null>;
+  ) => Promise<DataBaseQueryResult<T> | null>;
+
+  query: <T>(query: string, values?: any[]) => Promise<DataBaseQueryResult<T> | null>;
 }

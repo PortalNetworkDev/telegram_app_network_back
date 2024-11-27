@@ -16,11 +16,9 @@ const schema = { params };
 export default async function (fastify: FastifyInstance) {
   fastify.post<{ Body: Props }>(
     "/history",
-    // @ts-ignore: Unreachable code error
     { schema, onRequest: [fastify.auth] },
     async (request, response) => {
       const { limit, page, timePeriod } = request.body;
-      // @ts-ignore: Unreachable code error
       const userId = fastify.getUser(request).id;
       const returnedRowsLimit = limit > 50 ? 50 : limit;
 
