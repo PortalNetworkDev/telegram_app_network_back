@@ -26,7 +26,7 @@ export default async function (fastify, opts) {
     async function (request, reply) {
       const user = fastify.getUser(request);
 
-      let data = await fastify.models_mining_power.getMiningData(user.id);
+      let data = await fastify.miningPower.getMiningData(user.id);
 
       const price_rize_battery = fastify.calculationUtils.calculatePriceRiseBatteryWithLimit(
         data.battery_level,
@@ -42,13 +42,13 @@ export default async function (fastify, opts) {
         return reply.badRequest("not_enough_power");
       }
 
-      await fastify.models_mining_power.buyBatteryCapacity(
+      await fastify.miningPower.buyBatteryCapacity(
         user.id,
         power_rize_battery,
         price_rize_battery
       );
 
-      //data = await fastify.models_mining_power.getMiningData(user.id)
+      //data = await fastify.miningPower.getMiningData(user.id)
 
       return {
         code: "succcess",

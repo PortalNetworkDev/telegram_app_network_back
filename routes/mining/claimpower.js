@@ -26,9 +26,9 @@ export default async function (fastify, opts) {
     async function (request, reply) {
       const user = fastify.getUser(request);
 
-      await fastify.models_mining_power.claimBattery(user.id);
+      await fastify.miningPower.claimBattery(user.id);
 
-      //const data = await fastify.models_mining_power.getMiningData(user.id)
+      //const data = await fastify.miningPower.getMiningData(user.id)
 
       return {
         code: "succcess",

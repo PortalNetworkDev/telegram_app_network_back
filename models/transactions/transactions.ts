@@ -1,7 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import createPlugin from "fastify-plugin";
-import { Transaction } from "./transactions.types";
-import { getTimePeriodSQLCondition, transformSqlRowToTransactionData, transformTransactionHistoryItemData } from "./utils/utils.js";
+import { Transaction, TransactionModel } from "./transactions.types";
 
 export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
   const createTable = `  
@@ -33,10 +32,12 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     id: number
   ): Promise<Transaction | null> => {
     const sql = "SELECT * from transactions WHERE id =?";
-    const result = await fastify.dataBase.select(sql, [id]);
+    const result = await fastify.dataBase.select<TransactionModel>(sql, [id]);
 
     if (result?.rows[0]) {
-      return transformSqlRowToTransactionData(result?.rows[0]);
+      return fastify.transactionsUtils.transformSqlRowToTransactionData(
+        result?.rows[0]
+      );
     }
     return null;
   };
@@ -47,10 +48,15 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     offset = 0
   ): Promise<Transaction[]> => {
     const sql = `SELECT * from transactions WHERE sender_id =? OR recipient_id=? limit ${limit} offset ${offset}`;
-    const result = await fastify.dataBase.select(sql, [id, id]);
+    const result = await fastify.dataBase.select<TransactionModel>(sql, [
+      id,
+      id,
+    ]);
 
     if (result?.rows) {
-      return result.rows.map((item) => transformSqlRowToTransactionData(item));
+      return result.rows.map((item) =>
+        fastify.transactionsUtils.transformSqlRowToTransactionData(item)
+      );
     }
 
     return [];
@@ -62,20 +68,30 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     limit = 20,
     offset = 0
   ): Promise<Transaction[]> => {
-    const period = getTimePeriodSQLCondition(timePeriod);
+    const period =
+      fastify.transactionsUtils.getTimePeriodSQLCondition(timePeriod);
 
     const sql = `SELECT * from transactions WHERE sender_id =? OR recipient_id=? AND ${period} limit ${limit} offset ${offset}`;
-    const result = await fastify.dataBase.select(sql, [id, id]);
+    const result = await fastify.dataBase.select<TransactionModel>(sql, [
+      id,
+      id,
+    ]);
 
     if (result?.rows) {
-      const [{username:senderUserName},{username:recipientUserName}] = await Promise.all([
+      const [sender, recipient] = await Promise.all([
         // @ts-ignore: Unreachable code error
-        fastify.models_user.getUser(result?.rows[0].sender_id),
+        fastify.modelsUser.getUser(result?.rows[0].sender_id),
         // @ts-ignore: Unreachable code error
-        fastify.models_user.getUser(result?.rows[0].recipient_id),
+        fastify.modelsUser.getUser(result?.rows[0].recipient_id),
       ]);
 
-      return result.rows.map((item) => transformTransactionHistoryItemData(item,senderUserName,recipientUserName));
+      return result.rows.map((item) =>
+        fastify.transactionsUtils.transformTransactionHistoryItemData(
+          item,
+          sender?.username ?? "",
+          recipient?.username ?? ""
+        )
+      );
     }
 
     return [];

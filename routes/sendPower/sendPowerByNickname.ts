@@ -15,10 +15,9 @@ const schema = { params };
 export default async function (fastify: FastifyInstance) {
   fastify.post<{ Body: Body }>(
     "/send",
-    // @ts-ignore: Unreachable code error
     { schema, onRequest: [fastify.auth] },
     async (request, reply) => {
-      // @ts-ignore: Unreachable code error
+
       const senderId = fastify.getUser(request).id;
       const recipientName = request.body.recipient;
       const sendPowerAmount = request.body.amount;
@@ -34,17 +33,15 @@ export default async function (fastify: FastifyInstance) {
       if (recipientName && senderId) {
         const [senderInstance, recipientInstance, senderBalance] =
           await Promise.all([
-            // @ts-ignore: Unreachable code error
-            fastify.models_user.getUser(senderId),
-            // @ts-ignore: Unreachable code error
-            fastify.models_user.getUserByNickname(recipientName),
-            // @ts-ignore: Unreachable code error
-            fastify.models_mining_power.getUserPowerBalance(senderId),
+            fastify.modelsUser.getUser(senderId),
+            fastify.modelsUser.getUserByNickname(recipientName),
+            fastify.miningPower.getUserPowerBalance(senderId),
           ]);
 
+      
         // как найти именно того получателя с нужным id если он может поменять ник а в базе у меня старый
         // @ts-ignore: Unreachable code error
-        if (recipientInstance.some((item) => item.id === senderInstance.id)) {
+        if (recipientInstance?.rows.some((item) => item.id === senderInstance.id)) {
           return {
             statusCose: "400",
             description: "Bad request",
@@ -60,7 +57,7 @@ export default async function (fastify: FastifyInstance) {
           };
         }
 
-        if (recipientInstance.length > 1 || !recipientInstance[0]) {
+        if (!recipientInstance || recipientInstance.rows.length > 1 || !recipientInstance.rows[0]) {
           return {
             statusCose: "400",
             description: "Bad request",
@@ -69,9 +66,8 @@ export default async function (fastify: FastifyInstance) {
         }
 
         try {
-          // @ts-ignore: Unreachable code error
-          await fastify.models_mining_power.addPowerBalance(
-            recipientInstance[0].id,
+          await fastify.miningPower.addPowerBalance(
+            recipientInstance.rows[0].id,
             sendPowerAmount
           );
         } catch (error) {
@@ -79,9 +75,8 @@ export default async function (fastify: FastifyInstance) {
         }
 
         try {
-          // @ts-ignore: Unreachable code error
-          await fastify.models_mining_power.subtractPowerBalance(
-            senderInstance.id,
+          await fastify.miningPower.subtractPowerBalance(
+            senderInstance?.id ?? 0,
             sendPowerAmount
           );
         } catch (error) {
@@ -90,8 +85,8 @@ export default async function (fastify: FastifyInstance) {
 
         try {
           await fastify.transactions.addTransaction({
-            senderId: senderInstance.id,
-            recipientId: recipientInstance[0].id,
+            senderId: senderInstance?.id ?? 0,
+            recipientId: recipientInstance.rows[0].id,
             powerAmount: sendPowerAmount,
             creationTime: Date.now(),
           });

@@ -35,7 +35,7 @@ export default async function (fastify, opts) {
 
       const user = fastify.getUser(request);
 
-      let data = await fastify.models_mining_power.getMiningData(user.id);
+      let data = await fastify.miningPower.getMiningData(user.id);
 
       const now = new Date();
       const lastUpdate = new Date(data.time_last_update);
@@ -81,7 +81,7 @@ export default async function (fastify, opts) {
         power <= generatorBalance &&
         power <= data.battery_capacity - batteryBalance
       ) {
-        await fastify.models_mining_power.generatingEnergy(
+        await fastify.miningPower.generatingEnergy(
           user.id,
           generatorBalance - power,
           batteryBalance + power
@@ -91,7 +91,7 @@ export default async function (fastify, opts) {
           generatorBalance < data.battery_capacity - batteryBalance
             ? generatorBalance
             : data.battery_capacity - batteryBalance;
-        await fastify.models_mining_power.generatingEnergy(
+        await fastify.miningPower.generatingEnergy(
           user.id,
           generatorBalance - minPow,
           batteryBalance + minPow

@@ -4,6 +4,7 @@ import { FastifyPluginAsync } from "fastify";
 import createPlugin from "fastify-plugin";
 
 export default createPlugin<FastifyPluginAsync>( async function (fastify, opts) {
+  //TODO: are config vars always string or they acn be number? 
 
   const config = {
     bottoken: process.env.BOTTOKEN,

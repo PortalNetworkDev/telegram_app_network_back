@@ -26,7 +26,7 @@ export default async function (fastify, opts) {
     async function (request, reply) {
       const user = fastify.getUser(request);
 
-      let data = await fastify.models_mining_power.getMiningData(user.id);
+      let data = await fastify.miningPower.getMiningData(user.id);
 
       const price_rize_generator =
         2 ** Math.round(data.generator_level / 2) *
@@ -38,13 +38,13 @@ export default async function (fastify, opts) {
         return reply.badRequest("not_enough_power");
       }
 
-      await fastify.models_mining_power.buyGeneratorLimit(
+      await fastify.miningPower.buyGeneratorLimit(
         user.id,
         power_rize_generator,
         price_rize_generator
       );
 
-      //data = await fastify.models_mining_power.getMiningData(user.id)
+      //data = await fastify.miningPower.getMiningData(user.id)
 
       return {
         code: "succcess",

@@ -6,9 +6,17 @@ export interface Transaction {
   comment?: string;
 }
 
-export interface TransactionHistoryItem extends Transaction{
-  senderUserName: string,
-  recipientUserName: string
+export interface TransactionModel {
+  id: number;
+  sender_id: number;
+  recipient_id: number;
+  power_amount: number;
+  creation_time: number;
+  comment: string;
+}
+export interface TransactionHistoryItem extends Transaction {
+  senderUserName: string;
+  recipientUserName: string;
 }
 
 export interface TransactionsService {
