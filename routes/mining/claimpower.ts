@@ -1,4 +1,6 @@
-export default async function (fastify, opts) {
+import { FastifyInstance } from "fastify";
+
+export default async function (fastify: FastifyInstance) {
   fastify.post(
     "/claimpower",
     {
