@@ -10,6 +10,7 @@ import { Utils } from "../plugins/utils/utils.types";
 import { UserService } from "../models/user/user.types";
 import { Authentication, GetUserFromRequest } from "../plugins/auth";
 import { SendTonToken } from "../plugins/sendToken/sendToken";
+import {CalculationUtils} from "../utils/calculationUtils/calculationUtils.types";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -26,5 +27,6 @@ declare module "fastify" {
     getUser: GetUserFromRequest;
     sendTonToken: SendTonToken;
     transactionsUtils: TransactionsUtils;
+    calculationUtils: CalculationUtils;
   }
 }
