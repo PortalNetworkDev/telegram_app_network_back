@@ -10,6 +10,9 @@ export default async function (fastify: FastifyInstance) {
       const _user = fastify.getUser(request);
 
       const user = await fastify.modelsUser.getUser(_user.id);
+      const currentSkin = await fastify.skinsShop.getInfoAboutSkin(
+        user?.selectedGeneratorSkinId ?? 1
+      );
 
       const obj = { balance: 0, power_balance: 0 };
 
@@ -28,7 +31,11 @@ export default async function (fastify: FastifyInstance) {
         await fastify.miningPower.updatePoeBalance(_user.id, obj.balance);
       }
 
-      return { ...user, ...obj };
+      return {
+        ...user,
+        ...obj,
+        currentSelectedSkinUrl: currentSkin?.[0].imageUrl ?? "",
+      };
     }
   );
 }

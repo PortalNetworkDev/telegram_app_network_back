@@ -18,6 +18,8 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
             referal_reward FLOAT NOT NULL , 
             last_updated BIGINT NOT NULL ,
             tg_token TEXT,
+            selectedGeneratorSkinId INT,
+            selectedBatterySkinId INT,
             PRIMARY KEY (\`id\`)
         ) ENGINE = InnoDB CHARSET=utf8mb3 COLLATE utf8mb3_general_ci;
     `;
@@ -246,6 +248,15 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     }
   };
 
+  const selectUserGeneratorSkin = async (userId: number, skinId: number) => {
+    const sql = `update users set selectedGeneratorSkinId = ? where id = ? `;
+    fastify.dataBase.update<UserModel>(sql, [skinId, userId]);
+  };
+  const selectUserBatterySkin = async (userId: number, skinId: number) => {
+    const sql = `update users set selectedBatterySkinId = ? where id = ? `;
+    fastify.dataBase.update<UserModel>(sql, [skinId, userId]);
+  };
+
   if (!(await userExist(1)))
     await createUser(
       {
@@ -279,5 +290,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     countReferalUsers,
     checkAirDropUser,
     getUserByNickname,
+    selectUserGeneratorSkin,
+    selectUserBatterySkin
   });
 });

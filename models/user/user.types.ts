@@ -1,6 +1,5 @@
 import { DataBaseQueryResult } from "../../plugins/mysql/mysql.types";
 
-
 export interface UserService {
   createUser: (user: User, tgToken: string) => Promise<void>;
   userExist: (userId: number) => Promise<boolean>;
@@ -28,6 +27,8 @@ export interface UserService {
   getUserByNickname: (
     nickname: string
   ) => Promise<DataBaseQueryResult<UserModel> | null>;
+  selectUserGeneratorSkin: (userId: number, skinId: number) => Promise<void>;
+  selectUserBatterySkin: (userId: number, skinId: number) => Promise<void>
 }
 
 export interface User {
@@ -45,6 +46,8 @@ export interface UserModel extends User {
   referal_reward: number;
   last_updated: number;
   tg_token: string;
+  selectedGeneratorSkinId: number;
+  selectedBatterySkinId: number;
 }
 
 export interface ReferralUser {

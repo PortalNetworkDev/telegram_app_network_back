@@ -178,6 +178,11 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     await fastify.dataBase.update(sql, [price, userId]);
   }
 
+  async function reduceUserPowerBalance(userId:number,amount:number){
+    const sql = `update mining_data set power_balance=power_balance-? where user_id = ?`;
+    await fastify.dataBase.update(sql,[amount,userId])
+  }
+
   async function getUserPowerBalance(userId: number) {
     const query = "select power_balance from mining_data where user_id = ?";
     const result = await fastify.dataBase.select(query, [userId]);
@@ -205,5 +210,6 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     buyMultitab,
     getUserPowerBalance,
     subtractPowerBalance,
+    reduceUserPowerBalance,
   });
 });

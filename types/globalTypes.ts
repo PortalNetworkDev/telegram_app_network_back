@@ -10,7 +10,8 @@ import { Utils } from "../plugins/utils/utils.types";
 import { UserService } from "../models/user/user.types";
 import { Authentication, GetUserFromRequest } from "../plugins/auth";
 import { SendTonToken } from "../plugins/sendToken/sendToken";
-import {CalculationUtils} from "../utils/calculationUtils/calculationUtils.types";
+import { CalculationUtils } from "../utils/calculationUtils/calculationUtils.types";
+import { SkinShopService } from "../models/skinsShop/skins.types";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -28,5 +29,6 @@ declare module "fastify" {
     sendTonToken: SendTonToken;
     transactionsUtils: TransactionsUtils;
     calculationUtils: CalculationUtils;
+    skinsShop: SkinShopService;
   }
 }
