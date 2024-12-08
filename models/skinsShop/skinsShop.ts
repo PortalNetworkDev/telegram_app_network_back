@@ -1,5 +1,5 @@
 import createPlugin from "fastify-plugin";
-import { SkinModel, PurchasedSkinsModel } from "./skins.types";
+import { SkinModel, PurchasedSkinsModel, SkinType } from "./skins.types.js";
 
 export default createPlugin(async function (fastify, opts) {
   const createSkinsTable = `
@@ -7,7 +7,8 @@ export default createPlugin(async function (fastify, opts) {
             id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             price FLOAT NOT NULL,
             name CHAR(255),
-            image_url CHAR(255)
+            imageUrl CHAR(255),
+            type TINYINT
         );`;
 
   const createUsersPurchasedSkins = `
@@ -32,9 +33,20 @@ export default createPlugin(async function (fastify, opts) {
     ]);
   };
 
-  const getAllSkinsForUser = async (userId: number) => {
-    const sql = `SELECT skins.id, skins.price, skins.imageUrl, skins.name  from skins JOIN purchasedSkins on skins.id = purchasedSkins.skinId where purchasedSkins.userId= ?;`;
-    const result = await fastify.dataBase.select<SkinModel>(sql, [userId]);
+  const getAllSkinsForUser = async (
+    userId: number,
+    skinType: keyof typeof SkinType
+  ) => {
+    const sql = `SELECT skins.id, skins.price, skins.imageUrl, skins.name  from skins JOIN purchasedSkins on skins.id = purchasedSkins.skinId where purchasedSkins.userId= ? and skins.type = ?;`;
+    let result = null;
+
+    if (SkinType[skinType] !== undefined) {
+      result = await fastify.dataBase.select<SkinModel>(sql, [
+        userId,
+        SkinType[skinType],
+      ]);
+    }
+
     return result?.rows ?? null;
   };
 
@@ -44,8 +56,22 @@ export default createPlugin(async function (fastify, opts) {
     return result?.rows ?? null;
   };
 
+  const getAllSkinsByType = async (skinType: keyof typeof SkinType) => {
+    const sql = `SELECT * from skins where skins.type = ?`;
+    let result = null;
+
+    if (SkinType[skinType] !== undefined) {
+      result = await fastify.dataBase.select<SkinModel>(sql, [
+        SkinType[skinType],
+      ]);
+    }
+
+    return result?.rows ?? null;
+  };
+
   const getAllBoughtSkinsForUser = async (userId: number) => {
     const sql = `SELECT * from purchasedSkins where purchasedSkins.userId = ?;`;
+
     const result = await fastify.dataBase.select<PurchasedSkinsModel>(sql, [
       userId,
     ]);
@@ -64,5 +90,6 @@ export default createPlugin(async function (fastify, opts) {
     getAllBoughtSkinsForUser,
     getAllSkinsForUser,
     getInfoAboutSkin,
+    getAllSkinsByType,
   });
 });

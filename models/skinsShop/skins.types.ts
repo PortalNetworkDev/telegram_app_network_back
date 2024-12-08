@@ -1,5 +1,3 @@
-import { DataBaseQueryResult } from "../../plugins/mysql/mysql.types";
-
 export interface SkinModel {
   id: number;
   price: number;
@@ -14,12 +12,20 @@ export interface PurchasedSkinsModel {
   creationTime: number;
 }
 
+export enum SkinType {
+  generator,
+  battery,
+}
+
 export interface SkinShopService {
   addPurchasedSkin: (userId: number, skinId: number) => Promise<void>;
   getAllSkins: () => Promise<SkinModel[] | null>;
   getAllBoughtSkinsForUser: (
     userId: number
   ) => Promise<PurchasedSkinsModel[] | null>;
-  getAllSkinsForUser: (userId: number) => Promise<SkinModel[] | null>;
+  getAllSkinsForUser: (userId: number, skinType: keyof typeof SkinType) => Promise<SkinModel[] | null>
   getInfoAboutSkin: (skinId: number) => Promise<SkinModel[] | null>;
+  getAllSkinsByType: (
+    skinType: keyof typeof SkinType
+  ) => Promise<SkinModel[] | null>;
 }

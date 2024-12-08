@@ -1,38 +1,48 @@
 import { FastifyInstance } from "fastify";
 import { ShopItem } from "./generators.types";
+import { SkinType } from "../../models/skinsShop/skins.types.js";
 
 export default async function (fastify: FastifyInstance) {
-  //   fastify.get("/addSkins", async (request, reply) => {
-  //     const data = [
-  //       { id: 1, price: 5000, name: "defaultGenerator.png" },
-  //       { id: 2, price: 5000, name: "atom.png" },
-  //       { id: 3, price: 5000, name: "cogwheel.png" },
-  //       { id: 4, price: 5000, name: "earth.png" },
-  //       { id: 5, price: 5000, name: "lightning.png" },
-  //       { id: 6, price: 5000, name: "notcoin.png" },
-  //       { id: 7, price: 5000, name: "ton.png" },
-  //       { id: 8, price: 5000, name: "turbine.png" },
-  //       { id: 9, price: 5000, name: "pumpkin.png" },
-  //       { id: 10, price: 5000, name: "plasma.png" },
-  //     ];
+  // fastify.get("/addSkins", async (request, reply) => {
+  //   const data = [
+  //     { id: 1, price: 5000, name: "blackBattery.png" },
+  //     { id: 2, price: 5000, name: "whiteBattery.png" },
+  //     { id: 3, price: 5000, name: "blueBattery.png" },
+  //     { id: 4, price: 5000, name: "capperBattery.png" },
+  //     { id: 5, price: 5000, name: "darkBlueBattery.png" },
+  //     { id: 6, price: 5000, name: "purpleBattery.png" },
+  //     { id: 7, price: 5000, name: "raspberryBattery.png" },
+  //     { id: 8, price: 5000, name: "redButtery.png" },
+  //     { id: 9, price: 5000, name: "vinousBattery.png" },
+  //     { id: 10, price: 5000, name: "greenBattery .png" },
+  //   ];
 
-  //     data.forEach((item) => {
-  //         fastify.dataBase.insert(
-  //           "insert into skins (price,name,image_name) VALUES(?,?,?)",
-  //           [item.price, item.name.slice(0, item.name.length - 4), item.name]
-  //         );
-  //     });
-  //     return {
-  //       status: "ok",
-  //     };
+  //   data.forEach((item) => {
+  //     fastify.dataBase.insert(
+  //       "insert into skins (price,name,imageUrl) VALUES(?,?,?)",
+  //       [item.price, item.name.slice(0, item.name.length - 4), item.name]
+  //     );
   //   });
+  //   return {
+  //     status: "ok",
+  //   };
+  // });
 
-  fastify.post<{ Body: { userId: number } }>(
+  fastify.post<{ Body: { userId: number; skinType: string } }>(
     "/getItems",
     async (request, reply) => {
+      const { userId, skinType } = request.body;
+
+      if (!skinType) {
+        return reply.badRequest("Pram skinType should not be empty");
+      }
+
       const [boughtSkins, allSkins] = await Promise.all([
-        fastify.skinsShop.getAllSkinsForUser(request.body.userId),
-        fastify.skinsShop.getAllSkins(),
+        fastify.skinsShop.getAllSkinsForUser(
+          userId,
+          skinType as keyof typeof SkinType
+        ),
+        fastify.skinsShop.getAllSkinsByType(skinType as keyof typeof SkinType),
       ]);
 
       if (boughtSkins && allSkins) {
@@ -49,9 +59,7 @@ export default async function (fastify: FastifyInstance) {
         };
       }
 
-      return {
-        items: [],
-      };
+      return reply.badRequest(`No skins with this type: ${skinType}`);
     }
   );
 
@@ -101,6 +109,26 @@ export default async function (fastify: FastifyInstance) {
       return reply.badRequest(
         `No info about skin with this id: ${request.query.id}`
       );
+    }
+  );
+
+  fastify.get<{ Querystring: { type: string } }>(
+    "/getAllSkinsByType",
+    async (request, reply) => {
+      if (request.query.type) {
+        const result = await fastify.skinsShop.getAllSkinsByType(
+          request.query.type as keyof typeof SkinType
+        );
+
+        if (result) {
+          return result;
+        }
+        return reply.badRequest(
+          `No skins with this type: ${request.query.type}`
+        );
+      }
+
+      return reply.badRequest(`No skins with this type: ${request.query.type}`);
     }
   );
 }
