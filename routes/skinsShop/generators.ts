@@ -8,8 +8,7 @@ import {
   getSkinInfoQueryParamsSchema,
 } from "./generators.schemes.js";
 
-//вынести цену за скин в конфиг
-const CURRENT_SKIN_PRICE = 5000;
+const DEFAULT_SKIN_PRICE = 5000;
 
 export default async function (fastify: FastifyInstance) {
   fastify.get<{ Querystring: { skinType: string } }>(
@@ -54,16 +53,15 @@ export default async function (fastify: FastifyInstance) {
       const user = fastify.getUser(request);
       const { skinId } = request.body;
 
-      const userMiningData = await fastify.miningPower.getMiningData(user.id);
+      const [userMiningData, skinData] = await Promise.all([
+        fastify.miningPower.getMiningData(user.id),
+        fastify.skinsShop.getInfoAboutSkin(skinId),
+      ]);
 
-      if (
-        userMiningData &&
-        userMiningData?.power_balance >= CURRENT_SKIN_PRICE
-      ) {
-        await fastify.miningPower.reduceUserPowerBalance(
-          user.id,
-          CURRENT_SKIN_PRICE
-        );
+      const skinPrice = skinData?.[0].price ?? DEFAULT_SKIN_PRICE;
+
+      if (userMiningData && userMiningData?.power_balance >= skinPrice) {
+        await fastify.miningPower.reduceUserPowerBalance(user.id, skinPrice);
         await fastify.skinsShop.addPurchasedSkin(user.id, skinId);
       } else {
         return reply.badRequest("User does not have enough funds");
