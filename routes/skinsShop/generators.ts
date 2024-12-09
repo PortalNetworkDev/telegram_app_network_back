@@ -8,15 +8,17 @@ import {
   getSkinInfoQueryParamsSchema,
 } from "./generators.schemes.js";
 
-export default async function (fastify: FastifyInstance) {
+//вынести цену за скин в конфиг
+const CURRENT_SKIN_PRICE = 5000;
 
-  fastify.post<{ Body: { skinType: string } }>(
+export default async function (fastify: FastifyInstance) {
+  fastify.get<{ Querystring: { skinType: string } }>(
     "/getItems",
-    { schema: { body: getItemsBodySchema }, onRequest: [fastify.auth] },
+    { schema: { querystring: getItemsBodySchema }, onRequest: [fastify.auth] },
     async (request, reply) => {
       const { id: userId } = fastify.getUser(request);
 
-      const { skinType } = request.body;
+      const { skinType } = request.query;
 
       const [boughtSkins, allSkins] = await Promise.all([
         fastify.skinsShop.getAllSkinsForUser(
@@ -54,8 +56,14 @@ export default async function (fastify: FastifyInstance) {
 
       const userMiningData = await fastify.miningPower.getMiningData(user.id);
 
-      if (userMiningData && userMiningData?.power_balance >= 5000) {
-        await fastify.miningPower.reduceUserPowerBalance(user.id, 5000);
+      if (
+        userMiningData &&
+        userMiningData?.power_balance >= CURRENT_SKIN_PRICE
+      ) {
+        await fastify.miningPower.reduceUserPowerBalance(
+          user.id,
+          CURRENT_SKIN_PRICE
+        );
         await fastify.skinsShop.addPurchasedSkin(user.id, skinId);
       } else {
         return reply.badRequest("User does not have enough funds");
@@ -65,7 +73,7 @@ export default async function (fastify: FastifyInstance) {
     }
   );
 
-  fastify.post<{ Body: { userId: number; skinId: number } }>(
+  fastify.post<{ Body: { skinId: number } }>(
     "/selectSkin",
     { schema: { body: buyOrSelectSkinBodySchema }, onRequest: [fastify.auth] },
     async (request, reply) => {
@@ -85,21 +93,23 @@ export default async function (fastify: FastifyInstance) {
     }
   );
 
-  fastify.get<{ Querystring: { id: number } }>(
+  fastify.get<{ Querystring: { skinId: number } }>(
     "/getSkinInfo",
     {
       schema: { querystring: getSkinInfoQueryParamsSchema },
       onRequest: [fastify.auth],
     },
     async (request, reply) => {
-      const result = await fastify.skinsShop.getInfoAboutSkin(request.query.id);
+      const result = await fastify.skinsShop.getInfoAboutSkin(
+        request.query.skinId
+      );
 
       if (result) {
         return { status: "ok", item: result[0] };
       }
 
       return reply.badRequest(
-        `No info about skin with this id: ${request.query.id}`
+        `No info about skin with this id: ${request.query.skinId}`
       );
     }
   );

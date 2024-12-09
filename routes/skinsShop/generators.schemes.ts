@@ -24,8 +24,8 @@ export const getAllSkinsByTypeQueryParamsSchema = {
 
 export const getSkinInfoQueryParamsSchema = {
   type: "object",
-  required: ["id"],
+  required: ["skinId"],
   properties: {
-    id: { type: "number" },
+    skinId: { type: "number" },
   },
 };
