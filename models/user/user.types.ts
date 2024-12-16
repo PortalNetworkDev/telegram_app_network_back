@@ -1,6 +1,5 @@
 import { DataBaseQueryResult } from "../../plugins/mysql/mysql.types";
 
-
 export interface UserService {
   createUser: (user: User, tgToken: string) => Promise<void>;
   userExist: (userId: number) => Promise<boolean>;
@@ -25,9 +24,7 @@ export interface UserService {
   setRewarded: (userId: number, referalUserId: number) => Promise<void>;
   countReferalUsers: (userId: number) => Promise<number>;
   checkAirDropUser: (userId: number, referalUserId: number) => Promise<boolean>;
-  getUserByNickname: (
-    nickname: string
-  ) => Promise<DataBaseQueryResult<UserModel> | null>;
+  getUserByNickname: (nickname: string) => Promise<UserModel | null>;
 }
 
 export interface User {
