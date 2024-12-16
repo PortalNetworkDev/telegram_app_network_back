@@ -25,6 +25,8 @@ export interface UserService {
   countReferalUsers: (userId: number) => Promise<number>;
   checkAirDropUser: (userId: number, referalUserId: number) => Promise<boolean>;
   getUserByNickname: (nickname: string) => Promise<UserModel | null>;
+  selectUserGeneratorSkin: (userId: number, skinId: number) => Promise<void>;
+  selectUserBatterySkin: (userId: number, skinId: number) => Promise<void>
 }
 
 export interface User {
@@ -42,6 +44,8 @@ export interface UserModel extends User {
   referal_reward: number;
   last_updated: number;
   tg_token: string;
+  selectedGeneratorSkinId: number;
+  selectedBatterySkinId: number;
 }
 
 export interface ReferralUser {

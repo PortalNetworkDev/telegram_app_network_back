@@ -87,4 +87,6 @@ export interface MiningPowerService {
     userId: number,
     addPowerBalance: number
   ) => Promise<void>;
+
+  reduceUserPowerBalance: (userId: number, amount: number) => Promise<void>;
 }
