@@ -10,9 +10,10 @@ export default async function (fastify: FastifyInstance) {
       const _user = fastify.getUser(request);
 
       const user = await fastify.modelsUser.getUser(_user.id);
-      const currentSkin = await fastify.skinsShop.getInfoAboutSkin(
-        user?.selectedGeneratorSkinId ?? 1
-      );
+      const [currentGeneratorSkin, currentBatterySkin] = await Promise.all([
+        fastify.skinsShop.getInfoAboutSkin(user?.selectedGeneratorSkinId ?? 1),
+        fastify.skinsShop.getInfoAboutSkin(user?.selectedBatterySkinId ?? 11),
+      ]);
 
       const obj = { balance: 0, power_balance: 0 };
 
@@ -34,7 +35,8 @@ export default async function (fastify: FastifyInstance) {
       return {
         ...user,
         ...obj,
-        currentSelectedSkinUrl: currentSkin?.[0].imageUrl ?? "",
+        currentGeneratorSkinUrl: currentGeneratorSkin?.[0].imageUrl ?? "",
+        currentBatterySkinUrl: currentBatterySkin?.[0].imageUrl ?? "",
       };
     }
   );

@@ -1,12 +1,12 @@
 import { FastifyInstance } from "fastify";
 import { SkinType } from "../../models/skinsShop/skins.types";
-import { ShopItem } from "./generators.types";
+import { ShopItem } from "./skinsShop.types";
 import {
   buyOrSelectSkinBodySchema,
   getAllSkinsByTypeQueryParamsSchema,
   getItemsBodySchema,
   getSkinInfoQueryParamsSchema,
-} from "./generators.schemes.js";
+} from "./skinsShopRoutes.schemes.js";
 
 const DEFAULT_SKIN_PRICE = 5000;
 
