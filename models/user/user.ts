@@ -203,7 +203,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
       fastify.log.error("error when try to get user by nickname form db");
       return null;
     }
-    return result;
+    return result?.rows[0] ?? null;
   };
 
   const getUser = async (userId: number) => {

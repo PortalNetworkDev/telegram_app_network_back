@@ -1,101 +1,169 @@
-import { FastifyInstance } from "fastify";
-import Schema from "fluent-json-schema";
+import { FastifyInstance, FastifyReply } from "fastify";
+import {
+  sendByIdBodySchema,
+  sendByNickNameBodySchema,
+} from "./sendPower.schemes.js";
+import { UserModel } from "../../models/user/user.types";
 
 interface Body {
   recipient: string;
   amount: number;
 }
+interface RequestHandlerParams {
+  fastify: FastifyInstance;
+  reply: FastifyReply;
+  sendPowerAmount: number;
+  senderId: number;
+  recipient: {
+    name?: string;
+    id?: number;
+  };
+}
 
-const params = Schema.object()
-  .prop("recipient", Schema.string())
-  .prop("amount", Schema.number());
-const schema = { params };
+const validateUsers = (
+  recipientInstance: UserModel | null,
+  senderInstance: UserModel | null,
+  senderBalance: number,
+  sendPowerAmount: number,
+  reply: FastifyReply
+) => {
+  if (recipientInstance?.id === senderInstance?.id) {
+    return reply.badRequest("Recipient and sender should not be same");
+  }
 
-//TODO: how to get tg ID by username
+  if (senderBalance < sendPowerAmount) {
+    return reply.badRequest("Sender has not enough power value to send");
+  }
+
+  if (!recipientInstance) {
+    return reply.badRequest("Recipient do not exists");
+  }
+
+  if (!senderInstance) {
+    return reply.badRequest("Sender do not exists");
+  }
+
+  return reply;
+};
+
+const makeTransferOfPower = async (
+  fastify: FastifyInstance,
+  recipientInstance: UserModel | null,
+  senderInstance: UserModel | null,
+  sendPowerAmount: number
+) => {
+  try {
+    await fastify.miningPower.addPowerBalance(
+      recipientInstance?.id ?? 0,
+      sendPowerAmount
+    );
+  } catch (error) {
+    console.log("error in addPowerBalance", error);
+  }
+
+  try {
+    await fastify.miningPower.subtractPowerBalance(
+      senderInstance?.id ?? 0,
+      sendPowerAmount
+    );
+  } catch (error) {
+    console.log("error in subtractPowerBalance", error);
+  }
+
+  try {
+    await fastify.transactions.addTransaction({
+      senderId: senderInstance?.id ?? 0,
+      recipientId: recipientInstance?.id ?? 0,
+      powerAmount: sendPowerAmount,
+      creationTime: Date.now(),
+    });
+  } catch (error) {
+    console.log("error in addTransaction", error);
+  }
+};
+
+const handleRequest = async ({
+  fastify,
+  reply,
+  sendPowerAmount,
+  senderId,
+  recipient,
+}: RequestHandlerParams) => {
+  const recipientInfoQuery = recipient.name
+    ? fastify.modelsUser.getUserByNickname(recipient.name)
+    : fastify.modelsUser.getUser(recipient.id ?? 0);
+
+  const [senderInstance, recipientInstance, senderBalance] = await Promise.all([
+    fastify.modelsUser.getUser(senderId),
+    recipientInfoQuery,
+    fastify.miningPower.getUserPowerBalance(senderId),
+  ]);
+
+  validateUsers(
+    recipientInstance,
+    senderInstance,
+    senderBalance,
+    sendPowerAmount,
+    reply
+  );
+
+  await makeTransferOfPower(
+    fastify,
+    recipientInstance,
+    senderInstance,
+    sendPowerAmount
+  );
+
+  return { statusCose: 200, status: "ok" };
+};
+
 export default async function (fastify: FastifyInstance) {
   fastify.post<{ Body: Body }>(
     "/send",
-    { schema, onRequest: [fastify.auth] },
+    { schema: { body: sendByNickNameBodySchema }, onRequest: [fastify.auth] },
     async (request, reply) => {
-
       const senderId = fastify.getUser(request).id;
       const recipientName = request.body.recipient;
       const sendPowerAmount = request.body.amount;
 
-      if (typeof sendPowerAmount !== "number") {
-        return {
-          statusCose: "400",
-          description: "Bad request",
-          message: "Amount should be number",
-        };
+      if (sendPowerAmount < 0) {
+        return reply.badRequest("Funds amount should be more then 0");
       }
 
       if (recipientName && senderId) {
-        const [senderInstance, recipientInstance, senderBalance] =
-          await Promise.all([
-            fastify.modelsUser.getUser(senderId),
-            fastify.modelsUser.getUserByNickname(recipientName),
-            fastify.miningPower.getUserPowerBalance(senderId),
-          ]);
+        await handleRequest({
+          fastify,
+          reply,
+          sendPowerAmount,
+          senderId,
+          recipient: { name: recipientName },
+        });
+      }
+    }
+  );
 
-      
-        // как найти именно того получателя с нужным id если он может поменять ник а в базе у меня старый
-        // @ts-ignore: Unreachable code error
-        if (recipientInstance?.rows.some((item) => item.id === senderInstance.id)) {
-          return {
-            statusCose: "400",
-            description: "Bad request",
-            message: "Recipient and sender should not be same",
-          };
-        }
+  fastify.post<{ Body: { recipientId: number; amount: number } }>(
+    "/sendById",
+    { schema: { body: sendByIdBodySchema }, onRequest: [fastify.auth] },
+    async (request, reply) => {
+      const senderId = fastify.getUser(request).id;
 
-        if (senderBalance < sendPowerAmount) {
-          return {
-            statusCose: "400",
-            description: "Bad request",
-            message: "Sender has not enough power value to send",
-          };
-        }
+      const recipientId = request.body.recipientId;
+      const sendPowerAmount = request.body.amount;
 
-        if (!recipientInstance || recipientInstance.rows.length > 1 || !recipientInstance.rows[0]) {
-          return {
-            statusCose: "400",
-            description: "Bad request",
-            message: "Recipient do not exists",
-          };
-        }
-
-        try {
-          await fastify.miningPower.addPowerBalance(
-            recipientInstance.rows[0].id,
-            sendPowerAmount
-          );
-        } catch (error) {
-          console.log("error in addPowerBalance", error);
-        }
-
-        try {
-          await fastify.miningPower.subtractPowerBalance(
-            senderInstance?.id ?? 0,
-            sendPowerAmount
-          );
-        } catch (error) {
-          console.log("error in subtractPowerBalance", error);
-        }
-
-        try {
-          await fastify.transactions.addTransaction({
-            senderId: senderInstance?.id ?? 0,
-            recipientId: recipientInstance.rows[0].id,
-            powerAmount: sendPowerAmount,
-            creationTime: Date.now(),
-          });
-        } catch (error) {
-          console.log("error in addTransaction", error);
-        }
+      if (sendPowerAmount < 0) {
+        return reply.badRequest("Funds amount should be more then 0");
       }
 
-      return { statusCose: 200, status: "ok" };
+      if (recipientId && senderId) {
+        await handleRequest({
+          fastify,
+          reply,
+          sendPowerAmount,
+          senderId,
+          recipient: { id: recipientId },
+        });
+      }
     }
   );
 }
