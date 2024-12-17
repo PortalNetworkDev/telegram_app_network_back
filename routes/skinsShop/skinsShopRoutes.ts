@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { SkinType } from "../../models/skinsShop/skins.types";
+import { SkinType } from "../../models/skinsShop/skins.types.js";
 import { ShopItem } from "./skinsShop.types";
 import {
   buyOrSelectSkinBodySchema,
@@ -27,13 +27,20 @@ export default async function (fastify: FastifyInstance) {
         fastify.skinsShop.getAllSkinsByType(skinType as keyof typeof SkinType),
       ]);
 
+      const currentSelectedUserSkinId =
+        await fastify.modelsUser.getSelectedUserSkin(
+          userId,
+          skinType as keyof typeof SkinType
+        );
+
       if (allSkins) {
         const skins = allSkins.map<ShopItem>((item) => {
           const isPurchased = !!boughtSkins?.find(
             (boughtSkin) => boughtSkin.id === item.id
           );
+          const isSelected = item.id === currentSelectedUserSkinId;
 
-          return { ...item, isPurchased };
+          return { ...item, isPurchased, isSelected };
         });
 
         return {
