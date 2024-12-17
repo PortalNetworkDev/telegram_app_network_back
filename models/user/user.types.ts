@@ -1,4 +1,5 @@
 import { DataBaseQueryResult } from "../../plugins/mysql/mysql.types";
+import { SkinType } from "../skinsShop/skins.types";
 
 export interface UserService {
   createUser: (user: User, tgToken: string) => Promise<void>;
@@ -26,7 +27,11 @@ export interface UserService {
   checkAirDropUser: (userId: number, referalUserId: number) => Promise<boolean>;
   getUserByNickname: (nickname: string) => Promise<UserModel | null>;
   selectUserGeneratorSkin: (userId: number, skinId: number) => Promise<void>;
-  selectUserBatterySkin: (userId: number, skinId: number) => Promise<void>
+  selectUserBatterySkin: (userId: number, skinId: number) => Promise<void>;
+  getSelectedUserSkin: (
+    userId: number,
+    skinType: keyof typeof SkinType
+  ) => Promise<number>;
 }
 
 export interface User {

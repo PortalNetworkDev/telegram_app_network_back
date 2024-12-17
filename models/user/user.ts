@@ -3,6 +3,7 @@
 import { FastifyPluginAsync } from "fastify";
 import createPlugin from "fastify-plugin";
 import { ReferralUser, User, UserModel } from "./user.types";
+import { SkinType } from "../skinsShop/skins.types.js";
 
 export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
   const usersTable = `
@@ -252,9 +253,26 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     const sql = `update users set selectedGeneratorSkinId = ? where id = ? `;
     fastify.dataBase.update<UserModel>(sql, [skinId, userId]);
   };
+
   const selectUserBatterySkin = async (userId: number, skinId: number) => {
     const sql = `update users set selectedBatterySkinId = ? where id = ? `;
     fastify.dataBase.update<UserModel>(sql, [skinId, userId]);
+  };
+
+  const getSelectedUserSkin = async (
+    userId: number,
+    skinType: keyof typeof SkinType
+  ) => {
+    const skin =
+      SkinType[skinType] === SkinType.generator
+        ? "selectedGeneratorSkinId"
+        : "selectedBatterySkinId";
+
+    const sql = `select ${skin} as id from users where users.id = ?`;
+    const result = await fastify.dataBase.select<UserModel>(sql, [userId]);
+    const { id = 0 } = result?.rows[0] as { id: number };
+
+    return id;
   };
 
   if (!(await userExist(1)))
@@ -291,6 +309,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     checkAirDropUser,
     getUserByNickname,
     selectUserGeneratorSkin,
-    selectUserBatterySkin
+    selectUserBatterySkin,
+    getSelectedUserSkin,
   });
 });
