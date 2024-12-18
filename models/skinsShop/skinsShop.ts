@@ -81,7 +81,7 @@ export default createPlugin(async function (fastify, opts) {
   const getInfoAboutSkin = async (skinId: number) => {
     const sql = `select * from skins where skins.id = ?`;
     const result = await fastify.dataBase.select<SkinModel>(sql, [skinId]);
-    return result?.rows ?? null;
+    return result?.rows[0] ?? null;
   };
 
   fastify.decorate("skinsShop", {

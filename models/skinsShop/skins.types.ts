@@ -3,6 +3,7 @@ export interface SkinModel {
   price: number;
   imageUrl: string;
   name: string;
+  type: number;
 }
 
 export interface PurchasedSkinsModel {
@@ -23,8 +24,11 @@ export interface SkinShopService {
   getAllBoughtSkinsForUser: (
     userId: number
   ) => Promise<PurchasedSkinsModel[] | null>;
-  getAllSkinsForUser: (userId: number, skinType: keyof typeof SkinType) => Promise<SkinModel[] | null>
-  getInfoAboutSkin: (skinId: number) => Promise<SkinModel[] | null>;
+  getAllSkinsForUser: (
+    userId: number,
+    skinType: keyof typeof SkinType
+  ) => Promise<SkinModel[] | null>;
+  getInfoAboutSkin: (skinId: number) => Promise<SkinModel | null>;
   getAllSkinsByType: (
     skinType: keyof typeof SkinType
   ) => Promise<SkinModel[] | null>;
