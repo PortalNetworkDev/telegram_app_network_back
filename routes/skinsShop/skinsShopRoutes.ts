@@ -65,7 +65,7 @@ export default async function (fastify: FastifyInstance) {
         fastify.skinsShop.getInfoAboutSkin(skinId),
       ]);
 
-      const skinPrice = skinData?.[0].price ?? DEFAULT_SKIN_PRICE;
+      const skinPrice = skinData?.price ?? DEFAULT_SKIN_PRICE;
 
       if (userMiningData && userMiningData?.power_balance >= skinPrice) {
         await fastify.miningPower.reduceUserPowerBalance(user.id, skinPrice);
@@ -89,7 +89,15 @@ export default async function (fastify: FastifyInstance) {
       );
 
       if (boughtSkins && boughtSkins.find((item) => item.skinId === skinId)) {
-        await fastify.modelsUser.selectUserGeneratorSkin(user.id, skinId);
+        const skinForSelection = await fastify.skinsShop.getInfoAboutSkin(
+          skinId
+        );
+        if (skinForSelection?.type === SkinType.generator) {
+          await fastify.modelsUser.selectUserGeneratorSkin(user.id, skinId);
+        }
+        if (skinForSelection?.type === SkinType.battery) {
+          await fastify.modelsUser.selectUserBatterySkin(user.id, skinId);
+        }
 
         return { status: "ok" };
       }
@@ -110,7 +118,7 @@ export default async function (fastify: FastifyInstance) {
       );
 
       if (result) {
-        return { status: "ok", item: result[0] };
+        return { status: "ok", item: result};
       }
 
       return reply.badRequest(

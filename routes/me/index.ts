@@ -35,8 +35,8 @@ export default async function (fastify: FastifyInstance) {
       return {
         ...user,
         ...obj,
-        currentGeneratorSkinUrl: currentGeneratorSkin?.[0].imageUrl ?? "",
-        currentBatterySkinUrl: currentBatterySkin?.[0].imageUrl ?? "",
+        currentGeneratorSkinUrl: currentGeneratorSkin?.imageUrl ?? "",
+        currentBatterySkinUrl: currentBatterySkin?.imageUrl ?? "",
       };
     }
   );
