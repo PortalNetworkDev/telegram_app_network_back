@@ -38,6 +38,7 @@ export default createPlugin<FastifyPluginAsync>( async function (fastify, opts) 
     stepMultitabPrice: process.env.STEPMULTITABPRICE,
     forReferalPowerReward: process.env.FORREFERALPOWERREWARD,
     toReferalPowerReward: process.env.TOREFERALPOWERREWARD,
+    shopLotteryRollPrice: process.env.SHOP_LOTTERY_ROLL_PRICE,
   };
 
   fastify.decorate("config", config);

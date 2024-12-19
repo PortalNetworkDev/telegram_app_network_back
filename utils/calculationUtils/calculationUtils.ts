@@ -2,8 +2,7 @@ import { FastifyPluginCallback } from "fastify";
 import createPlugin from "fastify-plugin";
 import { MAX_PRICE_FOR_UPGRADE } from "../constants/constants.js";
 
-
-export default createPlugin<FastifyPluginCallback>((fastify, opts, done) => {
+export default createPlugin<FastifyPluginCallback>(async (fastify, opts) => {
   const calculateGeneratorRecoveryInterval = (
     generatorCapacity: number,
     generatorLevel: number
@@ -36,6 +35,4 @@ export default createPlugin<FastifyPluginCallback>((fastify, opts, done) => {
     calculatePriceRiseBatteryWithLimit,
     calculateGeneratorRecoveryInterval,
   });
-
-  done();
 });

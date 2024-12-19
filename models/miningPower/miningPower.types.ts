@@ -89,4 +89,6 @@ export interface MiningPowerService {
   ) => Promise<void>;
 
   reduceUserPowerBalance: (userId: number, amount: number) => Promise<void>;
+
+  addPoeBalance(userId: number, amount: number): Promise<void>;
 }

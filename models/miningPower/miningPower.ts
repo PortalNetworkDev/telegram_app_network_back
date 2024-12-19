@@ -116,6 +116,11 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     await fastify.dataBase.update(sql, [generatorLimit, userId]);
   }
 
+  async function addPoeBalance(userId: number, amount: number) {
+    const sql = `update mining_data set poe_balance = poe_balance+ ? where user_id = ?`;
+    await fastify.dataBase.update(sql, [amount, userId]);
+  }
+
   async function claimBattery(userId: number) {
     const sql = `update mining_data set power_balance=power_balance+battery_balance, battery_balance = 0, time_last_claim = ? where user_id = ?`;
     const now = new Date();
@@ -178,9 +183,9 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     await fastify.dataBase.update(sql, [price, userId]);
   }
 
-  async function reduceUserPowerBalance(userId:number,amount:number){
+  async function reduceUserPowerBalance(userId: number, amount: number) {
     const sql = `update mining_data set power_balance=power_balance-? where user_id = ?`;
-    await fastify.dataBase.update(sql,[amount,userId])
+    await fastify.dataBase.update(sql, [amount, userId]);
   }
 
   async function getUserPowerBalance(userId: number) {
@@ -211,5 +216,6 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     getUserPowerBalance,
     subtractPowerBalance,
     reduceUserPowerBalance,
+    addPoeBalance,
   });
 });
