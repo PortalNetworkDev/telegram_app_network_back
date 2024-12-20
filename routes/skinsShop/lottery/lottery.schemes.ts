@@ -3,6 +3,5 @@ export const doLotteryRollSchema = {
   required: ["position"],
   properties: {
     position: { type: "integer" },
-    
   },
 };
