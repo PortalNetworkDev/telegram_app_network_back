@@ -13,6 +13,7 @@ import { SendTonToken } from "../plugins/sendToken/sendToken";
 import { CalculationUtils } from "../utils/calculationUtils/calculationUtils.types";
 import { SkinShopService } from "../models/skinsShop/skins.types";
 import { ShopLotteryService } from "../models/shopLottery/shopLottery.types";
+import { GeneratorRecoveryBoostService } from "../models/dailyBoosts/dailyBoosts.types";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -32,5 +33,6 @@ declare module "fastify" {
     calculationUtils: CalculationUtils;
     skinsShop: SkinShopService;
     shopLottery: ShopLotteryService;
+    generatorRecoveryBoost: GeneratorRecoveryBoostService;
   }
 }
