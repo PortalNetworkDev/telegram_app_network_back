@@ -21,7 +21,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
       Pick<GeneratorRecoveryBoostModel, "amountAttemptsLeft">
     >(sql, [userId]);
 
-    return result?.rows[0].amountAttemptsLeft ?? null;
+    return result?.rows[0]?.amountAttemptsLeft ?? null;
   };
 
   const getGeneratorRecoveryBoostInfoByUserId = async (userId: number) => {
@@ -40,7 +40,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
       Pick<GeneratorRecoveryBoostModel, "maxAvailableAttempts">
     >(sql);
 
-    return result?.rows[0].maxAvailableAttempts ?? null;
+    return result?.rows[0]?.maxAvailableAttempts ?? null;
   };
 
   const reduceUserAttemptsForRecoverGenerator = async (
@@ -71,7 +71,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     const result = await fastify.dataBase.select<
       Pick<GeneratorRecoveryBoostModel, "previousActivationTime">
     >(sql, [userId]);
-    return result?.rows[0].previousActivationTime ?? null;
+    return result?.rows[0]?.previousActivationTime ?? null;
   };
 
   fastify.decorate("generatorRecoveryBoost", {
