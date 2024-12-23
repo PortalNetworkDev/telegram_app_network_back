@@ -3,8 +3,8 @@
 import { FastifyPluginAsync } from "fastify";
 import createPlugin from "fastify-plugin";
 
-export default createPlugin<FastifyPluginAsync>( async function (fastify, opts) {
-  //TODO: are config vars always string or they acn be number? 
+export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
+  //TODO: are config vars always string or they acn be number?
 
   const config = {
     bottoken: process.env.BOTTOKEN,
@@ -39,8 +39,11 @@ export default createPlugin<FastifyPluginAsync>( async function (fastify, opts) 
     forReferalPowerReward: process.env.FORREFERALPOWERREWARD,
     toReferalPowerReward: process.env.TOREFERALPOWERREWARD,
     shopLotteryRollPrice: process.env.SHOP_LOTTERY_ROLL_PRICE,
+    maxAvailableAttemptsToRecoveryGenerator:
+      process.env.MAX_AVAILABLE_ATTEMPTS_TO_RECOVER_GENERATOR,
+    recoveryGeneratorBootsActivationPeriodLimit:
+      process.env.RECOVERY_GENERATOR_BOOST_ACTIVATION_PERIOD_LIMIT,
   };
 
   fastify.decorate("config", config);
-
 });
