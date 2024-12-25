@@ -19,6 +19,7 @@ export default async function (fastify: FastifyInstance) {
 
       if (user && user.wallet) {
         const { token_balance } = await fastify.utils.getBalances(user.wallet);
+
         obj.balance = token_balance;
       } else {
         obj.balance = 0;
