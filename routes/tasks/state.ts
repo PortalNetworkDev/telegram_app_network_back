@@ -47,7 +47,7 @@ export default async function (fastify: FastifyInstance) {
             cat.description = en_cats[indexCat].description;
             cat.label = en_cats[indexCat].label;
           }
-          Object.defineProperty(cats[indexCat], "tasks", []);
+          Object.defineProperty(cats[indexCat], "tasks", { value: [] });
 
           for (let index = 0; index < tasks.length; index++) {
             const task = tasks[index];
@@ -58,7 +58,7 @@ export default async function (fastify: FastifyInstance) {
               task.title = en_tasks[index].title;
               task.other = en_tasks[index].other;
             }
-
+ 
             if (task.category_id === cat.id) {
               if (task.reward < 1)
                 task.reward = Number(Number(task.reward).toFixed(2));

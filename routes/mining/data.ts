@@ -11,8 +11,9 @@ export default async function (fastify: FastifyInstance) {
 
       const data = await fastify.miningPower.getMiningData(_user.id);
       if (data) {
-        const now = new Date().getDate();
-        const lastUpdate = new Date(data.time_last_update).getDate();
+        const now = new Date().getTime();
+        const lastUpdate = new Date(data.time_last_update).getTime();
+
         const calculatedPriceRiseBattery =
           fastify.calculationUtils.calculatePriceRiseBatteryWithLimit(
             data.battery_level,
@@ -38,6 +39,7 @@ export default async function (fastify: FastifyInstance) {
               data.poe_balance *
               Number(fastify.config.powerPrice)) /
               3600;
+
           generatorBalance =
             data.generator_balance +
             (now - lastUpdate) /
