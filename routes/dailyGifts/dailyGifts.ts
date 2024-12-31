@@ -10,6 +10,11 @@ import {
 } from "./dailyGifts.utils.js";
 
 export default async function (fastify: FastifyInstance) {
+  const MAX_DAY_NUMBER_FOR_CLAIM_GIFT = Number(
+    (await fastify.config.maxDayNumberForClaimGift) ??
+      MAX_DAY_NUMBER_TO_CLAIM_GIFT
+  );
+
   fastify.get(
     "/checkIsDailyGiftAvailable",
     { onRequest: [fastify.auth] },
@@ -26,7 +31,7 @@ export default async function (fastify: FastifyInstance) {
       if (
         claimAvailabilityInfo &&
         !claimAvailabilityInfo.isAlreadyClaim &&
-        claimAvailabilityInfo.claimCounter <= MAX_DAY_NUMBER_TO_CLAIM_GIFT
+        claimAvailabilityInfo.claimCounter <= MAX_DAY_NUMBER_FOR_CLAIM_GIFT
       ) {
         return { status: "ok", isAbleToClaim: true };
       }
@@ -42,7 +47,7 @@ export default async function (fastify: FastifyInstance) {
 
       if (
         claimAvailabilityInfo &&
-        claimAvailabilityInfo.claimCounter === MAX_DAY_NUMBER_TO_CLAIM_GIFT
+        claimAvailabilityInfo.claimCounter === MAX_DAY_NUMBER_FOR_CLAIM_GIFT
       ) {
         return {
           status: "ok",
@@ -101,7 +106,7 @@ export default async function (fastify: FastifyInstance) {
       if (
         claimAvailabilityInfo &&
         !claimAvailabilityInfo.isAlreadyClaim &&
-        claimAvailabilityInfo.claimCounter <= MAX_DAY_NUMBER_TO_CLAIM_GIFT
+        claimAvailabilityInfo.claimCounter <= MAX_DAY_NUMBER_FOR_CLAIM_GIFT
       ) {
         const currentGift = await fastify.dailyGiftService.getDailyGiftById(
           giftId
@@ -170,7 +175,7 @@ export default async function (fastify: FastifyInstance) {
         const result = sortedDailyGifts.map((gift) => ({
           ...gift,
           isAbleToClaim:
-            userLastClaimedGift.day + 1 === MAX_DAY_NUMBER_TO_CLAIM_GIFT ||
+            userLastClaimedGift.day + 1 === MAX_DAY_NUMBER_FOR_CLAIM_GIFT ||
             userLastClaimedGift.day + 1 === gift.day,
           isClaimed: claimedGiftsByDay.some((item) => item.id === gift.id),
         }));
