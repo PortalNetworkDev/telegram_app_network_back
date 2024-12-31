@@ -14,6 +14,7 @@ import { CalculationUtils } from "../utils/calculationUtils/calculationUtils.typ
 import { SkinShopService } from "../models/skinsShop/skins.types";
 import { ShopLotteryService } from "../models/shopLottery/shopLottery.types";
 import { GeneratorRecoveryBoostService } from "../models/dailyBoosts/dailyBoosts.types";
+import { DailyBonusService } from "../models/dailyBonus/dailyBonus.types";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -34,5 +35,6 @@ declare module "fastify" {
     skinsShop: SkinShopService;
     shopLottery: ShopLotteryService;
     generatorRecoveryBoost: GeneratorRecoveryBoostService;
+    dailyGiftService: DailyBonusService;
   }
 }
