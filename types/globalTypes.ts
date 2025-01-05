@@ -15,6 +15,7 @@ import { SkinShopService } from "../models/skinsShop/skins.types";
 import { ShopLotteryService } from "../models/shopLottery/shopLottery.types";
 import { GeneratorRecoveryBoostService } from "../models/dailyBoosts/dailyBoosts.types";
 import { DailyBonusService } from "../models/dailyBonus/dailyBonus.types";
+import { TopMinerListService } from "../models/topMinersList/topMinersList.types";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -36,5 +37,6 @@ declare module "fastify" {
     shopLottery: ShopLotteryService;
     generatorRecoveryBoost: GeneratorRecoveryBoostService;
     dailyGiftService: DailyBonusService;
+    topMinersListService: TopMinerListService;
   }
 }
