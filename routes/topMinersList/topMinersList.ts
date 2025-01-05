@@ -43,7 +43,17 @@ export default async function (fastify: FastifyInstance) {
         limit
       );
 
-      return { status: "ok", hasNextPage: isHasNextPage, list };
+      return {
+        status: "ok",
+        hasNextPage: isHasNextPage,
+        list:
+          list?.map((item) => ({
+            position: item.id,
+            powerBalance: item.powerBalance,
+            userId: item.userId,
+            level: 0,
+          })) ?? [],
+      };
     }
   );
 }
