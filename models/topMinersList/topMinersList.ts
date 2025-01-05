@@ -1,8 +1,14 @@
 import createPlugin from "fastify-plugin";
 import { TopMinerListItemModel } from "./topMinersList.types";
 export default createPlugin(async function (fastify, opts) {
-  //topMinerList table
-  // id , power_balance, user_id
+  const createTable = `
+    CREATE TABLE IF NOT EXISTS topMinersList (
+            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            userId BIGINT NOT NULL,
+            powerBalance FLOAT DEFAULT 0
+        )`;
+
+  await fastify.dataBase.insert(createTable);
 
   const getUserCurrentPosition = async (userId: number) => {
     const sql = `select id from topMinersList where userId = ?`;
