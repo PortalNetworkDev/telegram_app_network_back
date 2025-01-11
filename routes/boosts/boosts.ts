@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-const DEFAULT_RECOVERY_LIMIT = 60;
+const DEFAULT_RECOVERY_LIMIT = 3600;
 
 export default async function (fastify: FastifyInstance) {
   const MAX_AVAILABLE_ATTEMPTS =
@@ -9,7 +9,7 @@ export default async function (fastify: FastifyInstance) {
 
   const RECOVERY_PERIOD_LIMIT =
     Number(await fastify.config.recoveryGeneratorBootsActivationPeriodLimit) ??
-    DEFAULT_RECOVERY_LIMIT * 60 * 1000;
+    DEFAULT_RECOVERY_LIMIT;
 
   fastify.get(
     "/useDailyRecovery",
@@ -76,10 +76,18 @@ export default async function (fastify: FastifyInstance) {
           user.id
         );
 
+      const previousActivationTime =
+        (await fastify.generatorRecoveryBoost.getPreviousActivationTime(
+          user.id
+        )) ?? 0;
+
+      const timeLeftBeforeNewAttempt =
+        RECOVERY_PERIOD_LIMIT - (Date.now() - previousActivationTime) / 1000;
+
       return {
         status: "ok",
         leftAttempts: leftAttemptsForUser ?? MAX_AVAILABLE_ATTEMPTS,
-        activationPeriodLimit: RECOVERY_PERIOD_LIMIT,
+        timeLeftBeforeNewAttempt: Math.max(0, timeLeftBeforeNewAttempt),
       };
     }
   );
