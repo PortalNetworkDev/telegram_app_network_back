@@ -40,7 +40,7 @@ export function createArrayOfGits() {
     )
     .concat(NFT);
 
-  return shuffleLots(allLots);
+  return shuffleLots(allLots).map((item,index)=>({...item,position:index}));
 }
 
 export function getRandomGift(items: LotteryGiftModel[], weights: number[]) {
