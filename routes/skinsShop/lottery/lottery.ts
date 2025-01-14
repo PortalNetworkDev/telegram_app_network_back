@@ -22,9 +22,9 @@ export default async function (fastify: FastifyInstance) {
         return reply.badRequest("Position should be positive number");
       }
 
-      if (userSelectedLotteryPosition > AMOUNT_OF_GIFTS_IN_RESULT) {
+      if (userSelectedLotteryPosition > AMOUNT_OF_GIFTS_IN_RESULT - 1) {
         return reply.badRequest(
-          `Position should be less or equal ${AMOUNT_OF_GIFTS_IN_RESULT - 1}`
+          `Position should be less or equal ${AMOUNT_OF_GIFTS_IN_RESULT -1}`
         );
       }
 
@@ -55,7 +55,7 @@ export default async function (fastify: FastifyInstance) {
             isReward: true,
           };
 
-          arrayOfRandomGifts.splice(userSelectedLotteryPosition, 0, gift);
+          arrayOfRandomGifts.splice(userSelectedLotteryPosition, 1, gift);
 
           await fastify.miningPower.reduceUserPowerBalance(
             user.id,
