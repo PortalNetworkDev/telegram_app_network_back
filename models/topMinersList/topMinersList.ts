@@ -5,7 +5,8 @@ export default createPlugin(async function (fastify, opts) {
     CREATE TABLE IF NOT EXISTS topMinersList (
             id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             userId BIGINT NOT NULL,
-            powerBalance FLOAT DEFAULT 0
+            powerBalance FLOAT DEFAULT 0,
+            level int NOT NULL DEFAULT 0
         )`;
 
   await fastify.dataBase.insert(createTable);

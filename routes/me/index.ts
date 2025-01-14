@@ -3,6 +3,10 @@
 import { FastifyInstance } from "fastify";
 
 export default async function (fastify: FastifyInstance) {
+  const FIRST_LEVEL_BALANCE_AMOUNT = Number(
+    fastify.config.firstLevelPowerBalanceAmount ?? 500
+  );
+
   fastify.get(
     "/",
     { onRequest: [fastify.auth] },
@@ -33,11 +37,33 @@ export default async function (fastify: FastifyInstance) {
         await fastify.miningPower.updatePoeBalance(_user.id, obj.balance);
       }
 
+      let userMiningLevel = data?.level ?? 0;
+
+      if (
+        data &&
+        data.level === 0 &&
+        data.power_balance > FIRST_LEVEL_BALANCE_AMOUNT
+      ) {
+        const level = fastify.calculationUtils.calculateUserMiningLevel(
+          data.power_balance,
+          FIRST_LEVEL_BALANCE_AMOUNT
+        );
+
+        await fastify.miningPower.setUserLevel(_user.id, level);
+
+        userMiningLevel = level;
+      }
+
       return {
         ...user,
         ...obj,
         currentGeneratorSkinUrl: currentGeneratorSkin?.imageUrl ?? "",
         currentBatterySkinUrl: currentBatterySkin?.imageUrl ?? "",
+        level: userMiningLevel,
+        nextLevelPowerBalance: fastify.calculationUtils.getNextMiningLevelEdge(
+          userMiningLevel,
+          FIRST_LEVEL_BALANCE_AMOUNT
+        ),
       };
     }
   );

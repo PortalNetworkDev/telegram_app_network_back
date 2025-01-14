@@ -2,7 +2,7 @@
 
 import { FastifyPluginAsync } from "fastify";
 import createPlugin from "fastify-plugin";
-import { MiningPowerModal } from "./miningPower.types";
+import { MiningLevel, MiningPowerModal } from "./miningPower.types";
 
 export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
   const miningData = `
@@ -202,6 +202,18 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     return power_balance;
   }
 
+  async function getUserMiningLevel(userId: number) {
+    const sql = "select level from mining_data where user_id = ?";
+    const result = await fastify.dataBase.select<MiningLevel>(sql, [userId]);
+
+    return result?.rows[0]?.level ?? 0;
+  }
+
+  async function setUserLevel(userId: number, level: number) {
+    const sql = `update mining_data set level = ? where user_id=?`;
+    await fastify.dataBase.update(sql, [level, userId]);
+  }
+
   fastify.decorate("miningPower", {
     createUserMiningData,
     getMiningData,
@@ -223,5 +235,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     reduceUserPowerBalance,
     addPoeBalance,
     recoverGeneratorBalance,
+    setUserLevel,
+    getUserMiningLevel,
   });
 });
