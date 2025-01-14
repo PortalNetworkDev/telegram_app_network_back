@@ -18,6 +18,8 @@ export interface MiningPowerModal {
   time_last_update: string;
 }
 
+export type MiningLevel = Pick<MiningPowerModal, "level">;
+
 export interface MiningPowerService {
   createUserMiningData: (
     userId: number,
@@ -93,4 +95,8 @@ export interface MiningPowerService {
   addPoeBalance(userId: number, amount: number): Promise<void>;
 
   recoverGeneratorBalance(userId: number): Promise<void>;
+
+  setUserLevel(userId: number, level: number): Promise<void>;
+
+  getUserMiningLevel(userId: number): Promise<number>;
 }

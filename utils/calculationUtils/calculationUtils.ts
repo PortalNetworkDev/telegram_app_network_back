@@ -30,9 +30,21 @@ export default createPlugin<FastifyPluginAsync>(async (fastify, opts) => {
     return price >= limit ? limit : price;
   };
 
+  const calculateUserMiningLevel = (
+    userBalance: number,
+    powerBalanceForFirstLevel: number
+  ) => Math.floor((userBalance / powerBalanceForFirstLevel) ** (1 / 1.9));
+
+  const getNextMiningLevelEdge = (
+    currentLvl: number,
+    powerBalanceForFirstLevel: number
+  ) => Math.floor(powerBalanceForFirstLevel * Math.pow(currentLvl + 1, 1.9));
+
   fastify.decorate("calculationUtils", {
     calculatePriceRiseBattery,
     calculatePriceRiseBatteryWithLimit,
     calculateGeneratorRecoveryInterval,
+    calculateUserMiningLevel,
+    getNextMiningLevelEdge
   });
 });

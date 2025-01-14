@@ -1,6 +1,10 @@
 import { FastifyInstance } from "fastify";
 
 export default async function (fastify: FastifyInstance) {
+  const FIRST_LEVEL_BALANCE_AMOUNT = Number(
+    fastify.config.firstLevelPowerBalanceAmount ?? 500
+  );
+
   fastify.post(
     "/claimpower",
     {
@@ -30,6 +34,17 @@ export default async function (fastify: FastifyInstance) {
 
       await fastify.miningPower.claimBattery(user.id);
 
+      const userPowerBalance = await fastify.miningPower.getUserPowerBalance(
+        user.id
+      );
+
+      await fastify.miningPower.setUserLevel(
+        user.id,
+        fastify.calculationUtils.calculateUserMiningLevel(
+          userPowerBalance ?? 0,
+          FIRST_LEVEL_BALANCE_AMOUNT
+        )
+      );
       //const data = await fastify.miningPower.getMiningData(user.id)
 
       return {

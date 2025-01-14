@@ -12,4 +12,14 @@ export interface CalculationUtils {
     generatorCapacity: number,
     generatorLevel: number
   ) => number;
+
+  calculateUserMiningLevel: (
+    userBalance: number,
+    powerBalanceForFirstLevel: number
+  ) => number;
+
+  getNextMiningLevelEdge: (
+    currentLvl: number,
+    powerBalanceForFirstLevel: number
+  ) => number;
 }
