@@ -3,9 +3,6 @@ import { getMinersListSchema } from "./topMinersList.schemes.js";
 import { getLimit } from "./topMinersList.utils.js";
 
 export default async function (fastify: FastifyInstance) {
-  const currentMinersListLength =
-    await fastify.topMinersListService.getMinersListLength();
-
   fastify.get(
     "/getUserListPosition",
     { onRequest: [fastify.auth] },
@@ -27,18 +24,19 @@ export default async function (fastify: FastifyInstance) {
     "/getMinersList",
     { schema: { querystring: getMinersListSchema } },
     async (request, replay) => {
+      //попробовать как-то сделать чтобы подсчет происходил только когда обновилась таблица 
+      const currentMinersListLength =
+        await fastify.topMinersListService.getMinersListLength();
+
       const page = Number(request.query.page);
       const limit = request.query?.limit
         ? getLimit(Number(request.query.limit))
         : 30;
 
       const listItems = currentMinersListLength - limit * (page + 1);
+
       const isHasNextPage =
         listItems > 0 && listItems !== currentMinersListLength;
-
-      if (page > 0 && listItems < 0) {
-        return { status: "ok", hasNextPage: isHasNextPage, list: [] };
-      }
 
       const list = await fastify.topMinersListService.getUsersFromList(
         page,
