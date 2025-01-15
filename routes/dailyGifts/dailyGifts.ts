@@ -3,11 +3,7 @@ import {
   MAX_DAY_NUMBER_TO_CLAIM_GIFT,
   RESPONSE_CODES,
 } from "./dailyGifts.constants.js";
-import { ClaimDailyGiftSchema } from "./dailyGifts.schemes.js";
-import {
-  getBadRequestMessage,
-  resetDailyGiftProgressIfUserSkipClaimMoreThenDay,
-} from "./dailyGifts.utils.js";
+import { resetDailyGiftProgressIfUserSkipClaimMoreThenDay } from "./dailyGifts.utils.js";
 
 export default async function (fastify: FastifyInstance) {
   const MAX_DAY_NUMBER_FOR_CLAIM_GIFT = Number(
@@ -59,26 +55,16 @@ export default async function (fastify: FastifyInstance) {
     }
   );
 
-  fastify.post<{ Body: { giftId: number } }>(
+  fastify.post(
     "/claimDailyGift",
-    { schema: { body: ClaimDailyGiftSchema }, onRequest: [fastify.auth] },
+    { onRequest: [fastify.auth] },
     async (request, reply) => {
       const user = fastify.getUser(request);
-      const giftId = request.body.giftId;
 
-      resetDailyGiftProgressIfUserSkipClaimMoreThenDay(fastify, user.id);
+      await resetDailyGiftProgressIfUserSkipClaimMoreThenDay(fastify, user.id);
 
       const claimAvailabilityInfo =
         await fastify.dailyGiftService.getIsUserAbleToClaimGift(user.id);
-
-      const badRequestMessage = getBadRequestMessage(
-        giftId,
-        claimAvailabilityInfo
-      );
-
-      if (badRequestMessage) {
-        return reply.badRequest(badRequestMessage);
-      }
 
       if (claimAvailabilityInfo && claimAvailabilityInfo.isAlreadyClaim) {
         return {
@@ -88,51 +74,59 @@ export default async function (fastify: FastifyInstance) {
         };
       }
 
+      if (
+        claimAvailabilityInfo &&
+        claimAvailabilityInfo.claimCounter === MAX_DAY_NUMBER_FOR_CLAIM_GIFT
+      ) {
+        return {
+          status: "ok",
+          message: RESPONSE_CODES[2002].message,
+          code: RESPONSE_CODES[2002].code,
+        };
+      }
+
       if (claimAvailabilityInfo === null) {
-        const giftModel = await fastify.dailyGiftService.getDailyGiftById(
-          giftId
-        );
+        const giftModel = await fastify.dailyGiftService.getDailyGiftByDay(1);
 
         if (giftModel) {
-          await fastify.dailyGiftService.claimGiftFirstTime(user.id, giftId);
+          await fastify.dailyGiftService.claimGiftFirstTime(
+            user.id,
+            giftModel.id
+          );
           await fastify.miningPower.addPowerBalance(user.id, giftModel.gift);
 
           return { status: "ok" };
         }
 
-        return reply.badRequest(`Gift with this id ${giftId} is not available`);
+        return reply.badRequest(`Gift for day 1 is not available now`);
       }
 
       if (
         claimAvailabilityInfo &&
         !claimAvailabilityInfo.isAlreadyClaim &&
-        claimAvailabilityInfo.claimCounter <= MAX_DAY_NUMBER_FOR_CLAIM_GIFT
+        claimAvailabilityInfo.claimCounter < MAX_DAY_NUMBER_FOR_CLAIM_GIFT
       ) {
-        const currentGift = await fastify.dailyGiftService.getDailyGiftById(
-          giftId
-        );
         const lastClaimedGift = await fastify.dailyGiftService.getDailyGiftById(
           claimAvailabilityInfo.lastClaimedGiftId
         );
 
-        if (
-          currentGift &&
-          lastClaimedGift &&
-          currentGift.day - lastClaimedGift.day > 1
-        ) {
-          return reply.badRequest(
-            `User can not claim gift with this id ${giftId}`
-          );
-        }
+        const currentGiftDay = (lastClaimedGift?.day ?? 1) + 1;
+
+        const currentGift = await fastify.dailyGiftService.getDailyGiftByDay(
+          currentGiftDay
+        );
 
         if (currentGift) {
-          await fastify.dailyGiftService.claimDailyGift(user.id, giftId);
+          await fastify.dailyGiftService.claimDailyGift(
+            user.id,
+            currentGift.id
+          );
           await fastify.miningPower.addPowerBalance(user.id, currentGift.gift);
 
           return { status: "ok" };
         }
 
-        return reply.badRequest(`Gift with this id ${giftId} is not available`);
+        return reply.badRequest(`Gift is not available now`);
       }
     }
   );
@@ -143,7 +137,7 @@ export default async function (fastify: FastifyInstance) {
     async (request, reply) => {
       const user = fastify.getUser(request);
 
-      resetDailyGiftProgressIfUserSkipClaimMoreThenDay(fastify, user.id);
+      await resetDailyGiftProgressIfUserSkipClaimMoreThenDay(fastify, user.id);
 
       const allDailyGifts = await fastify.dailyGiftService.getAllDailyGifts();
       const userLastClaimedGift =

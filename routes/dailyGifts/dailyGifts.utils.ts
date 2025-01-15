@@ -1,6 +1,5 @@
-import { FastifyInstance, FastifyReply } from "fastify";
-import { TWO_DAYS } from "./dailyGifts.constants.js";
-import { AbleToClaimInfo } from "../../models/dailyBonus/dailyBonus.types.js";
+import { FastifyInstance } from "fastify";
+import { ONE_DAY } from "./dailyGifts.constants.js";
 
 export const resetDailyGiftProgressIfUserSkipClaimMoreThenDay = async (
   fastify: FastifyInstance,
@@ -9,29 +8,9 @@ export const resetDailyGiftProgressIfUserSkipClaimMoreThenDay = async (
   const lastClaimedTime = await fastify.dailyGiftService.getLastClaimTime(
     userId
   );
-  const isUserDoNotBreakClaimRow = Date.now() - lastClaimedTime <= TWO_DAYS;
+  const isUserBreakClaimRow = Date.now() - lastClaimedTime > ONE_DAY;
 
-  if (!isUserDoNotBreakClaimRow) {
+  if (isUserBreakClaimRow) {
     await fastify.dailyGiftService.resetDailyGiftProgressForUser(userId);
-  }
-};
-
-export const getBadRequestMessage = (
-  giftId: number,
-  claimAvailabilityInfo: AbleToClaimInfo | null
-) => {
-  if (giftId <= 0) {
-    return `User can not claim gift with this id ${giftId}`;
-  }
-
-  if (claimAvailabilityInfo === null && giftId > 1) {
-    return `User can not claim gift with this id ${giftId}`;
-  }
-
-  if (
-    claimAvailabilityInfo &&
-    claimAvailabilityInfo.lastClaimedGiftId === giftId
-  ) {
-    return `User already claim this gift with id ${giftId}`;
   }
 };
