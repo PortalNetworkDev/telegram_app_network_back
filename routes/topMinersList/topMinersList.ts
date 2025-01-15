@@ -54,6 +54,8 @@ export default async function (fastify: FastifyInstance) {
             powerBalance: item.powerBalance,
             userId: item.userId,
             level: item.level,
+            firstName: item.firstName,
+            lastName: item.lastName,
           })) ?? [],
       };
     }
