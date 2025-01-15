@@ -1,5 +1,8 @@
 import createPlugin from "fastify-plugin";
-import { TopMinerListItemModel } from "./topMinersList.types";
+import {
+  TopMinerListItemModel,
+  TopMinerListItemModelWithUserName,
+} from "./topMinersList.types";
 export default createPlugin(async function (fastify, opts) {
   const createTable = `
     CREATE TABLE IF NOT EXISTS topMinersList (
@@ -21,11 +24,12 @@ export default createPlugin(async function (fastify, opts) {
   };
 
   const getUsersFromList = async (page: number, limit = 30) => {
-    const sql = `select * from topMinersList limit ${limit} offset ${
+    const sql = `select topMinersList.*, users.first_Name as firstName, users.last_Name as lastName from topMinersList join users on topMinersList.userId = users.id limit ${limit} offset ${
       limit * page
     }`;
 
-    const result = await fastify.dataBase.select<TopMinerListItemModel>(sql);
+    const result =
+      await fastify.dataBase.select<TopMinerListItemModelWithUserName>(sql);
 
     return result?.rows ?? null;
   };

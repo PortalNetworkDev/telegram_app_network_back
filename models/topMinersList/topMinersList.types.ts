@@ -5,11 +5,17 @@ export interface TopMinerListItemModel {
   level: number;
 }
 
+export interface TopMinerListItemModelWithUserName
+  extends TopMinerListItemModel {
+  firstName: string;
+  lastName: string;
+}
+
 export interface TopMinerListService {
   getUserCurrentPosition: (userId: number) => Promise<number | null>;
   getUsersFromList: (
     page: number,
     limit?: number
-  ) => Promise<TopMinerListItemModel[] | null>;
+  ) => Promise<TopMinerListItemModelWithUserName[] | null>;
   getMinersListLength: () => Promise<number>;
 }
