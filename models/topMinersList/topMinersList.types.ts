@@ -2,6 +2,7 @@ export interface TopMinerListItemModel {
   id: number;
   userId: number;
   powerBalance: number;
+  level: number;
 }
 
 export interface TopMinerListService {

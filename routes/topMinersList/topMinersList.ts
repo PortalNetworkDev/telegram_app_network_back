@@ -23,12 +23,14 @@ export default async function (fastify: FastifyInstance) {
     }
   );
 
-  fastify.get<{ Querystring: { page: number; limit: number } }>(
+  fastify.get<{ Querystring: { page: number; limit?: number } }>(
     "/getMinersList",
     { schema: { querystring: getMinersListSchema } },
     async (request, replay) => {
       const page = Number(request.query.page);
-      const limit = getLimit(Number(request.query.limit));
+      const limit = request.query?.limit
+        ? getLimit(Number(request.query.limit))
+        : 30;
 
       const listItems = currentMinersListLength - limit * (page + 1);
       const isHasNextPage =
@@ -51,7 +53,7 @@ export default async function (fastify: FastifyInstance) {
             position: item.id,
             powerBalance: item.powerBalance,
             userId: item.userId,
-            level: 0,
+            level: item.level,
           })) ?? [],
       };
     }
