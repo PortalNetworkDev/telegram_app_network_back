@@ -1,6 +1,11 @@
 import { FastifyPluginAsync } from "fastify";
 import createPlugin from "fastify-plugin";
 import { Transaction, TransactionModel } from "./transactions.types";
+import {
+  getTimePeriodSQLCondition,
+  transformSqlRowToTransactionData,
+  transformTransactionHistoryItemData,
+} from "./transactions.utils.js";
 
 export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
   const createTable = `  
@@ -35,9 +40,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     const result = await fastify.dataBase.select<TransactionModel>(sql, [id]);
 
     if (result?.rows[0]) {
-      return fastify.transactionsUtils.transformSqlRowToTransactionData(
-        result?.rows[0]
-      );
+      return transformSqlRowToTransactionData(result?.rows[0]);
     }
     return null;
   };
@@ -54,9 +57,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     ]);
 
     if (result?.rows) {
-      return result.rows.map((item) =>
-        fastify.transactionsUtils.transformSqlRowToTransactionData(item)
-      );
+      return result.rows.map((item) => transformSqlRowToTransactionData(item));
     }
 
     return [];
@@ -68,8 +69,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     limit = 20,
     offset = 0
   ): Promise<Transaction[]> => {
-    const period =
-      fastify.transactionsUtils.getTimePeriodSQLCondition(timePeriod);
+    const period = getTimePeriodSQLCondition(timePeriod);
 
     const sql = `SELECT * from transactions WHERE sender_id =? OR recipient_id=? AND ${period} limit ${limit} offset ${offset}`;
     const result = await fastify.dataBase.select<TransactionModel>(sql, [
@@ -86,7 +86,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
       ]);
 
       return result.rows.map((item) =>
-        fastify.transactionsUtils.transformTransactionHistoryItemData(
+        transformTransactionHistoryItemData(
           item,
           sender?.username ?? "",
           recipient?.username ?? ""
@@ -97,10 +97,25 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     return [];
   };
 
+  const getLastUserTransactions = async (userId: number, amount: number) => {
+    const sql = `select * from transactions where recipient_id = ? order by id DESC limit ${amount}`;
+
+    const result = await fastify.dataBase.select<TransactionModel>(sql, [
+      userId,
+    ]);
+
+    if (result?.rows) {
+      return result.rows.map((item) => transformSqlRowToTransactionData(item));
+    }
+
+    return [];
+  };
+
   fastify.decorate("transactions", {
     addTransaction,
     getTransactionById,
     getTransactionsByUserId,
     getTransactionsByUserIdAndTime,
+    getLastUserTransactions,
   });
 });

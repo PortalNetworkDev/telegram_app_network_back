@@ -46,6 +46,22 @@ const validateUsers = (
   return reply;
 };
 
+const saveNotificationInfo = async (
+  fastify: FastifyInstance,
+  userId: number
+) => {
+  const affectedRowsNumber =
+    await fastify.notifications.transactions.incrementNotificationAmount(
+      userId
+    );
+
+  if (affectedRowsNumber === 0) {
+    await fastify.notifications.transactions.addNotificationInfoIfNotExists(
+      userId
+    );
+  }
+};
+
 const makeTransferOfPower = async (
   fastify: FastifyInstance,
   recipientInstance: UserModel | null,
@@ -77,6 +93,8 @@ const makeTransferOfPower = async (
       powerAmount: sendPowerAmount,
       creationTime: Date.now(),
     });
+
+    await saveNotificationInfo(fastify, recipientInstance?.id ?? 0);
   } catch (error) {
     console.log("error in addTransaction", error);
   }

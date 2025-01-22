@@ -54,6 +54,11 @@ export default async function (fastify: FastifyInstance) {
         userMiningLevel = level;
       }
 
+      const notificationsAmount =
+        await fastify.notifications.transactions.getNotificationAmount(
+          _user.id
+        );
+
       return {
         ...user,
         ...obj,
@@ -64,6 +69,7 @@ export default async function (fastify: FastifyInstance) {
           userMiningLevel,
           FIRST_LEVEL_BALANCE_AMOUNT
         ),
+        notifications: notificationsAmount,
       };
     }
   );

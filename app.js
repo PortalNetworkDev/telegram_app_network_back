@@ -22,8 +22,8 @@ export default async function (fastify, opts) {
   fastify.register(AutoLoad, {
     dir: join(__dirname, "/build/models"),
     options: Object.assign({}, opts),
-    ignorePattern: /^.*(?:\.ts|\.types.js)$/,
-    maxDepth: 1,
+    ignorePattern: /^.*(?:\.ts|\.schemes.js|\.types.js|\.utils.js|\.constants.js)$/
+
   });
   fastify.register(AutoLoad, {
     dir: join(__dirname, "/build/routes"),
