@@ -37,7 +37,7 @@ export default async function (fastify: FastifyInstance) {
 
       const isHasNextPage =
         listItems > 0 && listItems !== currentMinersListLength;
-      console.log(currentMinersListLength / limit);
+
       //придумать как не дергать запрос если page больше доступной
       const list = await fastify.topMinersListService.getUsersFromList(
         page,
