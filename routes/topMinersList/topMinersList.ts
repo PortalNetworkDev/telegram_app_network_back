@@ -24,7 +24,7 @@ export default async function (fastify: FastifyInstance) {
     "/getMinersList",
     { schema: { querystring: getMinersListSchema } },
     async (request, replay) => {
-      //попробовать как-то сделать чтобы подсчет происходил только когда обновилась таблица 
+      //попробовать как-то сделать чтобы подсчет происходил только когда обновилась таблица
       const currentMinersListLength =
         await fastify.topMinersListService.getMinersListLength();
 
@@ -37,7 +37,8 @@ export default async function (fastify: FastifyInstance) {
 
       const isHasNextPage =
         listItems > 0 && listItems !== currentMinersListLength;
-
+      console.log(currentMinersListLength / limit);
+      //придумать как не дергать запрос если page больше доступной
       const list = await fastify.topMinersListService.getUsersFromList(
         page,
         limit

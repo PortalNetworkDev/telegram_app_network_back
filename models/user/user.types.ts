@@ -32,6 +32,8 @@ export interface UserService {
     userId: number,
     skinType: keyof typeof SkinType
   ) => Promise<number>;
+
+  getUsersInfoByIds: (userIds: number[]) => Promise<UserModel[]>;
 }
 
 export interface User {

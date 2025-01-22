@@ -16,6 +16,7 @@ import { ShopLotteryService } from "../models/shopLottery/shopLottery.types";
 import { GeneratorRecoveryBoostService } from "../models/dailyBoosts/dailyBoosts.types";
 import { DailyBonusService } from "../models/dailyBonus/dailyBonus.types";
 import { TopMinerListService } from "../models/topMinersList/topMinersList.types";
+import { NotificationService } from "../models/notifications/notifications.types";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -38,5 +39,6 @@ declare module "fastify" {
     generatorRecoveryBoost: GeneratorRecoveryBoostService;
     dailyGiftService: DailyBonusService;
     topMinersListService: TopMinerListService;
+    notifications: NotificationService;
   }
 }

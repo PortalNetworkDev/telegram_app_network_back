@@ -33,4 +33,6 @@ export interface TransactionsService {
     limit?: number,
     offset?: number
   ) => Promise<Transaction[]>;
+
+  getLastUserTransactions: (userId: number, amount: number) => Promise<Transaction[]>
 }

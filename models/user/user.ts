@@ -275,6 +275,15 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     return id;
   };
 
+  const getUsersInfoByIds = async (userIds: number[]) => {
+    const data = userIds.join(",");
+    const sql = `select first_name,last_name,username from users where id in (${data})`;
+
+    const result = await fastify.dataBase.select<UserModel>(sql);
+ 
+    return result?.rows ?? [];
+  };
+
   if (!(await userExist(1)))
     await createUser(
       {
@@ -311,5 +320,6 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     selectUserGeneratorSkin,
     selectUserBatterySkin,
     getSelectedUserSkin,
+    getUsersInfoByIds,
   });
 });

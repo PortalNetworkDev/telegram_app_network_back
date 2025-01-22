@@ -97,10 +97,27 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     return [];
   };
 
+  const getLastUserTransactions = async (userId: number, amount: number) => {
+    const sql = `select * from transactions where recipient_id = ? order by id DESC limit ${amount}`;
+
+    const result = await fastify.dataBase.select<TransactionModel>(sql, [
+      userId,
+    ]);
+
+    if (result?.rows) {
+      return result.rows.map((item) =>
+        fastify.transactionsUtils.transformSqlRowToTransactionData(item)
+      );
+    }
+
+    return [];
+  };
+
   fastify.decorate("transactions", {
     addTransaction,
     getTransactionById,
     getTransactionsByUserId,
     getTransactionsByUserIdAndTime,
+    getLastUserTransactions,
   });
 });
