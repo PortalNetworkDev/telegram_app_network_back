@@ -1,4 +1,5 @@
 export interface Transaction {
+  id?: number;
   senderId: number;
   recipientId: number;
   powerAmount: number;
@@ -34,5 +35,8 @@ export interface TransactionsService {
     offset?: number
   ) => Promise<Transaction[]>;
 
-  getLastUserTransactions: (userId: number, amount: number) => Promise<Transaction[]>
+  getLastUserTransactions: (
+    userId: number,
+    amount: number
+  ) => Promise<Transaction[]>;
 }
