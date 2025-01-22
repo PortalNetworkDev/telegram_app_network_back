@@ -51,6 +51,7 @@ export default async function (fastify: FastifyInstance) {
       });
 
       return result.map((item) => ({
+        id: item.id,
         sender: {
           id: item.senderId,
           userName: usersInfoMap[item.senderId].username,
@@ -95,7 +96,7 @@ export default async function (fastify: FastifyInstance) {
 
         return randomDate;
       };
-   
+
       for (let index = 0; index < length; index++) {
         const randomDate = getRandomDate(1);
 

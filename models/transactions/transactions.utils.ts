@@ -7,6 +7,7 @@ import {
 export const transformSqlRowToTransactionData = (
   input: TransactionModel
 ): Transaction => ({
+  id: input.id,
   senderId: input.sender_id,
   recipientId: input.recipient_id,
   powerAmount: input.power_amount,
