@@ -50,19 +50,22 @@ export default async function (fastify: FastifyInstance) {
         usersInfoMap[item.id] = rest;
       });
 
-      return result.map((item) => ({
-        id: item.id,
-        sender: {
-          id: item.senderId,
-          userName: usersInfoMap[item.senderId].username,
-        },
-        recipient: {
-          id: item.recipientId,
-          userName: usersInfoMap[item.recipientId].username,
-        },
-        powerAmount: item.powerAmount,
-        creationTime: item.creationTime,
-      }));
+      return {
+        status: "ok",
+        items: result.map((item) => ({
+          id: item.id,
+          sender: {
+            id: item.senderId,
+            userName: usersInfoMap[item.senderId].username,
+          },
+          recipient: {
+            id: item.recipientId,
+            userName: usersInfoMap[item.recipientId].username,
+          },
+          powerAmount: item.powerAmount,
+          creationTime: item.creationTime,
+        })),
+      };
     }
   );
 
@@ -72,7 +75,39 @@ export default async function (fastify: FastifyInstance) {
       const transaction = await fastify.transactions.getTransactionById(
         request.query.id
       );
-      return transaction;
+
+      if (transaction) {
+        const senderInfo = await fastify.modelsUser.getUser(
+          transaction?.senderId ?? 0
+        );
+
+        const recipientInfo = await fastify.modelsUser.getUser(
+          transaction?.recipientId ?? 0
+        );
+
+        return {
+          status: "ok",
+          transaction: {
+            id: transaction?.id,
+            sender: {
+              firstName: senderInfo?.first_name,
+              lastName: senderInfo?.last_name,
+              userName: senderInfo?.username,
+            },
+            recipient: {
+              firstName: recipientInfo?.first_name,
+              lastName: recipientInfo?.last_name,
+              userName: recipientInfo?.username,
+            },
+            powerAmount: transaction?.powerAmount,
+            creationTime: transaction?.creationTime,
+          },
+        };
+      }
+      
+      return replay.badRequest(
+        `There is no transaction with this id: ${request.query.id}`
+      );
     }
   );
 
