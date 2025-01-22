@@ -277,7 +277,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
 
   const getUsersInfoByIds = async (userIds: number[]) => {
     const data = userIds.join(",");
-    const sql = `select first_name,last_name,username from users where id in (${data})`;
+    const sql = `select first_name,last_name,username,id from users where id in (${data})`;
 
     const result = await fastify.dataBase.select<UserModel>(sql);
  

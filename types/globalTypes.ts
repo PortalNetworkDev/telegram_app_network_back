@@ -2,7 +2,7 @@ import { MySQLPromisePool } from "@fastify/mysql";
 import { DataBase } from "../plugins/mysql/mysql.types";
 import { Config } from "../plugins/config/config.types";
 import { TransactionsService } from "../models/transactions/transactions.types";
-import { TransactionsUtils } from "../models/transactions/utils/utils.types";
+
 import { MiningPowerService } from "../models/miningPower/miningPower.types";
 import { BalanceHistoryService } from "../models/balanceHisotry/balanceHistory.types";
 import { TaskService } from "../models/tasks/tasks.types";
@@ -32,7 +32,6 @@ declare module "fastify" {
     auth: Authentication;
     getUser: GetUserFromRequest;
     sendTonToken: SendTonToken;
-    transactionsUtils: TransactionsUtils;
     calculationUtils: CalculationUtils;
     skinsShop: SkinShopService;
     shopLottery: ShopLotteryService;

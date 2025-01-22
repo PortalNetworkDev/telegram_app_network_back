@@ -31,10 +31,11 @@ export default async function (fastify: FastifyInstance) {
       const sendersInfo = await fastify.modelsUser.getUsersInfoByIds(
         Array.from(senderIds)
       );
-      const sendersInfoMap: Record<number, UserModel> = {};
+      const sendersInfoMap: Record<number, Omit<UserModel, "id">> = {};
 
-      Array.from(senderIds).forEach((item, index) => {
-        sendersInfoMap[item] = sendersInfo[index];
+      sendersInfo.forEach((item) => {
+        const { id, ...rest } = item;
+        sendersInfoMap[item.id] = rest;
       });
 
       const resultData = transactions.map((item) => ({
