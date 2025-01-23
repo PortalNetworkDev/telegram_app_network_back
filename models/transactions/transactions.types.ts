@@ -39,4 +39,6 @@ export interface TransactionsService {
     userId: number,
     amount: number
   ) => Promise<Transaction[]>;
+
+  getTransactionsTableLength: (userId: number) => Promise<number>;
 }
