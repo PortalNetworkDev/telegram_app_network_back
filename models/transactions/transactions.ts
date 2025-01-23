@@ -111,11 +111,22 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     return [];
   };
 
+  const getTransactionsTableLength = async (userId: number) => {
+    const sql = `select count(*) as count from transactions where sender_id =? OR recipient_id=?`;
+    const result = await fastify.dataBase.query<{ count: number }>(sql, [
+      userId,
+      userId,
+    ]);
+
+    return result?.rows[0].count ?? 0;
+  };
+
   fastify.decorate("transactions", {
     addTransaction,
     getTransactionById,
     getTransactionsByUserId,
     getTransactionsByUserIdAndTime,
     getLastUserTransactions,
+    getTransactionsTableLength,
   });
 });

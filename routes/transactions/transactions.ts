@@ -22,6 +22,8 @@ export default async function (fastify: FastifyInstance) {
 
       const userId = fastify.getUser(request).id;
       const returnedRowsLimit = limit > 50 ? 50 : limit;
+      const currentTransactionsListLength =
+        await fastify.transactions.getTransactionsTableLength(userId);
 
       const result = await fastify.transactions.getTransactionsByUserId(
         userId,
@@ -32,6 +34,11 @@ export default async function (fastify: FastifyInstance) {
       if (result.length === 0) {
         return { status: "ok", items: [] };
       }
+
+      const listItems = currentTransactionsListLength - limit * (page + 1);
+
+      const isHasNextPage =
+        listItems > 0 && listItems !== currentTransactionsListLength;
 
       const usersIds = new Set<number>();
 
@@ -52,6 +59,7 @@ export default async function (fastify: FastifyInstance) {
 
       return {
         status: "ok",
+        isHasNextPage,
         items: result.map((item) => ({
           id: item.id,
           sender: {
@@ -104,7 +112,7 @@ export default async function (fastify: FastifyInstance) {
           },
         };
       }
-      
+
       return replay.badRequest(
         `There is no transaction with this id: ${request.query.id}`
       );
