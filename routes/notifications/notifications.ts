@@ -51,4 +51,17 @@ export default async function (fastify: FastifyInstance) {
       return { status: "ok", items: resultData };
     }
   );
+
+  fastify.get(
+    "/checkNotifications",
+    { onRequest: [fastify.auth] },
+    async (request, reply) => {
+      const userId = fastify.getUser(request).id;
+
+      const amount =
+        await fastify.notifications.transactions.getNotificationAmount(userId);
+
+      return { status: "ok", amount };
+    }
+  );
 }
