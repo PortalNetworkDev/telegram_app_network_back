@@ -173,15 +173,13 @@ export default async function (fastify: FastifyInstance) {
         return reply.badRequest("Funds amount should be more then 0");
       }
 
-      if (recipientId && senderId) {
-        await handleRequest({
-          fastify,
-          reply,
-          sendPowerAmount,
-          senderId,
-          recipient: { id: recipientId },
-        });
-      }
+      await handleRequest({
+        fastify,
+        reply,
+        sendPowerAmount,
+        senderId,
+        recipient: { id: recipientId },
+      });
     }
   );
 }
