@@ -64,11 +64,11 @@ export default async function (fastify: FastifyInstance) {
           id: item.id,
           sender: {
             id: item.senderId,
-            userName: usersInfoMap[item.senderId].username,
+            userName: usersInfoMap[item.senderId]?.username,
           },
           recipient: {
             id: item.recipientId,
-            userName: usersInfoMap[item.recipientId].username,
+            userName: usersInfoMap[item.recipientId]?.username,
           },
           powerAmount: item.powerAmount,
           creationTime: item.creationTime,
