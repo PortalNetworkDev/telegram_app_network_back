@@ -50,7 +50,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
     limit = 20,
     offset = 0
   ): Promise<Transaction[]> => {
-    const sql = `SELECT * from transactions WHERE sender_id =? OR recipient_id=? limit ${limit} offset ${offset}`;
+    const sql = `SELECT * from transactions WHERE sender_id =? OR recipient_id=? order by id DESC limit ${limit} offset ${offset} `;
     const result = await fastify.dataBase.select<TransactionModel>(sql, [
       id,
       id,
@@ -112,7 +112,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
   };
 
   const getTransactionsTableLength = async (userId: number) => {
-    const sql = `select count(*) as count from transactions where sender_id =? OR recipient_id=?`;
+    const sql = `select count(*) as count from transactions where sender_id =? OR recipient_id=? `;
     const result = await fastify.dataBase.query<{ count: number }>(sql, [
       userId,
       userId,
