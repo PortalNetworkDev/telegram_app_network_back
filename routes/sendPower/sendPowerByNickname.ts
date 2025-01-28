@@ -24,26 +24,31 @@ const validateUsers = (
   recipientInstance: UserModel | null,
   senderInstance: UserModel | null,
   senderBalance: number,
-  sendPowerAmount: number,
-  reply: FastifyReply
+  sendPowerAmount: number
 ) => {
   if (recipientInstance?.id === senderInstance?.id) {
-    return reply.badRequest("Recipient and sender should not be same");
+    return {
+      isValid: false,
+      message: "Recipient and sender should not be same",
+    };
   }
 
   if (senderBalance < sendPowerAmount) {
-    return reply.badRequest("Sender has not enough power value to send");
+    return {
+      isValid: false,
+      message: "Sender has not enough power value to send",
+    };
   }
 
   if (!recipientInstance) {
-    return reply.badRequest("Recipient do not exists");
+    return { isValid: false, message: "Recipient do not exists" };
   }
 
   if (!senderInstance) {
-    return reply.badRequest("Sender do not exists");
+    return { isValid: false, message: "Sender do not exists" };
   }
 
-  return reply;
+  return { isValid: true };
 };
 
 const saveNotificationInfo = async (
@@ -117,13 +122,16 @@ const handleRequest = async ({
     fastify.miningPower.getUserPowerBalance(senderId),
   ]);
 
-  validateUsers(
+  const { isValid, message } = validateUsers(
     recipientInstance,
     senderInstance,
     senderBalance,
-    sendPowerAmount,
-    reply
+    sendPowerAmount
   );
+
+  if (!isValid) {
+    return reply.badRequest(message);
+  }
 
   await makeTransferOfPower(
     fastify,
