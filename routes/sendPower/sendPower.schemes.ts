@@ -1,6 +1,6 @@
 export const sendByIdBodySchema = {
   type: "object",
-  required: ["recipientId"],
+  required: ["recipientId", "amount"],
   properties: {
     recipientId: { type: "number" },
     amount: { type: "number" },
@@ -9,7 +9,7 @@ export const sendByIdBodySchema = {
 
 export const sendByNickNameBodySchema = {
   type: "object",
-  required: ["recipient"],
+  required: ["recipient", "amount"],
   properties: {
     recipient: { type: "string" },
     amount: { type: "number" },

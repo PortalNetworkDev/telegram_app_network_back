@@ -1,4 +1,10 @@
 import { FastifyInstance } from "fastify";
+import {
+  saveInviterNotificationInfo,
+  saveNotificationInfo,
+  saveReferralNotificationInfo,
+} from "../../models/notifications/notifications.utils.js";
+import { NotificationsTypes } from "../../models/notifications/notifications.constants.js";
 
 interface Body {
   user_id: number;
@@ -59,7 +65,11 @@ export default async function (fastify: FastifyInstance) {
       if (user) {
         if (await fastify.modelsUser.checkReferaluser(user_id, user.id))
           return reply.badRequest("already_follow");
-        fastify.modelsUser.addReferralUser(user_id, user.id);
+        await fastify.modelsUser.addReferralUser(user_id, user.id);
+
+        await saveInviterNotificationInfo(fastify, user_id);
+
+        await saveReferralNotificationInfo(fastify, user.id);
       }
 
       return { code: "succcess" };

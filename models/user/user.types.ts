@@ -34,6 +34,8 @@ export interface UserService {
   ) => Promise<number>;
 
   getUsersInfoByIds: (userIds: number[]) => Promise<UserModel[]>;
+  getLastInviterForRefUser: (userId: number) => Promise<UserModel | null>;
+  getLastReferralForUser: (userId: number) => Promise<UserModel | null>;
 }
 
 export interface User {

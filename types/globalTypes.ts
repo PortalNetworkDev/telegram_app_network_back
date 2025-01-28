@@ -17,6 +17,8 @@ import { GeneratorRecoveryBoostService } from "../models/dailyBoosts/dailyBoosts
 import { DailyBonusService } from "../models/dailyBonus/dailyBonus.types";
 import { TopMinerListService } from "../models/topMinersList/topMinersList.types";
 import { NotificationService } from "../models/notifications/notifications.types";
+import { ReferralNotificationsService } from "../models/notifications/referrals/referral.types";
+import { TransactionsNotificationsService } from "../models/notifications/transactions/transactions.types";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -38,6 +40,7 @@ declare module "fastify" {
     generatorRecoveryBoost: GeneratorRecoveryBoostService;
     dailyGiftService: DailyBonusService;
     topMinersListService: TopMinerListService;
-    notifications: NotificationService;
+    transactionsNotifications: TransactionsNotificationsService;
+    referralNotifications: ReferralNotificationsService;
   }
 }

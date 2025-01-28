@@ -79,6 +79,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
 
     await fastify.miningPower.getMiningData(userId); //проверка данных пользователя
     await fastify.miningPower.getMiningData(referralUserId); //проверка данных пользователя
+
     await fastify.miningPower.addPowerBalance(
       userId,
       Number(fastify.config.forReferalPowerReward)
@@ -152,6 +153,20 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     const sql = `update referal_users set is_rewarded = 1 where user_id = ? and referal_user_id = ?`;
     console.log("setRewarded", userId, referalUserId);
     await fastify.dataBase.update(sql, [userId, referalUserId]);
+  };
+
+  const getLastReferralForUser = async (userId: number) => {
+    const sql = `select * from users join referal_users on users.id = referal_users.referal_user_id  where referal_users.user_id = ? order by referal_users.last_updated DESC limit 1`;
+    const result = await fastify.dataBase.select<UserModel>(sql, [userId]);
+
+    return result?.rows[0] ?? null;
+  };
+
+  const getLastInviterForRefUser = async (userId: number) => {
+    const sql = `select * from users join referal_users on users.id = referal_users.user_id  where referal_users.referal_user_id = ? order by referal_users.last_updated DESC limit 1`;
+    const result = await fastify.dataBase.select<UserModel>(sql, [userId]);
+
+    return result?.rows[0] ?? null;
   };
 
   const updateLastUpdated = async (userId: number) => {
@@ -280,7 +295,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     const sql = `select first_name,last_name,username,id from users where id in (${data})`;
 
     const result = await fastify.dataBase.select<UserModel>(sql);
- 
+
     return result?.rows ?? [];
   };
 
@@ -321,5 +336,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     selectUserBatterySkin,
     getSelectedUserSkin,
     getUsersInfoByIds,
+    getLastReferralForUser,
+    getLastInviterForRefUser,
   });
 });
