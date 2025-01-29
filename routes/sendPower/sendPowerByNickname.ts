@@ -30,6 +30,7 @@ const validateUsers = (
     return {
       isValid: false,
       message: "Recipient and sender should not be same",
+      code: 4001,
     };
   }
 
@@ -37,15 +38,16 @@ const validateUsers = (
     return {
       isValid: false,
       message: "Sender has not enough power value to send",
+      code: 4002,
     };
   }
 
   if (!recipientInstance) {
-    return { isValid: false, message: "Recipient do not exists" };
+    return { isValid: false, message: "Recipient do not exists", code: 4003 };
   }
 
   if (!senderInstance) {
-    return { isValid: false, message: "Sender do not exists" };
+    return { isValid: false, message: "Sender do not exists", code: 4004 };
   }
 
   return { isValid: true };
@@ -122,7 +124,7 @@ const handleRequest = async ({
     fastify.miningPower.getUserPowerBalance(senderId),
   ]);
 
-  const { isValid, message } = validateUsers(
+  const { isValid, message, code } = validateUsers(
     recipientInstance,
     senderInstance,
     senderBalance,
@@ -130,7 +132,7 @@ const handleRequest = async ({
   );
 
   if (!isValid) {
-    return reply.badRequest(message);
+    return reply.code(400).send({ message, code });
   }
 
   await makeTransferOfPower(
@@ -153,7 +155,10 @@ export default async function (fastify: FastifyInstance) {
       const sendPowerAmount = request.body.amount;
 
       if (sendPowerAmount < 0) {
-        return reply.badRequest("Funds amount should be more then 0");
+        return reply.code(400).send({
+          message: "Funds amount should be more then 0",
+          code: 4005,
+        });
       }
 
       if (recipientName && senderId) {
@@ -178,7 +183,10 @@ export default async function (fastify: FastifyInstance) {
       const sendPowerAmount = request.body.amount;
 
       if (sendPowerAmount < 0) {
-        return reply.badRequest("Funds amount should be more then 0");
+        return reply.code(400).send({
+          message: "Funds amount should be more then 0",
+          code: 4005,
+        });
       }
 
       await handleRequest({
