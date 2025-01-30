@@ -9,7 +9,6 @@ export type Authentication = (req: FastifyRequest, res: FastifyReply) => void;
 export type GetUserFromRequest = (req: FastifyRequest) => User;
 
 export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
-
   fastify.decorate("getUser", function (req: FastifyRequest) {
     return JSON.parse(
       new URLSearchParams(req.headers.authorization)?.get("user") ?? ""
