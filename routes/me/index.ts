@@ -75,6 +75,9 @@ export default async function (fastify: FastifyInstance) {
         ...obj,
         currentGeneratorSkinUrl: currentGeneratorSkin?.imageUrl ?? "",
         currentBatterySkinUrl: currentBatterySkin?.imageUrl ?? "",
+        isGeneratorSkinWithLightInCenter: Boolean(
+          currentGeneratorSkin?.withLightInCenter
+        ),
         level: userMiningLevel,
         nextLevelPowerBalance: fastify.calculationUtils.getNextMiningLevelEdge(
           userMiningLevel,

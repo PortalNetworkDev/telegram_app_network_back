@@ -1,5 +1,6 @@
 import createPlugin from "fastify-plugin";
 import { SkinModel, PurchasedSkinsModel, SkinType } from "./skins.types.js";
+import skins from "../../routes/static/skins.js";
 
 export default createPlugin(async function (fastify, opts) {
   const createSkinsTable = `
@@ -8,7 +9,8 @@ export default createPlugin(async function (fastify, opts) {
             price FLOAT NOT NULL,
             name CHAR(255),
             imageUrl CHAR(255),
-            type TINYINT
+            type TINYINT,
+            withLightInCenter BOOLEAN DEFAULT 0
         );`;
 
   const createUsersPurchasedSkins = `
@@ -84,6 +86,15 @@ export default createPlugin(async function (fastify, opts) {
     return result?.rows[0] ?? null;
   };
 
+  const getIsSkinWithLitherInCenter = async (skinId: number) => {
+    const sql = `select withLightInCenter from skins where skin.id = ?`;
+    const result = await fastify.dataBase.select<
+      Pick<SkinModel, "withLightInCenter">
+    >(sql, [skinId]);
+
+    return result?.rows[0].withLightInCenter ?? false;
+  };
+
   fastify.decorate("skinsShop", {
     addPurchasedSkin,
     getAllSkins,
@@ -91,5 +102,6 @@ export default createPlugin(async function (fastify, opts) {
     getAllSkinsForUser,
     getInfoAboutSkin,
     getAllSkinsByType,
+    getIsSkinWithLitherInCenter,
   });
 });
