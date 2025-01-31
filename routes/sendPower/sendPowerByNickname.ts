@@ -26,26 +26,33 @@ const validateUsers = (
   recipientInstance: UserModel | null,
   senderInstance: UserModel | null,
   senderBalance: number,
-  sendPowerAmount: number,
-  reply: FastifyReply
+  sendPowerAmount: number
 ) => {
   if (recipientInstance?.id === senderInstance?.id) {
-    return reply.badRequest("Recipient and sender should not be same");
+    return {
+      isValid: false,
+      message: "Recipient and sender should not be same",
+      code: 4001,
+    };
   }
 
   if (senderBalance < sendPowerAmount) {
-    return reply.badRequest("Sender has not enough power value to send");
+    return {
+      isValid: false,
+      message: "Sender has not enough power value to send",
+      code: 4002,
+    };
   }
 
   if (!recipientInstance) {
-    return reply.badRequest("Recipient do not exists");
+    return { isValid: false, message: "Recipient do not exists", code: 4003 };
   }
 
   if (!senderInstance) {
-    return reply.badRequest("Sender do not exists");
+    return { isValid: false, message: "Sender do not exists", code: 4004 };
   }
 
-  return reply;
+  return { isValid: true };
 };
 
 const makeTransferOfPower = async (
@@ -103,13 +110,16 @@ const handleRequest = async ({
     fastify.miningPower.getUserPowerBalance(senderId),
   ]);
 
-  validateUsers(
+  const { isValid, message, code } = validateUsers(
     recipientInstance,
     senderInstance,
     senderBalance,
-    sendPowerAmount,
-    reply
+    sendPowerAmount
   );
+
+  if (!isValid) {
+    return reply.code(400).send({ message, code });
+  }
 
   await makeTransferOfPower(
     fastify,
@@ -131,7 +141,10 @@ export default async function (fastify: FastifyInstance) {
       const sendPowerAmount = request.body.amount;
 
       if (sendPowerAmount < 0) {
-        return reply.badRequest("Funds amount should be more then 0");
+        return reply.code(400).send({
+          message: "Funds amount should be more then 0",
+          code: 4005,
+        });
       }
 
       if (recipientName && senderId) {
@@ -156,18 +169,19 @@ export default async function (fastify: FastifyInstance) {
       const sendPowerAmount = request.body.amount;
 
       if (sendPowerAmount < 0) {
-        return reply.badRequest("Funds amount should be more then 0");
-      }
-
-      if (recipientId && senderId) {
-        await handleRequest({
-          fastify,
-          reply,
-          sendPowerAmount,
-          senderId,
-          recipient: { id: recipientId },
+        return reply.code(400).send({
+          message: "Funds amount should be more then 0",
+          code: 4005,
         });
       }
+
+      await handleRequest({
+        fastify,
+        reply,
+        sendPowerAmount,
+        senderId,
+        recipient: { id: recipientId },
+      });
     }
   );
 }

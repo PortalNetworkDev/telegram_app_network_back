@@ -4,6 +4,7 @@ export interface SkinModel {
   imageUrl: string;
   name: string;
   type: number;
+  withLightInCenter: boolean;
 }
 
 export interface PurchasedSkinsModel {
@@ -32,4 +33,5 @@ export interface SkinShopService {
   getAllSkinsByType: (
     skinType: keyof typeof SkinType
   ) => Promise<SkinModel[] | null>;
+  getIsSkinWithLitherInCenter: (skinId: number) => Promise<boolean>;
 }

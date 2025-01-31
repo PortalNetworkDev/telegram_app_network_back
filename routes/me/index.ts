@@ -1,6 +1,8 @@
 "use strict";
 
 import { FastifyInstance } from "fastify";
+import TelegramBot from "node-telegram-bot-api";
+import { getUserAvatarUrlIfItExists } from "../../utils/tg/tg.utils.js";
 
 export default async function (fastify: FastifyInstance) {
   const FIRST_LEVEL_BALANCE_AMOUNT = Number(
@@ -18,6 +20,15 @@ export default async function (fastify: FastifyInstance) {
         fastify.skinsShop.getInfoAboutSkin(user?.selectedGeneratorSkinId ?? 1),
         fastify.skinsShop.getInfoAboutSkin(user?.selectedBatterySkinId ?? 11),
       ]);
+
+      let userAvatarUrl = "";
+
+      if (_user.photo_url === undefined) {
+        //вынести во что-то на подобие сингелтона и переспользовать в других местах
+        const bot = new TelegramBot((fastify.config?.bottoken ?? "") as string);
+
+        userAvatarUrl = await getUserAvatarUrlIfItExists(bot, _user.id);
+      }
 
       const obj = { balance: 0, power_balance: 0 };
 
@@ -62,11 +73,15 @@ export default async function (fastify: FastifyInstance) {
         ...obj,
         currentGeneratorSkinUrl: currentGeneratorSkin?.imageUrl ?? "",
         currentBatterySkinUrl: currentBatterySkin?.imageUrl ?? "",
+        isGeneratorSkinWithLightInCenter: Boolean(
+          currentGeneratorSkin?.withLightInCenter
+        ),
         level: userMiningLevel,
         nextLevelPowerBalance: fastify.calculationUtils.getNextMiningLevelEdge(
           userMiningLevel,
           FIRST_LEVEL_BALANCE_AMOUNT
         ),
+        userAvatarUrl: _user?.photo_url ?? userAvatarUrl,
         notifications: notificationsAmount,
       };
     }

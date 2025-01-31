@@ -47,6 +47,7 @@ export interface User {
   language_code: "en" | "ru";
   is_premium: boolean;
   allows_write_to_pm: boolean;
+  photo_url?: string;
 }
 
 export interface UserModel extends User {
