@@ -4,6 +4,8 @@ import {
   sendByNickNameBodySchema,
 } from "./sendPower.schemes.js";
 import { UserModel } from "../../models/user/user.types";
+import { saveNotificationInfo } from "../../models/notifications/notifications.utils.js";
+import { NotificationsTypes } from "../../models/notifications/notifications.constants.js";
 
 interface Body {
   recipient: string;
@@ -51,22 +53,6 @@ const validateUsers = (
   }
 
   return { isValid: true };
-};
-
-const saveNotificationInfo = async (
-  fastify: FastifyInstance,
-  userId: number
-) => {
-  const affectedRowsNumber =
-    await fastify.notifications.transactions.incrementNotificationAmount(
-      userId
-    );
-
-  if (affectedRowsNumber === 0) {
-    await fastify.notifications.transactions.addNotificationInfoIfNotExists(
-      userId
-    );
-  }
 };
 
 const makeTransferOfPower = async (
@@ -142,7 +128,7 @@ const handleRequest = async ({
     sendPowerAmount
   );
 
-  return { statusCose: 200, status: "ok" };
+  reply.code(200).send({ statusCose: 200, status: "ok" });
 };
 
 export default async function (fastify: FastifyInstance) {

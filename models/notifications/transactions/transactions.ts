@@ -48,14 +48,11 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     return result?.rows[0]?.recentTransactionsAmount ?? 0;
   }
 
-
-  fastify.decorate("notifications", {
-    transactions: {
-      addNotificationInfo,
-      addNotificationInfoIfNotExists,
-      incrementNotificationAmount,
-      resetNotificationAmount,
-      getNotificationAmount,
-    },
+  fastify.decorate("transactionsNotifications", {
+    addNotificationInfo,
+    addNotificationInfoIfNotExists,
+    incrementNotificationAmount,
+    resetNotificationAmount,
+    getNotificationAmount,
   });
 });

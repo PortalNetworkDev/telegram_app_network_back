@@ -4,6 +4,12 @@ import createPlugin from "fastify-plugin";
 import CryptoJS from "crypto-js";
 import { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import { User } from "../models/user/user.types";
+import {
+  saveInviterNotificationInfo,
+  saveNotificationInfo,
+  saveReferralNotificationInfo,
+} from "../models/notifications/notifications.utils.js";
+import { NotificationsTypes } from "../models/notifications/notifications.constants.js";
 
 export type Authentication = (req: FastifyRequest, res: FastifyReply) => void;
 export type GetUserFromRequest = (req: FastifyRequest) => User;
@@ -53,6 +59,10 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
           ) {
             await fastify.modelsUser.addReferralUser(userId, user.id);
             await fastify.modelsTasks.compliteTask(7, userId, "");
+
+            await saveReferralNotificationInfo(fastify, userId);
+
+            await saveInviterNotificationInfo(fastify, user.id);
           }
         }
       } else {

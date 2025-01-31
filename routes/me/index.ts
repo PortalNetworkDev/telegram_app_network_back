@@ -66,9 +66,7 @@ export default async function (fastify: FastifyInstance) {
       }
 
       const notificationsAmount =
-        await fastify.notifications.transactions.getNotificationAmount(
-          _user.id
-        );
+        await fastify.transactionsNotifications.getNotificationAmount(_user.id);
 
       return {
         ...user,
