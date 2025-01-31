@@ -18,7 +18,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     transactionsAmount: number
   ) {
     const sql =
-      "insert into notificationsAboutTransactions (userId,recentTransactionsAmount) values (?,?,?)";
+      "insert into notificationsAboutTransactions (userId,recentTransactionsAmount) values (?,?)";
     await fastify.dataBase.insert(sql, [userId, transactionsAmount]);
   }
 

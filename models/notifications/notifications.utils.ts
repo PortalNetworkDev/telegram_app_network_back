@@ -19,7 +19,10 @@ export const saveReferralNotificationInfo = async (
   userId: number
 ) => {
   const affectedRows =
-    await fastify.referralNotifications.incrementNotificationAmount(userId);
+    await fastify.referralNotifications.incrementNotificationAmount(
+      userId,
+      "referral"
+    );
   if (affectedRows === 0) {
     await fastify.referralNotifications.addReferralNotificationIfNotExists(
       userId
@@ -32,7 +35,10 @@ export const saveInviterNotificationInfo = async (
   userId: number
 ) => {
   const affectedRows =
-    await fastify.referralNotifications.incrementNotificationAmount(userId);
+    await fastify.referralNotifications.incrementNotificationAmount(
+      userId,
+      "inviter"
+    );
   if (affectedRows === 0) {
     await fastify.referralNotifications.addInviterNotificationIfNotExists(
       userId

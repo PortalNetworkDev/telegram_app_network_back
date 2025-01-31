@@ -7,15 +7,12 @@ export default async function (fastify: FastifyInstance) {
       await fastify.transactionsNotifications.getNotificationAmount(userId);
 
     if (amount === 0) {
-      return {
-        status: "ok",
-        message: "there is not any notification for user",
-      };
+      return [];
     }
 
     const transactions = await fastify.transactions.getLastUserTransactions(
       userId,
-      amount
+      1
     );
 
     const senderIds = new Set<number>();
@@ -47,6 +44,15 @@ export default async function (fastify: FastifyInstance) {
     const notificationInfo =
       await fastify.referralNotifications.getNotificationInfo(userId);
 
+    const notificationAmount = notificationInfo?.reduce(
+      (acc, prev) => (acc += prev.notificationAmount),
+      0
+    );
+
+    if (notificationAmount === 0) {
+      return [];
+    }
+
     const referralInfo = await fastify.modelsUser.getLastReferralForUser(
       userId
     );
@@ -55,35 +61,89 @@ export default async function (fastify: FastifyInstance) {
       userId
     );
 
-    return notificationInfo?.map((item) => {
-      if (item.isReferral) {
-        return {
-          type: "referral",
-          powerAmount: Number(fastify.config.forReferalPowerReward),
-          inviterUserName: inviterInfo?.username,
-        };
-      }
+    return notificationInfo
+      ?.map((item) => {
+        if (item.type === "referral" && item.notificationAmount > 0) {
+          return {
+            type: "referral",
+            powerAmount: Number(fastify.config.forReferalPowerReward),
+            inviterUserName: inviterInfo?.username,
+          };
+        }
 
-      if (item.isInviter) {
-        return {
-          type: "invite",
-          powerAmount: Number(fastify.config.toReferalPowerReward),
-          refUserName: referralInfo?.username,
-        };
-      }
-    });
+        if (item.type === "inviter" && item.notificationAmount > 0) {
+          return {
+            type: "invite",
+            powerAmount: Number(fastify.config.toReferalPowerReward),
+            refUserName: referralInfo?.username,
+          };
+        }
+      })
+      .filter((item) => item);
+  };
+
+  const resetNotifications = async (userId: number) => {
+    await fastify.transactionsNotifications.resetNotificationAmount(userId);
+    await fastify.referralNotifications.resetNotificationAmount(userId);
   };
 
   fastify.get(
     "/getNotificationsInfo",
-    { onRequest: [fastify.auth] },
+    {
+      onRequest: [fastify.auth],
+      onResponse: [
+        async (request, reply) => {
+          const userId = fastify.getUser(request).id;
+          await resetNotifications(userId);
+        },
+      ],
+    },
     async (request, reply) => {
       const userId = fastify.getUser(request).id;
+
+      const [
+        transactionsNotificationsNumber,
+        referralSystemNotificationsNumber,
+      ] = await Promise.all([
+        fastify.transactionsNotifications.getNotificationAmount(userId),
+        fastify.referralNotifications.getNotificationAmount(userId),
+      ]);
+
+      if (
+        transactionsNotificationsNumber > 1 &&
+        referralSystemNotificationsNumber > 1
+      ) {
+        return {
+          status: "ok",
+          transactionsNotificationsNumber,
+          referralSystemNotificationsNumber,
+        };
+      }
+
       const transactionsResponse = await getTransactionResponse(userId);
       const referralResponse = await getReferralResponse(userId);
 
-      // await fastify.transactionsNotifications.resetNotificationAmount(userId);
-      // await fastify.referralNotifications.resetNotificationAmount(userId);
+      if (
+        transactionsNotificationsNumber === 1 &&
+        referralSystemNotificationsNumber > 1
+      ) {
+        return {
+          status: "ok",
+          transactions: transactionsResponse,
+          referralSystemNotificationsNumber,
+        };
+      }
+
+      if (
+        referralSystemNotificationsNumber === 1 &&
+        transactionsNotificationsNumber > 1
+      ) {
+        return {
+          status: "ok",
+          referral: referralResponse,
+          transactionsNotificationsNumber,
+        };
+      }
 
       return {
         status: "ok",
@@ -102,13 +162,13 @@ export default async function (fastify: FastifyInstance) {
       const transactionsNotificationsNumber =
         await fastify.transactionsNotifications.getNotificationAmount(userId);
 
-      const referralNotificationsNumber =
+      const referralSystemNotificationsNumber =
         await fastify.referralNotifications.getNotificationAmount(userId);
 
       return {
         status: "ok",
         transactionsNotificationsNumber,
-        referralNotificationsNumber,
+        referralSystemNotificationsNumber,
       };
     }
   );
