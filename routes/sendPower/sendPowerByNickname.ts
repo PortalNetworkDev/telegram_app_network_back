@@ -128,7 +128,7 @@ const handleRequest = async ({
     sendPowerAmount
   );
 
-  return { statusCose: 200, status: "ok" };
+  reply.code(200).send({ statusCose: 200, status: "ok" });
 };
 
 export default async function (fastify: FastifyInstance) {
