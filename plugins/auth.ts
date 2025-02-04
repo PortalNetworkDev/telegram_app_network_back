@@ -60,9 +60,9 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
             await fastify.modelsUser.addReferralUser(userId, user.id);
             await fastify.modelsTasks.compliteTask(7, userId, "");
 
-            await saveReferralNotificationInfo(fastify, userId);
+            await saveReferralNotificationInfo(fastify, user.id);
 
-            await saveInviterNotificationInfo(fastify, user.id);
+            await saveInviterNotificationInfo(fastify,userId);
           }
         }
       } else {

@@ -67,8 +67,8 @@ export default async function (fastify: FastifyInstance) {
           return reply.badRequest("already_follow");
         await fastify.modelsUser.addReferralUser(user_id, user.id);
 
-        await saveInviterNotificationInfo(fastify,user.id);
-        await saveReferralNotificationInfo(fastify, user_id );
+        await saveInviterNotificationInfo(fastify, user_id);
+        await saveReferralNotificationInfo(fastify, user.id);
       }
 
       return { code: "succcess" };
