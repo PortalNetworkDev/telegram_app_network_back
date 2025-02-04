@@ -125,7 +125,7 @@ export default async function (fastify: FastifyInstance) {
 
       if (
         transactionsNotificationsNumber === 1 &&
-        referralSystemNotificationsNumber > 1
+        referralSystemNotificationsNumber > 2
       ) {
         return {
           status: "ok",
@@ -135,7 +135,7 @@ export default async function (fastify: FastifyInstance) {
       }
 
       if (
-        referralSystemNotificationsNumber === 1 &&
+        referralSystemNotificationsNumber <=2 &&
         transactionsNotificationsNumber > 1
       ) {
         return {
