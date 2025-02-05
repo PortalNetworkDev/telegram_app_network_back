@@ -15,28 +15,21 @@ export default async function (fastify: FastifyInstance) {
       1
     );
 
-    const senderIds = new Set<number>();
-    transactions.forEach((item) => {
-      senderIds.add(item.senderId);
-    });
-
-    const sendersInfo = await fastify.modelsUser.getUsersInfoByIds(
-      Array.from(senderIds)
+    const senderInfo = await fastify.modelsUser.getUser(
+      transactions[0].senderId
     );
-    const sendersInfoMap: Record<number, Omit<UserModel, "id">> = {};
 
-    sendersInfo.forEach((item) => {
-      const { id, ...rest } = item;
-      sendersInfoMap[item.id] = rest;
-    });
-
-    const resultData = transactions.map((item) => ({
-      comment: item.comment,
-      sender: sendersInfoMap[item.senderId],
-      powerAmount: item.powerAmount,
-      time: item.creationTime,
-    }));
-
+    const resultData = {
+      type: "transaction",
+      comment: transactions[0].comment,
+      sender: {
+        firstName: senderInfo?.first_name,
+        lastName: senderInfo?.last_name,
+        username: senderInfo?.username,
+      },
+      powerAmount: transactions[0].powerAmount,
+      time: transactions[0].creationTime,
+    };
     return resultData;
   };
 
@@ -102,53 +95,41 @@ export default async function (fastify: FastifyInstance) {
       const userId = fastify.getUser(request).id;
 
       const [
-        transactionsNotificationsNumber,
-        referralSystemNotificationsNumber,
+        transactionsNotificationsCounter,
+        referralSystemNotificationsCounter,
       ] = await Promise.all([
         fastify.transactionsNotifications.getNotificationAmount(userId),
         fastify.referralNotifications.getNotificationAmount(userId),
       ]);
 
-      if (
-        transactionsNotificationsNumber > 1 &&
-        referralSystemNotificationsNumber > 1
-      ) {
+      const totalNotificationAmount =
+        transactionsNotificationsCounter + referralSystemNotificationsCounter;
+
+      if (totalNotificationAmount > 1) {
         return {
           status: "ok",
-          transactionsNotificationsNumber,
-          referralSystemNotificationsNumber,
+          transactionsNotificationsCounter,
+          referralSystemNotificationsCounter,
         };
-      }
+      } else if (transactionsNotificationsCounter === 1) {
+        const transactionsResponse = await getTransactionResponse(userId);
 
-      const transactionsResponse = await getTransactionResponse(userId);
-      const referralResponse = await getReferralResponse(userId);
-
-      if (
-        transactionsNotificationsNumber === 1 &&
-        referralSystemNotificationsNumber > 2
-      ) {
         return {
           status: "ok",
-          transactions: transactionsResponse,
-          referralSystemNotificationsNumber,
+          notification: transactionsResponse ,
         };
-      }
+      } else if (referralSystemNotificationsCounter === 1) {
+        const referralResponse = await getReferralResponse(userId);
 
-      if (
-        referralSystemNotificationsNumber <=2 &&
-        transactionsNotificationsNumber > 1
-      ) {
         return {
           status: "ok",
-          referral: referralResponse,
-          transactionsNotificationsNumber,
+          notification: referralResponse?.[0],
         };
       }
 
       return {
         status: "ok",
-        transactions: transactionsResponse,
-        referral: referralResponse,
+        notification: {},
       };
     }
   );
@@ -159,16 +140,16 @@ export default async function (fastify: FastifyInstance) {
     async (request, reply) => {
       const userId = fastify.getUser(request).id;
 
-      const transactionsNotificationsNumber =
+      const transactionsNotificationsCounter =
         await fastify.transactionsNotifications.getNotificationAmount(userId);
 
-      const referralSystemNotificationsNumber =
+      const referralSystemNotificationsCounter =
         await fastify.referralNotifications.getNotificationAmount(userId);
 
       return {
         status: "ok",
-        transactionsNotificationsNumber,
-        referralSystemNotificationsNumber,
+        transactionsNotificationsCounter,
+        referralSystemNotificationsCounter,
       };
     }
   );
