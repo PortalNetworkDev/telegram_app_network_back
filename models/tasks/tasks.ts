@@ -187,7 +187,6 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     return result?.rows ? (result.rows as TaskModel[]) : null;
   };
 
-
   const getUserTasks = async (userId: number, where = "") => {
     try {
       const result = await fastify.dataBase.select<TaskModel>(
@@ -311,6 +310,13 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     return tasks;
   };
 
+  const resetTaskState = async (id: number, userId: number) => {
+    await fastify.dataBase.update<TaskModel>(
+      "update user_task_state set is_rewarded = 0, is_complite = 0 where task_id = ? and user_id = ?",
+      [id, userId]
+    );
+  };
+
   const getAllTasks = async () => {
     const sql = `select * from tasks`;
     const result = await fastify.dataBase.select<TaskModel>(sql);
@@ -334,6 +340,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
 
   fastify.decorate("modelsTasks", {
     createUserTaskState,
+    resetTaskState,
     compliteTask,
     createCategory,
     createTask,

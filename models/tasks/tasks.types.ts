@@ -78,4 +78,5 @@ export interface TaskService {
   getAllTasks: () => Promise<DataBaseQueryResult<TaskModel> | null>;
   reimportCat: () => Promise<void>;
   reimportTasks: () => Promise<void>;
+  resetTaskState: (id: number, userId: number) => Promise<void>
 }
