@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { ONE_DAY } from "./dailyGifts.constants.js";
+import { ONE_DAY } from "../../constants/app.constants.js";
+
 
 export const resetDailyGiftProgressIfUserSkipClaimMoreThenDay = async (
   fastify: FastifyInstance,

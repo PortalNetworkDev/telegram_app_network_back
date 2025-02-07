@@ -2,11 +2,17 @@
 
 import createPlugin from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import { CategoriesTaskModel, TaskModel } from "./tasks.types";
+import {
+  CategoriesTaskModel,
+  TaskModel,
+  TaskModelJoinUserTaskStateModel,
+  UserTaskStateModel,
+} from "./tasks.types";
 import {
   CsvCategoryFileProps,
   CsvTaskFileProps,
 } from "../../plugins/utils/utils.types";
+import { MySQLResultSetHeader } from "@fastify/mysql";
 
 export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
   const userTaskState = `
@@ -16,7 +22,8 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
             user_id BIGINT,
             is_complite BOOLEAN DEFAULT 0,
             is_rewarded BOOLEAN DEFAULT 0,
-            result VARCHAR(255) DEFAULT ""
+            result VARCHAR(255) DEFAULT "",
+            lastCompletionTime BIGINT
         )`;
 
   const categoriesTable = `
@@ -189,8 +196,9 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
 
   const getUserTasks = async (userId: number, where = "") => {
     try {
-      const result = await fastify.dataBase.select<TaskModel>(
-        `select  
+      const result =
+        await fastify.dataBase.select<TaskModelJoinUserTaskStateModel>(
+          `select  
             user_task_state.is_complite as is_complite,
             user_task_state.is_rewarded as is_rewarded,
             user_task_state.result as result,
@@ -205,8 +213,8 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
             tasks.other as other
 
             from tasks JOIN user_task_state on tasks.id = user_task_state.task_id where user_task_state.user_id = ? ${where}`,
-        [userId]
-      );
+          [userId]
+        );
 
       return result?.rows ? result.rows : null;
     } catch (error) {
@@ -284,9 +292,13 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     }
   };
 
-  const createUserTaskState = async (userId: number, taskId: number) => {
-    const sql = `INSERT INTO user_task_state (user_id, task_id) VALUES (?,?)`;
-    await fastify.dataBase.insert(sql, [userId, taskId]);
+  const createUserTaskState = async (
+    userId: number,
+    taskId: number,
+    completionTime?: number
+  ) => {
+    const sql = `INSERT INTO user_task_state (user_id, task_id,completionTime) VALUES (?,?,?)`;
+    await fastify.dataBase.insert(sql, [userId, taskId, completionTime]);
   };
 
   const compliteTask = async (id: number, userId: number, result: string) => {
@@ -303,7 +315,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     result: string
   ) => {
     console.log("setRewardedTask", id, userId, result);
-    const tasks = await fastify.dataBase.update<TaskModel>(
+    const tasks = await fastify.dataBase.update<UserTaskStateModel>(
       "update user_task_state set result = ?, is_rewarded = 1 where task_id = ? and user_id = ?",
       [result, id, userId]
     );
@@ -311,8 +323,8 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
   };
 
   const resetTaskState = async (id: number, userId: number) => {
-    await fastify.dataBase.update<TaskModel>(
-      "update user_task_state set is_rewarded = 0, is_complite = 0 where task_id = ? and user_id = ?",
+    await fastify.dataBase.update<UserTaskStateModel>(
+      "update user_task_state set is_rewarded = 1, is_complite = 0 where task_id = ? and user_id = ?",
       [id, userId]
     );
   };
@@ -331,6 +343,29 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
   const reimportTasks = async () => {
     await fastify.dataBase.query("delete from tasks;");
     await taskImport("./db/tasksimport.csv");
+  };
+
+  const getUserLastCompletionTimeForTask = async (
+    userId: number,
+    taskId: number
+  ) => {
+    const sql = `select completionTime from user_task_state where user_id =? and task_id = ?`;
+    const result = await fastify.dataBase.select<
+      Pick<UserTaskStateModel, "completionTime">
+    >(sql, [userId, taskId]);
+
+    return result?.rows[0]?.completionTime ?? null;
+  };
+
+  const updateTaskState = async (userId: number, taskId: number) => {
+    const sql = `update user_task_state set is_complite =1, completionTime = ? where user_id = ? and task_id = ? `;
+    const result = await fastify.dataBase.update(sql, [
+      Date.now(),
+      userId,
+      taskId,
+    ]);
+
+    return (result?.rows as unknown as MySQLResultSetHeader)?.affectedRows ?? 0;
   };
 
   await Promise.all([
@@ -354,5 +389,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     getAllTasks,
     reimportCat,
     reimportTasks,
+    getUserLastCompletionTimeForTask,
+    updateTaskState,
   });
 });

@@ -7,6 +7,7 @@ import { TaskModel } from "../models/tasks/tasks.types";
 export default async function (fastify: FastifyInstance) {
   const checkInterval = 5;
   let runnded = false;
+
   setInterval(async function () {
     if (runnded) {
       console.log("try to run sendRewards, runned");
@@ -36,6 +37,8 @@ export default async function (fastify: FastifyInstance) {
           "and is_complite = 1 and is_rewarded = 0"
         );
 
+        const filteredUserTasks = userTasks?.filter((item) => item.task_id !== 10);
+
         let airDrop = 0; //airdrop
         const checkUser = await fastify.modelsUser.checkAirDropUser(
           Number(fastify.config.airDropRefMasterId),
@@ -51,7 +54,7 @@ export default async function (fastify: FastifyInstance) {
             referalUsersUnrewarded?.rows ?? [],
             user.referal_reward
           ) +
-          sumUnrewardedTasks(userTasks ?? []) +
+          sumUnrewardedTasks(filteredUserTasks ?? []) +
           Number(sumAD);
 
         if (sum >= Number(fastify.config.minrewardfortransfer) && user.wallet) {
@@ -66,7 +69,7 @@ export default async function (fastify: FastifyInstance) {
               user.referal_reward
             ),
             "task",
-            sumUnrewardedTasks(userTasks ?? []),
+            sumUnrewardedTasks(filteredUserTasks ?? []),
             "Airdrop",
             sumAD
           );
@@ -97,9 +100,9 @@ export default async function (fastify: FastifyInstance) {
                 );
               }
             }
-            if (userTasks) {
-              for (let index = 0; index < userTasks.length; index++) {
-                const task = userTasks[index];
+            if (filteredUserTasks) {
+              for (let index = 0; index < filteredUserTasks.length; index++) {
+                const task = filteredUserTasks[index];
                 await fastify.modelsTasks.setRewardedTask(task.id, user.id, "");
               }
             }

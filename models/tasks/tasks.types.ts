@@ -16,9 +16,10 @@ export interface UserTaskStateModel {
   rowid: number;
   task_id: number;
   user_id: number;
-  is_complite: number;
-  is_rewarded: number;
+  is_complite: boolean;
+  is_rewarded: boolean;
   result: string;
+  completionTime: number;
 }
 
 export interface CategoriesTaskModel {
@@ -28,11 +29,17 @@ export interface CategoriesTaskModel {
 }
 
 export interface CategoriesTaskModelWithTasks extends CategoriesTaskModel {
-  tasks: TaskModel[]
+  tasks: TaskModel[];
 }
 
+export type TaskModelJoinUserTaskStateModel = TaskModel & UserTaskStateModel;
+
 export interface TaskService {
-  createUserTaskState: (userId: number, taskId: number) => Promise<void>;
+  createUserTaskState: (
+    userId: number,
+    taskId: number,
+    completionTime?: number
+  ) => Promise<void>;
   compliteTask: (
     id: number,
     userId: number,
@@ -61,14 +68,17 @@ export interface TaskService {
 
   categoryExist: (id: number) => Promise<boolean>;
 
-  getUserTasks: (userId: number, where?: string) => Promise<TaskModel[] | null>;
+  getUserTasks: (
+    userId: number,
+    where?: string
+  ) => Promise<TaskModelJoinUserTaskStateModel[] | null>;
   getUserTask: (userId: number, taskId: number) => Promise<TaskModel | null>;
   createUserTaskStates: (userId: number) => Promise<void>;
   setRewardedTask: (
     id: number,
     userId: number,
     result: string
-  ) => Promise<DataBaseQueryResult<TaskModel> | null>;
+  ) => Promise<DataBaseQueryResult<UserTaskStateModel> | null>;
 
   getUserTaskByTaskId: (
     userId: number,
@@ -78,5 +88,10 @@ export interface TaskService {
   getAllTasks: () => Promise<DataBaseQueryResult<TaskModel> | null>;
   reimportCat: () => Promise<void>;
   reimportTasks: () => Promise<void>;
-  resetTaskState: (id: number, userId: number) => Promise<void>
+  resetTaskState: (id: number, userId: number) => Promise<void>;
+  getUserLastCompletionTimeForTask: (
+    userId: number,
+    taskId: number
+  ) => Promise<number | null>;
+  updateTaskState: (userId: number, taskId: number) => Promise<number>
 }
