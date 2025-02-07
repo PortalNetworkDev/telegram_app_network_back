@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { ONE_DAY } from "../../constants/app.constants";
+import { ONE_DAY } from "../../constants/app.constants.js";
 
 export default async function (fastify: FastifyInstance) {
   fastify.post(
