@@ -85,6 +85,7 @@ const makeTransferOfPower = async (
       recipientId: recipientInstance?.id ?? 0,
       powerAmount: sendPowerAmount,
       creationTime: Date.now(),
+      type:'transfer'
     });
 
     await saveNotificationInfo(fastify, recipientInstance?.id ?? 0);

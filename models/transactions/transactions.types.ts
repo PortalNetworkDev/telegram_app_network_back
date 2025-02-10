@@ -1,3 +1,4 @@
+export type TransactionType= "transfer" | "referral" | "invitation"
 export interface Transaction {
   id?: number;
   senderId: number;
@@ -5,6 +6,7 @@ export interface Transaction {
   powerAmount: number;
   creationTime: number;
   comment?: string;
+  type: TransactionType;
 }
 
 export interface TransactionModel {
@@ -13,7 +15,8 @@ export interface TransactionModel {
   recipient_id: number;
   power_amount: number;
   creation_time: number;
-  comment: string;
+  comment?: string;
+  type?: TransactionType;
 }
 export interface TransactionHistoryItem extends Transaction {
   senderUserName: string;

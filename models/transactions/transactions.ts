@@ -15,14 +15,15 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
             recipient_id BIGINT NOT NULL,
             power_amount FLOAT NOT NULL,
             comment TEXT,
-            creation_time BIGINT NOT NULL
+            creation_time BIGINT NOT NULL,
+            type varchar(128)
         );`;
 
   await fastify.dataBase.query(createTable);
 
   const addTransaction = async (data: Transaction) => {
     const sql =
-      "INSERT INTO transactions (sender_id,recipient_id,power_amount,comment,creation_time) VALUES (?,?,?,?,?)";
+      "INSERT INTO transactions (sender_id,recipient_id,power_amount,comment,creation_time,type) VALUES (?,?,?,?,?,?)";
 
     fastify.dataBase.insert(sql, [
       data.senderId,
@@ -30,6 +31,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, ops) {
       data.powerAmount,
       data.comment ?? null,
       data.creationTime,
+      data.type,
     ]);
   };
 

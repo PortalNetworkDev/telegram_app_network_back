@@ -1,15 +1,14 @@
 "use strict";
 
-import createPlugin from "fastify-plugin";
 import CryptoJS from "crypto-js";
 import { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
-import { User } from "../models/user/user.types";
+import createPlugin from "fastify-plugin";
 import {
   saveInviterNotificationInfo,
-  saveNotificationInfo,
   saveReferralNotificationInfo,
 } from "../models/notifications/notifications.utils.js";
-import { NotificationsTypes } from "../models/notifications/notifications.constants.js";
+import { addTransactionForReferralSystemParticipant } from "../models/transactions/transactions.utils.js";
+import { User } from "../models/user/user.types";
 
 export type Authentication = (req: FastifyRequest, res: FastifyReply) => void;
 export type GetUserFromRequest = (req: FastifyRequest) => User;
@@ -62,7 +61,13 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
 
             await saveReferralNotificationInfo(fastify, user.id);
 
-            await saveInviterNotificationInfo(fastify,userId);
+            await saveInviterNotificationInfo(fastify, userId);
+
+            await addTransactionForReferralSystemParticipant(
+              fastify,
+              userId,
+              user.id
+            );
           }
         }
       } else {

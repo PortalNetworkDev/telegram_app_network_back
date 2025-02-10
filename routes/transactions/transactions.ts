@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import Schema from "fluent-json-schema";
 import { UserModel } from "../../models/user/user.types";
+import { TransactionType } from "../../models/transactions/transactions.types";
 
 interface Props {
   limit: number;
@@ -12,6 +13,11 @@ const params = Schema.object()
   .prop("page", Schema.number())
   .prop("limit", Schema.number());
 const schema = { params };
+
+const addPrefixToUserName = (name: string, transactionType: TransactionType) =>
+  transactionType === "invitation" || transactionType === "referral"
+    ? `referral@${name}`
+    : `@${name}`;
 
 export default async function (fastify: FastifyInstance) {
   fastify.post<{ Body: Props }>(
@@ -60,19 +66,36 @@ export default async function (fastify: FastifyInstance) {
       return {
         status: "ok",
         isHasNextPage,
-        items: result.map((item) => ({
-          id: item.id,
-          sender: {
-            id: item.senderId,
-            userName: usersInfoMap[item.senderId]?.username,
-          },
-          recipient: {
-            id: item.recipientId,
-            userName: usersInfoMap[item.recipientId]?.username,
-          },
-          powerAmount: item.powerAmount,
-          creationTime: item.creationTime,
-        })),
+        items: result
+          .map((item) => {
+            const senderName = usersInfoMap[item.senderId]?.username;
+            const recipientName = usersInfoMap[item.recipientId]?.username;
+
+            if (item.senderId === userId && item.type === "invitation") {
+              return null;
+            }
+
+            return {
+              id: item.id,
+              sender: {
+                id: item.senderId,
+                userName: addPrefixToUserName(
+                  senderName,
+                  item.type ?? "invitation"
+                ),
+              },
+              recipient: {
+                id: item.recipientId,
+                userName: addPrefixToUserName(
+                  recipientName,
+                  item.type ?? "invitation"
+                ),
+              },
+              powerAmount: item.powerAmount,
+              creationTime: item.creationTime,
+            };
+          })
+          .filter((item) => item),
       };
     }
   );
@@ -100,12 +123,18 @@ export default async function (fastify: FastifyInstance) {
             sender: {
               firstName: senderInfo?.first_name,
               lastName: senderInfo?.last_name,
-              userName: senderInfo?.username,
+              userName: addPrefixToUserName(
+                senderInfo?.username ?? "",
+                transaction.type ?? "invitation"
+              ),
             },
             recipient: {
               firstName: recipientInfo?.first_name,
               lastName: recipientInfo?.last_name,
-              userName: recipientInfo?.username,
+              userName: addPrefixToUserName(
+                recipientInfo?.username ?? "",
+                transaction.type ?? "invitation"
+              ),
             },
             powerAmount: transaction?.powerAmount,
             creationTime: transaction?.creationTime,
@@ -148,6 +177,7 @@ export default async function (fastify: FastifyInstance) {
           recipientId: allUsers?.rows[index].id ?? 0,
           powerAmount: (Math.floor(Math.random() * 10) + 1) * 100,
           creationTime: randomDate.getTime(),
+          type: "transfer",
         });
       }
 
@@ -159,6 +189,7 @@ export default async function (fastify: FastifyInstance) {
           recipientId: userId,
           powerAmount: (Math.floor(Math.random() * 10) + 1) * 100,
           creationTime: randomDate.getTime(),
+          type: "transfer",
         });
       }
 
@@ -170,6 +201,7 @@ export default async function (fastify: FastifyInstance) {
           recipientId: userId,
           powerAmount: (Math.floor(Math.random() * 10) + 1) * 100,
           creationTime: randomDate.getTime(),
+          type: "transfer",
         });
       }
 
@@ -181,6 +213,7 @@ export default async function (fastify: FastifyInstance) {
           recipientId: userId,
           powerAmount: (Math.floor(Math.random() * 10) + 1) * 100,
           creationTime: randomDate.getTime(),
+          type: "transfer",
         });
       }
       return { status: "ok" };

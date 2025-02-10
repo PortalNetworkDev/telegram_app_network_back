@@ -1,3 +1,4 @@
+import { FastifyInstance } from "fastify";
 import {
   Transaction,
   TransactionHistoryItem,
@@ -12,6 +13,7 @@ export const transformSqlRowToTransactionData = (
   recipientId: input.recipient_id,
   powerAmount: input.power_amount,
   creationTime: input.creation_time,
+  type: input.type ?? 'transfer',
 });
 
 export const transformTransactionHistoryItemData = (
@@ -40,4 +42,26 @@ export const getTimePeriodSQLCondition = (period: {
   } else {
     return `creation_time >=${to}`;
   }
+};
+
+export const addTransactionForReferralSystemParticipant = async (
+  fastify: FastifyInstance,
+  inviterId: number,
+  referralId: number
+) => {
+  await fastify.transactions.addTransaction({
+    senderId: referralId,
+    recipientId: inviterId,
+    powerAmount: Number(fastify.config.toReferalPowerReward),
+    creationTime: Date.now(),
+    type: "invitation",
+  });
+
+  await fastify.transactions.addTransaction({
+    senderId: inviterId,
+    recipientId: referralId,
+    powerAmount: Number(fastify.config.forReferalPowerReward),
+    creationTime: Date.now(),
+    type: "referral",
+  });
 };
