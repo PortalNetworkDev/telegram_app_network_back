@@ -1,10 +1,9 @@
 import { FastifyInstance } from "fastify";
 import {
   saveInviterNotificationInfo,
-  saveNotificationInfo,
-  saveReferralNotificationInfo,
+  saveReferralNotificationInfo
 } from "../../models/notifications/notifications.utils.js";
-import { NotificationsTypes } from "../../models/notifications/notifications.constants.js";
+import { addTransactionForReferralSystemParticipant } from "../../models/transactions/transactions.utils.js";
 
 interface Body {
   user_id: number;
@@ -69,6 +68,12 @@ export default async function (fastify: FastifyInstance) {
 
         await saveInviterNotificationInfo(fastify, user_id);
         await saveReferralNotificationInfo(fastify, user.id);
+
+        await addTransactionForReferralSystemParticipant(
+          fastify,
+          user_id,
+          user.id
+        );
       }
 
       return { code: "succcess" };
