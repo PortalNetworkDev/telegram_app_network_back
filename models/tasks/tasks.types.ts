@@ -19,7 +19,6 @@ export interface UserTaskStateModel {
   is_complite: boolean;
   is_rewarded: boolean;
   result: string;
-  completionTime: number;
 }
 
 export interface CategoriesTaskModel {
@@ -32,14 +31,11 @@ export interface CategoriesTaskModelWithTasks extends CategoriesTaskModel {
   tasks: TaskModel[];
 }
 
-export type TaskModelJoinUserTaskStateModel = TaskModel & UserTaskStateModel;
+export type TaskModelJoinUserTaskStateModel = TaskModel &
+  UserTaskStateModel & { isActive: boolean; rewardUnit: string };
 
 export interface TaskService {
-  createUserTaskState: (
-    userId: number,
-    taskId: number,
-    completionTime?: number
-  ) => Promise<void>;
+  createUserTaskState: (userId: number, taskId: number) => Promise<void>;
   compliteTask: (
     id: number,
     userId: number,
@@ -89,9 +85,6 @@ export interface TaskService {
   reimportCat: () => Promise<void>;
   reimportTasks: () => Promise<void>;
   resetTaskState: (id: number, userId: number) => Promise<void>;
-  getUserLastCompletionTimeForTask: (
-    userId: number,
-    taskId: number
-  ) => Promise<number | null>;
-  updateTaskState: (userId: number, taskId: number) => Promise<number>
+  updateTaskState: (userId: number, taskId: number) => Promise<number>;
+  getIsUserCompleteTask: (userId: number, taskId: number) => Promise<boolean>;
 }

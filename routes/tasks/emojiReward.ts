@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import { ONE_DAY } from "../../constants/app.constants.js";
 
 export default async function (fastify: FastifyInstance) {
   fastify.post(
@@ -7,8 +6,15 @@ export default async function (fastify: FastifyInstance) {
     { onRequest: [fastify.auth] },
     async (request, reply) => {
       const user = fastify.getUser(request);
-      const lastTime =
-        await fastify.modelsTasks.getUserLastCompletionTimeForTask(user.id, 10);
+      const isUserCompleteTaskWithEmoji =
+        await fastify.modelsTasks.getIsUserCompleteTask(user.id, 10);
+
+      if (isUserCompleteTaskWithEmoji) {
+        return {
+          statusCode: 200,
+          message: "Already complete task",
+        };
+      }
 
       const updateUserTaskStateRow = await fastify.modelsTasks.updateTaskState(
         user.id,
@@ -16,31 +22,11 @@ export default async function (fastify: FastifyInstance) {
       );
 
       if (updateUserTaskStateRow === 0) {
-        await fastify.modelsTasks.createUserTaskState(user.id, 10, Date.now());
+        await fastify.modelsTasks.createUserTaskState(user.id, 10);
         await fastify.modelsTasks.compliteTask(10, user.id, "");
       }
-
-      if (!lastTime) {
-        await fastify.miningPower.addPowerBalance(user.id, 10000);
-      } else if (Date.now() - lastTime > ONE_DAY) {
-        await fastify.miningPower.addPowerBalance(user.id, 10000);
-      }
-
+      await fastify.miningPower.addPowerBalance(user.id, 10000);
       await fastify.modelsTasks.setRewardedTask(10, user.id, "");
-
-      return {
-        statusCode: 200,
-      };
-    }
-  );
-
-  fastify.post(
-    "/resetEmojiTaskState",
-    { onRequest: [fastify.auth] },
-    async (request, reply) => {
-      const user = fastify.getUser(request);
-
-      await fastify.modelsTasks.resetTaskState(10, user.id);
 
       return {
         statusCode: 200,
