@@ -63,6 +63,8 @@ export default async function (fastify: FastifyInstance) {
               task.other = en_tasks[index].other;
             }
 
+            task.rewardUnit = "Poe";
+            
             if (task.category_id === cat.id) {
               if (task.reward < 1)
                 task.reward = Number(Number(task.reward).toFixed(2));
@@ -86,6 +88,11 @@ export default async function (fastify: FastifyInstance) {
                   `<br><br>${daysInPoolText}: <b>${days?.length ?? 0}</b>`;
               }
 
+              if (task.type === "emojiReward") {
+                task.isActive = !task.is_complite;
+                task.rewardUnit = "Вт";
+              }
+          
               cats[indexCat].tasks.push(task);
             }
           }
