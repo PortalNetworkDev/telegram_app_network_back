@@ -20,6 +20,11 @@ export default async function (fastify: FastifyInstance) {
         return reply.badRequest("User do not exists");
       }
 
+      // костыль из-за кривого механизма заданий и их добавлений для юзера.  createUserTaskStates вызывается только для пользователй которые впервые в приложении 
+      // так как этот эндпоинт не часто посещаемый пока вызывавем метод тут что-бы обновить список заданий для пользователя 
+      // как будет время переделать механизм целеком
+      await fastify.modelsTasks.createUserTaskStates(user.id);
+
       const cats =
         (await fastify.modelsTasks.getCategories()) as CategoriesTaskModelWithTasks[];
       const tasks = await fastify.modelsTasks.getUserTasks(user.id);
@@ -64,7 +69,7 @@ export default async function (fastify: FastifyInstance) {
             }
 
             task.rewardUnit = "Poe";
-            
+
             if (task.category_id === cat.id) {
               if (task.reward < 1)
                 task.reward = Number(Number(task.reward).toFixed(2));
@@ -92,7 +97,7 @@ export default async function (fastify: FastifyInstance) {
                 task.isActive = !task.is_complite;
                 task.rewardUnit = "Вт";
               }
-          
+
               cats[indexCat].tasks.push(task);
             }
           }
