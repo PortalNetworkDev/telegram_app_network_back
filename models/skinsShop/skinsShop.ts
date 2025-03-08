@@ -1,6 +1,5 @@
 import createPlugin from "fastify-plugin";
 import { SkinModel, PurchasedSkinsModel, SkinType } from "./skins.types.js";
-import skins from "../../routes/static/skins.js";
 
 export default createPlugin(async function (fastify, opts) {
   const createSkinsTable = `

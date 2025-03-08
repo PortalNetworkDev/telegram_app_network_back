@@ -36,6 +36,7 @@ export interface UserService {
   getUsersInfoByIds: (userIds: number[]) => Promise<UserModel[]>;
   getLastInviterForRefUser: (userId: number) => Promise<UserModel | null>;
   getLastReferralForUser: (userId: number) => Promise<UserModel | null>;
+  getUserIdByWalletAddress: (userWallet: string) => Promise<number | null>
 }
 
 export interface User {
