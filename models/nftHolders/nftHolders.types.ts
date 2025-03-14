@@ -6,10 +6,19 @@ export interface NftHolderModel {
   isRewarded: boolean;
 }
 
+export interface NftCollectionsModel {
+  id: number;
+  nftCollectionAddress: string;
+  rewardForOneItem: number;
+}
+
 export interface NftHolderService {
   addNftHolder: (
     userId: number | null,
     userWallerAddress: string,
-    nftAddress: string
+    nftAddress: string,
+    collectionId: number
   ) => Promise<void>;
+
+  getAllNFTCollectionData: () => Promise<NftCollectionsModel[] | null>;
 }
