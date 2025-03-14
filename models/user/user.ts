@@ -290,6 +290,14 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     return id;
   };
 
+  const getUserIdByWalletAddress = async (userWallet: string) => {
+    const sql = `select id from users where wallet = ?`;
+    const result = await fastify.dataBase.select<Pick<UserModel, "id">>(sql, [
+      userWallet,
+    ]);
+    return result?.rows[0]?.id ?? null;
+  };
+
   const getUsersInfoByIds = async (userIds: number[]) => {
     const data = userIds.join(",");
     const sql = `select first_name,last_name,username,id from users where id in (${data})`;
@@ -338,5 +346,6 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
     getUsersInfoByIds,
     getLastReferralForUser,
     getLastInviterForRefUser,
+    getUserIdByWalletAddress,
   });
 });
