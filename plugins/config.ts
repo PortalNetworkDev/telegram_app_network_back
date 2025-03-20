@@ -45,6 +45,7 @@ export default createPlugin<FastifyPluginAsync>(async function (fastify, opts) {
       process.env.RECOVERY_GENERATOR_BOOST_ACTIVATION_PERIOD_LIMIT,
     maxDayNumberForClaimGift: process.env.MAX_DAY_NUMBER_FOR_CLAIM_GIFT,
     firstLevelPowerBalanceAmount: process.env.FIRST_LEVEL_POWER_BALANCE_AMOUNT,
+    isUseTonTestNet: process.env.IS_USE_TON_TEST_NET,
   };
 
   fastify.decorate("config", config);

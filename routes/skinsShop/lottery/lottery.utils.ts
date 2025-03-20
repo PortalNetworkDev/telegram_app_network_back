@@ -4,6 +4,8 @@ import {
   LotteryGiftType,
 } from "../../../models/shopLottery/shopLottery.types";
 import { LOSES, NFT, POE, POWER } from "./lottery.constants.js";
+import { transferNFT } from "../../../utils/ton/ton.utils.js";
+import { Address } from "@ton/core";
 
 export interface Lot {
   type: LotteryGiftType;
@@ -40,7 +42,10 @@ export function createArrayOfGits() {
     )
     .concat(NFT);
 
-  return shuffleLots(allLots).map((item,index)=>({...item,position:index}));
+  return shuffleLots(allLots).map((item, index) => ({
+    ...item,
+    position: index,
+  }));
 }
 
 export function getRandomGift(items: LotteryGiftModel[], weights: number[]) {
@@ -69,6 +74,38 @@ export function getRandomGift(items: LotteryGiftModel[], weights: number[]) {
   }
 }
 
+const sendNftForUser = async (fastify: FastifyInstance, userId: number) => {
+  const result = await fastify.nftForLotteryService.getAllNftsWithoutWinner();
+  const randomIndex = getRandomValueInRange(0, result?.length ?? 0);
+  const nftPrize = result?.[randomIndex];
+
+  if (nftPrize) {
+    const userAddress = await fastify.modelsUser.getUser(userId);
+    await fastify.nftForLotteryService.setWinnerForNft(userId, nftPrize?.id);
+
+    if (userAddress?.wallet) {
+      try {
+        await transferNFT({
+          userAddress: Address.parse(userAddress?.wallet),
+          nftContractAddress: Address.parse(nftPrize.nftAddress),
+          isTestNet: Boolean(fastify.config.isUseTonTestNet),
+          fastify,
+        });
+
+        await fastify.nftForLotteryService.setIsNftSendToWinnerUser(
+          nftPrize?.id
+        );
+      } catch (error) {
+        console.log(
+          'error when try to send nft for user in function "transferNFT"'
+        );
+      }
+    }
+
+    console.log("send nft for user : ", userId);
+  }
+};
+
 export function applyReceivedGift(
   fastify: FastifyInstance,
   gift: LotteryGiftModel,
@@ -78,6 +115,7 @@ export function applyReceivedGift(
     case "lose":
       break;
     case "nft":
+      sendNftForUser(fastify, userId);
       break;
     case "poe":
       fastify.miningPower.addPoeBalance(userId, gift?.value ?? 0);

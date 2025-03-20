@@ -1,24 +1,73 @@
+import { mnemonicToPrivateKey } from "@ton/crypto";
 import {
   Address,
   beginCell,
-  Cell,
-  CellType,
   internal,
+  toNano,
   TonClient,
+  WalletContractV3R2,
   WalletContractV4,
 } from "@ton/ton";
-import { mnemonicToWalletKey } from "ton-crypto";
+import { FastifyInstance } from "fastify";
 
-const TEST_MNEMONIIC =
-  "dinosaur black ranch digital snack antique across raise misery between route nephew kingdom slab own syrup ecology pretty will divert match quit domain filter";
+export interface TransferNFTparams {
+  userAddress: Address;
+  nftContractAddress: Address;
+  isTestNet: boolean;
+  fastify: FastifyInstance;
+}
 
-async function tansferNFT(userAddress: Address, nftContractAddress: Address) {
+const TOO_MANY_REQUESTS_STATUS = 429;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const runWalletRequestWithRetryOnError = async (
+  action: () => Promise<any>,
+  retryAmount = 4,
+  initDelayTime = 1000
+) => {
+  let i = 0;
+  let timeout = initDelayTime;
+
+  while (i < retryAmount) {
+    const newTimeout = i < 4 ? timeout + 400 : timeout;
+
+    try {
+      await delay(newTimeout);
+      await action();
+      break;
+    } catch (error: any) {
+      if (error.status === TOO_MANY_REQUESTS_STATUS) {
+        i++;
+      }
+    }
+  }
+};
+
+export async function transferNFT({
+  userAddress,
+  nftContractAddress,
+  isTestNet = true,
+  fastify,
+}: TransferNFTparams) {
+  const tonCenterEndpoint = isTestNet
+    ? "https://testnet.toncenter.com"
+    : "https://toncenter.com";
+
   const client = new TonClient({
-    endpoint: "https://toncenter.com/api/v2/jsonRPC",
+    endpoint: `${tonCenterEndpoint}/api/v2/jsonRPC`,
   });
 
-  const peparedKeyData = await mnemonicToWalletKey(TEST_MNEMONIIC.split(" "));
-  const ownerWaller = WalletContractV4.create({
+  const peparedKeyData = await mnemonicToPrivateKey(
+    String(fastify.config.mnemonic).split(" ")
+  );
+
+  //for future: should use different constructor  version according to wallet version
+  const walletContractConstructor = isTestNet
+    ? WalletContractV3R2
+    : WalletContractV4;
+
+  const ownerWaller = walletContractConstructor.create({
     workchain: 0,
     publicKey: peparedKeyData.publicKey,
   });
@@ -29,25 +78,43 @@ async function tansferNFT(userAddress: Address, nftContractAddress: Address) {
     .storeUint(0x5fcc3d14, 32) // NFT transfer op code 0x5fcc3d14
     .storeUint(0, 64) // query_id:uint64
     .storeAddress(userAddress) // new_owner:MsgAddress
-    .storeAddress(ownerWalletContract.address) // response_destination:MsgAddress
-    .storeUint(0, 1) // custom_payload:(Maybe ^Cell)
-    .storeCoins(1) // forward_amount:(VarUInteger 16) (1 nanoTon = toNano("0.000000001"))
-    .storeUint(0, 1) // forward_payload:(Either Cell ^Cell)
+    .storeAddress(null) // response_destination:MsgAddress
+    .storeBit(false) // custom_payload:(Maybe ^Cell)
+    .storeCoins(0) // forward_amount:(VarUInteger 16) (1 nanoTon = toNano("0.000000001"))
     .endCell();
 
   const transferMessage = internal({
     to: nftContractAddress,
-    value: "0.05", // TON amount to cover fees
+    value: toNano("0.08"), // TON amount to cover fees
     body: body,
   });
 
   const seqno = await ownerWalletContract.getSeqno();
-  await ownerWalletContract.sendTransfer({
-    secretKey: peparedKeyData.secretKey,
-    seqno,
-    messages: [transferMessage],
-  });
-}
 
-//сделать нфт и отправить с одного кошелка на другой через этот метод
-//возможно поможет https://ton-collection-edit.vercel.app/deploy-collection
+  await runWalletRequestWithRetryOnError(
+    async () => {
+      await ownerWalletContract.sendTransfer({
+        secretKey: peparedKeyData.secretKey,
+        seqno,
+        messages: [transferMessage],
+      });
+    },
+    4,
+    1000
+  );
+
+  let newSecno = seqno;
+  await runWalletRequestWithRetryOnError(
+    async () => {
+      newSecno = await ownerWalletContract.getSeqno();
+    },
+    20,
+    1000
+  );
+
+  if (newSecno > seqno) {
+    return newSecno;
+  }
+
+  return 0;
+}

@@ -19,6 +19,8 @@ import { Authentication, GetUserFromRequest } from "../plugins/auth";
 import { SendTonToken } from "../plugins/sendToken/sendToken";
 import { Utils } from "../plugins/utils/utils.types";
 import { CalculationUtils } from "../utils/calculationUtils/calculationUtils.types";
+import { NftForLotteryService } from "../models/nftForLottery/nftForLottery.types";
+
 declare module "fastify" {
   interface FastifyInstance {
     mysql: MySQLPromisePool;
@@ -42,5 +44,6 @@ declare module "fastify" {
     transactionsNotifications: TransactionsNotificationsService;
     referralNotifications: ReferralNotificationsService;
     nftHolders: NftHolderService;
+    nftForLotteryService: NftForLotteryService;
   }
 }

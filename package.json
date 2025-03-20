@@ -23,6 +23,7 @@
     "@fastify/sensible": "^5.0.0",
     "@fastify/static": "^7.0.3",
     "@ton/core": "^0.60.1",
+    "@ton/crypto": "^3.3.0",
     "@ton/ton": "^15.2.1",
     "buffer": "^6.0.3",
     "cron": "^4.1.0",
