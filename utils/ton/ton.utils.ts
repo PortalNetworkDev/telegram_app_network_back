@@ -21,8 +21,8 @@ const TOO_MANY_REQUESTS_STATUS = 429;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const runWalletRequestWithRetryOnError = async (
-  action: () => Promise<any>,
+export const runWalletRequestWithRetryOnError = async <T>(
+  action: () => Promise<T>,
   retryAmount = 4,
   initDelayTime = 1000
 ) => {
@@ -34,8 +34,8 @@ const runWalletRequestWithRetryOnError = async (
 
     try {
       await delay(newTimeout);
-      await action();
-      break;
+      const result = await action();
+      return result;
     } catch (error: any) {
       if (error.status === TOO_MANY_REQUESTS_STATUS) {
         i++;
