@@ -1,6 +1,7 @@
-import { Address, TonClient, TupleBuilder } from "@ton/ton";
+import { Address, TonClient, TupleBuilder, TupleReader } from "@ton/ton";
 import { CronJob } from "cron";
 import { FastifyInstance } from "fastify";
+import { runWalletRequestWithRetryOnError } from "../utils/ton/ton.utils.js";
 
 interface GetNftOwnersParams {
   itemsAmount: number;
@@ -18,7 +19,7 @@ async function createTonClient(testnet: boolean, fastify: FastifyInstance) {
     endpoint: `${tonCenterEndpoint}/api/v2/jsonRPC`,
     apiKey: String(fastify.config.tonwebapikey) ?? "",
   });
-  
+
   return client;
 }
 
@@ -35,39 +36,49 @@ export default async function (fastify: FastifyInstance) {
       const args = new TupleBuilder();
       args.writeNumber(index);
 
-      const { stack } = await client.runMethod(
-        Address.parse(collectionAddress),
-        "get_nft_address_by_index",
-        args.build()
+      const nftAddressByIndexData = await runWalletRequestWithRetryOnError<{
+        gas_used: number;
+        stack: TupleReader;
+      }>(
+        async () =>
+          client.runMethod(
+            Address.parse(collectionAddress),
+            "get_nft_address_by_index",
+            args.build()
+          ),
+        4,
+        1000
       );
 
-      const currentNftAddress = stack.readAddress();
+      const currentNftAddress = nftAddressByIndexData?.stack.readAddress();
 
       if (currentNftAddress) {
-        const nftItemData = await client.runMethod(
-          currentNftAddress,
-          "get_nft_data",
-          args.build()
+        const nftItemData = await runWalletRequestWithRetryOnError(
+          async () =>
+            client.runMethod(currentNftAddress, "get_nft_data", args.build()),
+          4,
+          1000
         );
 
-        nftItemData.stack.skip(4);
+        nftItemData?.stack.skip(4);
 
-        const ownerAddress = nftItemData.stack.readAddress();
+        const ownerAddress = nftItemData?.stack.readAddress();
+        if (ownerAddress) {
+          const userId = await fastify.modelsUser.getUserIdByWalletAddress(
+            ownerAddress.toString({ bounceable: false })
+          );
 
-        const userId = await fastify.modelsUser.getUserIdByWalletAddress(
-          ownerAddress.toString({ bounceable: false })
-        );
+          await fastify.nftHolders.addNftHolder(
+            userId,
+            ownerAddress.toString({ bounceable: false }),
+            currentNftAddress.toString(),
+            collectionId
+          );
 
-        await fastify.nftHolders.addNftHolder(
-          userId,
-          ownerAddress.toString({ bounceable: false }),
-          currentNftAddress.toString(),
-          collectionId
-        );
-
-        if (userId) {
-          //давай бонус за каждый нфт или как-то по другому
-          await fastify.miningPower.addPowerBalance(userId, rewardForItem);
+          if (userId) {
+            //давай бонус за каждый нфт или как-то по другому
+            await fastify.miningPower.addPowerBalance(userId, rewardForItem);
+          }
         }
       }
     }
@@ -92,6 +103,7 @@ export default async function (fastify: FastifyInstance) {
         );
 
         const itemsAmount = collectionData.readNumber();
+        await fastify.utils.sleep(1000);
 
         await getNftOwners({
           rewardForItem,
