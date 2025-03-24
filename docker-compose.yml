@@ -2,7 +2,7 @@ services:
   web:
     restart: always
     build: .
-    command: ./node_modules/.bin/fastify start -l info app.js
+    command: sh -c "./node_modules/.bin/tsc -p tsconfig.json && ./node_modules/.bin/fastify start -l info app.js"
     volumes:
       - ./:/usr/app/
     ports:
