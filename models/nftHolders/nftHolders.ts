@@ -16,9 +16,6 @@ export default createPlugin(async function (fastify, opts) {
             rewardForOneItem TINYINT 
         );`;
 
-  const BASE_COLLECTION = `EQDxVIF0_OSEcT2isB5YBmaU1ZQZeSLkfmDX0xoqDtLtxYM6`;
-  const BASE_REWARD_FOR_ITEM = 100;
-
   await fastify.dataBase.query(createNFTholderTable);
   await fastify.dataBase.query(createNFTCollectionsTable);
 
@@ -43,13 +40,6 @@ export default createPlugin(async function (fastify, opts) {
     const result = await fastify.dataBase.select<NftCollectionsModel>(sql);
     return result?.rows ?? null;
   };
-
-  const setInitialDataForNFTcollectionsTable = async () => {
-    const sql = `insert into nftCollections (nftCollectionAddress,rewardForOneItem) values(?,?)`;
-    await fastify.dataBase.insert(sql, [BASE_COLLECTION, BASE_REWARD_FOR_ITEM]);
-  };
-
-  await setInitialDataForNFTcollectionsTable();
 
   fastify.decorate("nftHolders", { addNftHolder, getAllNFTCollectionData });
 });
