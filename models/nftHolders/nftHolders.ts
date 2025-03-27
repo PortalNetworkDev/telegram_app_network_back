@@ -41,5 +41,14 @@ export default createPlugin(async function (fastify, opts) {
     return result?.rows ?? null;
   };
 
-  fastify.decorate("nftHolders", { addNftHolder, getAllNFTCollectionData });
+  const truncateTable = async () => {
+    const sql = "truncate table nftHolders";
+    await fastify.dataBase.query(sql);
+  };
+
+  fastify.decorate("nftHolders", {
+    addNftHolder,
+    getAllNFTCollectionData,
+    truncateTable,
+  });
 });

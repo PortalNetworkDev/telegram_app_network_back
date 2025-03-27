@@ -90,6 +90,8 @@ export default async function (fastify: FastifyInstance) {
     const nftCollections = await fastify.nftHolders.getAllNFTCollectionData();
 
     if (nftCollections) {
+      await fastify.nftHolders.truncateTable();
+
       for (let index = 0; index < nftCollections.length; index++) {
         const {
           id,

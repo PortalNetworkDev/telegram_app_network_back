@@ -21,4 +21,5 @@ export interface NftHolderService {
   ) => Promise<void>;
 
   getAllNFTCollectionData: () => Promise<NftCollectionsModel[] | null>;
+  truncateTable: () => Promise<void>;
 }
