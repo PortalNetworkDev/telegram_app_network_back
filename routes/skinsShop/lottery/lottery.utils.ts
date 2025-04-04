@@ -106,7 +106,7 @@ const sendNftForUser = async (fastify: FastifyInstance, userId: number) => {
   }
 };
 
-export function applyReceivedGift(
+export async function applyReceivedGift(
   fastify: FastifyInstance,
   gift: LotteryGiftModel,
   userId: number
@@ -118,10 +118,10 @@ export function applyReceivedGift(
       sendNftForUser(fastify, userId);
       break;
     case "poe":
-      fastify.miningPower.addPoeBalance(userId, gift?.value ?? 0);
+      await fastify.miningPower.addPoeBalance(userId, gift?.value ?? 0);
       break;
     case "power":
-      fastify.miningPower.addPowerBalance(userId, gift?.value ?? 0);
+      await fastify.miningPower.addPowerBalance(userId, gift?.value ?? 0);
     default:
       break;
   }

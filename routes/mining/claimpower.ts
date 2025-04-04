@@ -38,13 +38,23 @@ export default async function (fastify: FastifyInstance) {
         user.id
       );
 
-      await fastify.miningPower.setUserLevel(
-        user.id,
-        fastify.calculationUtils.calculateUserMiningLevel(
-          userPowerBalance ?? 0,
-          FIRST_LEVEL_BALANCE_AMOUNT
-        )
+      const userCurrentLevel = await fastify.miningPower.getUserMiningLevel(
+        user.id
       );
+      const newLevel = fastify.calculationUtils.calculateUserMiningLevel(
+        userPowerBalance ?? 0,
+        FIRST_LEVEL_BALANCE_AMOUNT
+      );
+
+      if (newLevel > userCurrentLevel) {
+        await fastify.miningPower.setUserLevel(
+          user.id,
+          fastify.calculationUtils.calculateUserMiningLevel(
+            userPowerBalance ?? 0,
+            FIRST_LEVEL_BALANCE_AMOUNT
+          )
+        );
+      }
       //const data = await fastify.miningPower.getMiningData(user.id)
 
       return {
